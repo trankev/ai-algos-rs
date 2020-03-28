@@ -13,4 +13,21 @@ impl State {
             current_player: 0,
         }
     }
+
+    pub fn isempty(&self, index: u8) -> bool {
+        self.grids.iter().all(|&grid| !grid.isset(index))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::State;
+
+    #[test]
+    fn test_is_empty_empty() {
+        let state = State::new();
+        for index in 0..9 {
+            assert!(state.isempty(index));
+        }
+    }
 }
