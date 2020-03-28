@@ -1,7 +1,7 @@
 use super::BitArray;
 
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct BitArray9 {
     bits: u16,
 }
@@ -18,6 +18,10 @@ impl BitArray for BitArray9 {
         debug_assert!(index < 9, format!("BitArray index out of bound: {} >= 9", index));
         let mask = 1u16 << index;
         self.bits & mask == mask
+    }
+
+    fn set(&mut self, index: Self::Index) {
+        self.bits |= 1u16 << index;
     }
 }
 
