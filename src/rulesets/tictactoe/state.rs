@@ -5,8 +5,8 @@ use crate::rulesets;
 
 #[derive(Clone, Debug)]
 pub struct State {
-    grids: [bitarray::BitArray9; 2],
-    current_player: u8,
+    pub grids: [bitarray::BitArray9; 2],
+    pub current_player: u8,
 }
 
 impl State {
@@ -14,6 +14,16 @@ impl State {
         State {
             grids: [bitarray::BitArray9::zero(); 2],
             current_player: 0,
+        }
+    }
+
+    pub fn from_indices(player1_indices: &[u8], player2_indices: &[u8], current_player: u8) -> State {
+        State {
+            grids: [
+                bitarray::BitArray9::from_indices(player1_indices),
+                bitarray::BitArray9::from_indices(player2_indices),
+            ],
+            current_player
         }
     }
 
