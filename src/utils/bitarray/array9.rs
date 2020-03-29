@@ -1,7 +1,8 @@
+use std::ops;
 use super::BitArray;
 
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitArray9 {
     bits: u16,
 }
@@ -12,6 +13,14 @@ impl BitArray for BitArray9 {
         BitArray9 {
             bits: 0,
         }
+    }
+
+    fn from_indices(indices: &[Self::Index]) -> Self {
+        let mut result = BitArray9::zero();
+        for index in indices {
+            result.set(*index);
+        }
+        result
     }
 
     fn isset(&self, index: Self::Index) -> bool {
@@ -25,6 +34,15 @@ impl BitArray for BitArray9 {
     }
 }
 
+impl ops::BitOr<BitArray9> for BitArray9 {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self {
+        BitArray9 {
+            bits: self.bits | rhs.bits
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -44,5 +62,26 @@ mod tests {
     fn test_out_of_bound() {
         let instance = BitArray9::zero();
         instance.isset(9);
+    }
+
+    #[test]
+    fn test_from_positions() {
+        let indices = vec![2, 3, 5];
+        let instance = BitArray9::from_indices(&indices);
+        for index in 0..9 {
+            if indices.contains(&index) {
+                assert!(instance.isset(index));
+            } else {
+                assert!(!instance.isset(index));
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitor() {
+        let array1 = BitArray9::from_indices(&[2, 3, 5]);
+        let array2 = BitArray9::from_indices(&[2, 4, 6]);
+        let expected = BitArray9::from_indices(&[2, 3, 4, 5, 6]);
+        assert_eq!(array1 | array2, expected);
     }
 }
