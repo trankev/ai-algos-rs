@@ -7,7 +7,7 @@ pub struct BitArray9 {
     bits: u16,
 }
 
-impl BitArray for BitArray9 {
+impl BitArray<'_, '_, '_, '_> for BitArray9 {
     type Index = u8;
     fn zero() -> BitArray9 {
         BitArray9 {
@@ -34,29 +34,30 @@ impl BitArray for BitArray9 {
     }
 }
 
-impl ops::BitAnd<BitArray9> for BitArray9 {
-    type Output = Self;
+impl<'a, 'b> ops::BitAnd<&'b BitArray9> for &'a BitArray9 {
+    type Output = BitArray9;
 
-    fn bitand(self, rhs: Self) -> Self {
+    fn bitand(self, rhs: &'b BitArray9) -> BitArray9 {
         BitArray9 {
             bits: self.bits & rhs.bits
         }
     }
 }
 
-impl ops::BitOr<BitArray9> for BitArray9 {
-    type Output = Self;
+impl<'a, 'b> ops::BitOr<&'b BitArray9> for &'a BitArray9 {
+    type Output = BitArray9;
 
-    fn bitor(self, rhs: Self) -> Self {
+    fn bitor(self, rhs: &'b BitArray9) -> BitArray9 {
         BitArray9 {
             bits: self.bits | rhs.bits
         }
     }
 }
 
-impl ops::BitXor<BitArray9> for BitArray9 {
-    type Output = Self;
-    fn bitxor(self, rhs: Self) -> Self {
+impl<'a, 'b> ops::BitXor<&'b BitArray9> for &'a BitArray9 {
+    type Output = BitArray9;
+
+    fn bitxor(self, rhs: &'b BitArray9) -> BitArray9 {
         BitArray9 {
             bits: self.bits ^ rhs.bits
         }
@@ -101,7 +102,7 @@ mod tests {
         let array1 = BitArray9::from_indices(&[2, 3, 5]);
         let array2 = BitArray9::from_indices(&[2, 4, 6]);
         let expected = BitArray9::from_indices(&[2, 3, 4, 5, 6]);
-        assert_eq!(array1 | array2, expected);
+        assert_eq!(&array1 | &array2, expected);
     }
 
     #[test]
@@ -109,7 +110,7 @@ mod tests {
         let array1 = BitArray9::from_indices(&[1, 3]);
         let array2 = BitArray9::from_indices(&[2, 3]);
         let expected = BitArray9::from_indices(&[1, 2]);
-        assert_eq!(array1 ^ array2, expected);
+        assert_eq!(&array1 ^ &array2, expected);
     }
 
     #[test]
@@ -117,6 +118,6 @@ mod tests {
         let array1 = BitArray9::from_indices(&[1, 3]);
         let array2 = BitArray9::from_indices(&[2, 3]);
         let expected = BitArray9::from_indices(&[3]);
-        assert_eq!(array1 & array2, expected);
+        assert_eq!(&array1 & &array2, expected);
     }
 }

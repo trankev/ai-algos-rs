@@ -54,10 +54,10 @@ impl rulesets::RuleSet for TicTacToe {
         let zero = bitarray::BitArray9::zero();
         for strip in &self.strips {
             for player in 0u8..2 {
-                if (state.grids[player as usize] & *strip) == *strip {
+                if (&state.grids[player as usize] & strip) == *strip {
                     return rulesets::Status::Win{player}
                 }
-                if (state.grids[player as usize] & *strip) == zero {
+                if (&state.grids[player as usize] & strip) == zero {
                     ongoing = true;
                 }
             }
