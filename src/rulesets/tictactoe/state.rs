@@ -3,7 +3,7 @@ use crate::utils::bitarray::BitArray;
 use super::plies;
 use crate::rulesets;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct State {
     pub grids: [bitarray::BitArray9; 2],
     pub current_player: u8,
@@ -49,6 +49,7 @@ impl State {
 #[cfg(test)]
 mod tests {
     use super::State;
+    use super::super::plies;
 
     #[test]
     fn test_is_empty_empty() {
@@ -56,5 +57,15 @@ mod tests {
         for index in 0..9 {
             assert!(state.isempty(index));
         }
+    }
+
+    #[test]
+    fn test_from_indices() {
+        let from_indices = State::from_indices(&[4, 1], &[8, 7], 0);
+        let mut from_scratch = State::new();
+        for index in &[4, 8, 1, 7] {
+            from_scratch.play(&plies::Ply{index: *index}).unwrap();
+        }
+        assert_eq!(from_indices, from_scratch);
     }
 }
