@@ -34,6 +34,16 @@ impl BitArray for BitArray9 {
     }
 }
 
+impl ops::BitAnd<BitArray9> for BitArray9 {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self {
+        BitArray9 {
+            bits: self.bits & rhs.bits
+        }
+    }
+}
+
 impl ops::BitOr<BitArray9> for BitArray9 {
     type Output = Self;
 
@@ -100,5 +110,13 @@ mod tests {
         let array2 = BitArray9::from_indices(&[2, 3]);
         let expected = BitArray9::from_indices(&[1, 2]);
         assert_eq!(array1 ^ array2, expected);
+    }
+
+    #[test]
+    fn test_bitand() {
+        let array1 = BitArray9::from_indices(&[1, 3]);
+        let array2 = BitArray9::from_indices(&[2, 3]);
+        let expected = BitArray9::from_indices(&[3]);
+        assert_eq!(array1 & array2, expected);
     }
 }
