@@ -44,6 +44,15 @@ impl ops::BitOr<BitArray9> for BitArray9 {
     }
 }
 
+impl ops::BitXor<BitArray9> for BitArray9 {
+    type Output = Self;
+    fn bitxor(self, rhs: Self) -> Self {
+        BitArray9 {
+            bits: self.bits ^ rhs.bits
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::BitArray9;
@@ -83,5 +92,13 @@ mod tests {
         let array2 = BitArray9::from_indices(&[2, 4, 6]);
         let expected = BitArray9::from_indices(&[2, 3, 4, 5, 6]);
         assert_eq!(array1 | array2, expected);
+    }
+
+    #[test]
+    fn test_bitxor() {
+        let array1 = BitArray9::from_indices(&[1, 3]);
+        let array2 = BitArray9::from_indices(&[2, 3]);
+        let expected = BitArray9::from_indices(&[1, 2]);
+        assert_eq!(array1 ^ array2, expected);
     }
 }

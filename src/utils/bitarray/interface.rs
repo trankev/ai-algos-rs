@@ -1,6 +1,6 @@
 use std::ops;
 
-pub trait BitArray: Clone + Copy + ops::BitOr<Self> + PartialEq {
+pub trait BitArray: ops::BitOr<Self> + ops::BitXor<Self> + Clone + Copy + PartialEq {
     type Index;
     fn zero() -> Self;
     fn from_indices(indices: &[Self::Index]) -> Self;
