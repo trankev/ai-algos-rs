@@ -7,7 +7,7 @@ pub enum Status {
 
 pub trait RuleSet {
     type State;
-    type Ply;
+    type Ply: Copy;
 
     fn initial_state(&self) -> Self::State;
     fn available_plies(&self, state: &Self::State) -> Vec<Self::Ply>;

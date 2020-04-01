@@ -9,7 +9,7 @@ pub struct TicTacToe {
 }
 
 impl TicTacToe {
-    fn new() -> TicTacToe {
+    pub fn new() -> TicTacToe {
         TicTacToe {
             strips: vec![
                 bitarray::BitArray9::from_indices(&[0, 1, 2]),
