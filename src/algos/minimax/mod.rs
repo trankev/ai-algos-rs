@@ -1,4 +1,4 @@
 mod negamax;
-mod status;
+mod state;
 
 pub use negamax::Negamax;

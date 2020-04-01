@@ -1,32 +1,26 @@
 use crate::rulesets;
-use std::f32;
+use super::state;
 
 pub struct Negamax<RuleSet: rulesets::RuleSet> {
     ruleset: RuleSet,
 }
 
 impl<RuleSet: rulesets::RuleSet> Negamax<RuleSet> {
-    pub fn iterate(&self, state: &RuleSet::State, player: u8) -> (Vec<RuleSet::Ply>, f32) {
+    pub fn iterate(&self, state: &RuleSet::State, player: u8) -> state::State<RuleSet::Ply> {
         match self.ruleset.status(&state) {
-            rulesets::Status::Win{player: winner} => (
-                vec![],
-                if winner == player { f32::INFINITY } else { f32::NEG_INFINITY },
-            ),
-            rulesets::Status::Draw => (vec![], 0.0),
+            rulesets::Status::Win{player: winner} => if winner == player { state::State::Win } else { state::State::Loss },
+            rulesets::Status::Draw => state::State::Draw,
             rulesets::Status::Ongoing => {
-                let available_plies = self.ruleset.available_plies(&state);
-                let mut current_score = f32::NEG_INFINITY;
-                let mut current_plies: Option<Vec<RuleSet::Ply>> = None;
-                for ply in available_plies {
+                let mut available_plies = self.ruleset.available_plies(&state);
+                let mut current_state = state::State::Unset;
+                for ply in available_plies.drain(..) {
                     let resulting_state = self.ruleset.play(&state, &ply).unwrap();
-                    let (mut ply_list, score) = self.iterate(&resulting_state, 1 - player);
-                    if current_plies.is_none() || current_score < -score {
-                        current_score = -score;
-                        ply_list.push(ply);
-                        current_plies = Some(ply_list);
+                    let iteration_state = self.iterate(&resulting_state, 1 - player);
+                    if iteration_state.should_replace(&current_state) {
+                        current_state = state::State::tree_search(ply, iteration_state);
                     }
                 }
-                (current_plies.unwrap(), current_score)
+                current_state
             },
         }
     }
@@ -39,16 +33,6 @@ mod tests {
     use crate::rulesets::RuleSet;
     use super::Negamax;
 
-    #[test]
-    fn test_sample() {
-        let ruleset = tictactoe::TicTacToe::new();
-        let initial_state = ruleset.initial_state();
-        let algo = Negamax{ruleset};
-        let result = algo.iterate(&initial_state, 0);
-        println!("{:?}", result);
-        assert!(false);
-    }
-
     macro_rules! iterate_tests {
         ($($name:ident: $value:expr,)*) => {
             $(
@@ -58,11 +42,12 @@ mod tests {
                     let ruleset = tictactoe::TicTacToe::new();
                     let state = tictactoe::State::from_indices(&p1_indices, &p2_indices, current_player);
                     let algo = Negamax{ruleset};
-                    let (plies, score) = algo.iterate(&state, current_player);
-                    assert_eq!(score, expected_score);
+                    let result = algo.iterate(&state, current_player);
+                    assert_eq!(result.score(), expected_score);
                     let expected_plies: Vec<tictactoe::Ply> = expected_indices.iter().map(
                         |index| tictactoe::Ply{index: *index}
                     ).collect();
+                    let plies = result.plies();
                     assert_eq!(plies, expected_plies);
                 }
             )*
@@ -78,7 +63,5 @@ mod tests {
         draw_p1_pov: ([4, 1, 6, 5], [8, 7, 2, 3], 0, vec![], 0.0),
         draw_p2_pov: ([4, 1, 6, 5], [8, 7, 2, 3], 1, vec![], 0.0),
         drawing_game: ([4, 1, 6, 5], [8, 7, 2], 1, vec![3], 0.0),
-        p1_winning_position: ([4], [5], 0, vec![3, 5], f32::INFINITY),
-        hum: ([4, 0], [5], 1, vec![], f32::NEG_INFINITY),
     }
 }
