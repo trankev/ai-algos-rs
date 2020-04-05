@@ -1,7 +1,8 @@
-mod game;
 mod plies;
+mod ruleset;
 mod state;
+pub mod ply_iterators;
 
-pub use game::TicTacToe;
+pub use ruleset::TicTacToe;
 pub use state::State;
 pub use plies::Ply;

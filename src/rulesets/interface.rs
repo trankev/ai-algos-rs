@@ -1,3 +1,5 @@
+use std::rc;
+
 #[derive(Debug, PartialEq)]
 pub enum Status {
     Ongoing,
@@ -10,9 +12,12 @@ pub trait RuleSet {
     type Ply: Copy;
 
     fn initial_state(&self) -> Self::State;
-    fn available_plies(&self, state: &Self::State) -> Vec<Self::Ply>;
     fn play(&self, state: &Self::State, ply: &Self::Ply) -> Result<Self::State, PlayError>;
     fn status(&self, state: &Self::State) -> Status;
+}
+
+pub trait PlyIterator<Rules: RuleSet>: Iterator<Item=Rules::Ply> {
+    fn new(state: rc::Rc<Rules::State>) -> Self;
 }
 
 #[derive(Debug)]

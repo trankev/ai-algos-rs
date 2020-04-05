@@ -27,7 +27,7 @@ impl State {
         }
     }
 
-    pub fn isempty(&self, index: u8) -> bool {
+    pub fn is_empty(&self, index: u8) -> bool {
         self.grids.iter().all(|&grid| !grid.isset(index))
     }
 
@@ -55,8 +55,17 @@ mod tests {
     fn test_is_empty_empty() {
         let state = State::new();
         for index in 0..9 {
-            assert!(state.isempty(index));
+            assert!(state.is_empty(index));
         }
+    }
+
+    #[test]
+    fn test_is_empty_filled() {
+        let state = State::from_indices(&[4, 1], &[0, 8], 0);
+        assert!(!state.is_empty(0));
+        assert!(!state.is_empty(1));
+        assert!(state.is_empty(2));
+        assert!(!state.is_empty(8));
     }
 
     #[test]
