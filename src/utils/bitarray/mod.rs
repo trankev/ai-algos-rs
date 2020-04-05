@@ -1,5 +1,5 @@
-mod interface;
 mod array9;
+mod interface;
 
-pub use interface::BitArray;
 pub use array9::BitArray9;
+pub use interface::BitArray;

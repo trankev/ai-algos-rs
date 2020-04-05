@@ -1,8 +1,8 @@
 mod plies;
+pub mod ply_iterators;
 mod ruleset;
 mod state;
-pub mod ply_iterators;
 
+pub use plies::Ply;
 pub use ruleset::TicTacToe;
 pub use state::State;
-pub use plies::Ply;

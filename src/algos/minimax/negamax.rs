@@ -1,31 +1,44 @@
+use super::state;
 use crate::rulesets;
 use std::f32;
 use std::rc;
-use super::state;
 
 pub struct Negamax<RuleSet: rulesets::RuleSet> {
     ruleset: RuleSet,
 }
 
 impl<RuleSet: rulesets::RuleSet> Negamax<RuleSet> {
-    pub fn compute<
-        PlyIterator: rulesets::PlyIterator<RuleSet>,
-    >(&self, state: rc::Rc<RuleSet::State>, player: u8) -> state::State<RuleSet::Ply> {
+    pub fn compute<PlyIterator: rulesets::PlyIterator<RuleSet>>(
+        &self,
+        state: rc::Rc<RuleSet::State>,
+        player: u8,
+    ) -> state::State<RuleSet::Ply> {
         self.iterate::<PlyIterator>(state, player, f32::NEG_INFINITY, f32::INFINITY)
     }
 
-    fn iterate<
-        PlyIterator: rulesets::PlyIterator<RuleSet>
-    >(&self, state: rc::Rc<RuleSet::State>, player: u8, mut alpha: f32, beta: f32) -> state::State<RuleSet::Ply> {
+    fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(
+        &self,
+        state: rc::Rc<RuleSet::State>,
+        player: u8,
+        mut alpha: f32,
+        beta: f32,
+    ) -> state::State<RuleSet::Ply> {
         match self.ruleset.status(&state) {
-            rulesets::Status::Win{player: winner} => if winner == player { state::State::Win } else { state::State::Loss },
+            rulesets::Status::Win { player: winner } => {
+                if winner == player {
+                    state::State::Win
+                } else {
+                    state::State::Loss
+                }
+            }
             rulesets::Status::Draw => state::State::Draw,
             rulesets::Status::Ongoing => {
                 let available_plies = PlyIterator::new(state.clone());
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
                     let resulting_state = rc::Rc::new(self.ruleset.play(&state, &ply).unwrap());
-                    let iteration_state = self.iterate::<PlyIterator>(resulting_state, 1 - player, -beta, -alpha);
+                    let iteration_state =
+                        self.iterate::<PlyIterator>(resulting_state, 1 - player, -beta, -alpha);
                     if iteration_state.should_replace(&current_state) {
                         current_state = state::State::tree_search(ply, iteration_state);
                         alpha = alpha.max(current_state.score());
@@ -35,18 +48,18 @@ impl<RuleSet: rulesets::RuleSet> Negamax<RuleSet> {
                     }
                 }
                 current_state
-            },
+            }
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::f32;
-    use std::rc;
+    use super::Negamax;
     use crate::rulesets::tictactoe;
     use crate::rulesets::tictactoe::ply_iterators;
-    use super::Negamax;
+    use std::f32;
+    use std::rc;
 
     macro_rules! iterate_tests {
         ($($name:ident: $value:expr,)*) => {

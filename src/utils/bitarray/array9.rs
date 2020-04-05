@@ -1,6 +1,5 @@
-use std::ops;
 use super::BitArray;
-
+use std::ops;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitArray9 {
@@ -10,9 +9,7 @@ pub struct BitArray9 {
 impl BitArray<'_, '_, '_, '_> for BitArray9 {
     type Index = u8;
     fn zero() -> BitArray9 {
-        BitArray9 {
-            bits: 0,
-        }
+        BitArray9 { bits: 0 }
     }
 
     fn from_indices(indices: &[Self::Index]) -> Self {
@@ -24,7 +21,10 @@ impl BitArray<'_, '_, '_, '_> for BitArray9 {
     }
 
     fn isset(&self, index: Self::Index) -> bool {
-        debug_assert!(index < 9, format!("BitArray index out of bound: {} >= 9", index));
+        debug_assert!(
+            index < 9,
+            format!("BitArray index out of bound: {} >= 9", index)
+        );
         let mask = 1u16 << index;
         self.bits & mask == mask
     }
@@ -39,7 +39,7 @@ impl<'a, 'b> ops::BitAnd<&'b BitArray9> for &'a BitArray9 {
 
     fn bitand(self, rhs: &'b BitArray9) -> BitArray9 {
         BitArray9 {
-            bits: self.bits & rhs.bits
+            bits: self.bits & rhs.bits,
         }
     }
 }
@@ -49,7 +49,7 @@ impl<'a, 'b> ops::BitOr<&'b BitArray9> for &'a BitArray9 {
 
     fn bitor(self, rhs: &'b BitArray9) -> BitArray9 {
         BitArray9 {
-            bits: self.bits | rhs.bits
+            bits: self.bits | rhs.bits,
         }
     }
 }
@@ -59,15 +59,15 @@ impl<'a, 'b> ops::BitXor<&'b BitArray9> for &'a BitArray9 {
 
     fn bitxor(self, rhs: &'b BitArray9) -> BitArray9 {
         BitArray9 {
-            bits: self.bits ^ rhs.bits
+            bits: self.bits ^ rhs.bits,
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::BitArray9;
     use super::super::BitArray;
+    use super::BitArray9;
 
     #[test]
     fn test_zero() {

@@ -1,7 +1,7 @@
-use crate::utils::bitarray;
-use crate::utils::bitarray::BitArray;
 use super::plies;
 use crate::rulesets;
+use crate::utils::bitarray;
+use crate::utils::bitarray::BitArray;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct State {
@@ -17,13 +17,17 @@ impl State {
         }
     }
 
-    pub fn from_indices(player1_indices: &[u8], player2_indices: &[u8], current_player: u8) -> State {
+    pub fn from_indices(
+        player1_indices: &[u8],
+        player2_indices: &[u8],
+        current_player: u8,
+    ) -> State {
         State {
             grids: [
                 bitarray::BitArray9::from_indices(player1_indices),
                 bitarray::BitArray9::from_indices(player2_indices),
             ],
-            current_player
+            current_player,
         }
     }
 
@@ -34,7 +38,7 @@ impl State {
     pub fn play(&mut self, ply: &plies::Ply) -> Result<(), rulesets::PlayError> {
         for grid in &self.grids {
             if grid.isset(ply.index) {
-                return Err(rulesets::PlayError{
+                return Err(rulesets::PlayError {
                     message: "Cell is occupied",
                     field: "index",
                 });
@@ -48,8 +52,8 @@ impl State {
 
 #[cfg(test)]
 mod tests {
-    use super::State;
     use super::super::plies;
+    use super::State;
 
     #[test]
     fn test_is_empty_empty() {
@@ -73,7 +77,7 @@ mod tests {
         let from_indices = State::from_indices(&[4, 1], &[8, 7], 0);
         let mut from_scratch = State::new();
         for index in &[4, 8, 1, 7] {
-            from_scratch.play(&plies::Ply{index: *index}).unwrap();
+            from_scratch.play(&plies::Ply { index: *index }).unwrap();
         }
         assert_eq!(from_indices, from_scratch);
     }

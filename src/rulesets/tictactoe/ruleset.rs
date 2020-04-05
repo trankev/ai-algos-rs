@@ -1,8 +1,8 @@
+use super::plies;
+use super::state;
 use crate::rulesets;
 use crate::utils::bitarray;
 use crate::utils::bitarray::BitArray;
-use super::plies;
-use super::state;
 
 pub struct TicTacToe {
     strips: Vec<bitarray::BitArray9>,
@@ -20,7 +20,7 @@ impl TicTacToe {
                 bitarray::BitArray9::from_indices(&[2, 5, 8]),
                 bitarray::BitArray9::from_indices(&[0, 4, 8]),
                 bitarray::BitArray9::from_indices(&[2, 4, 6]),
-            ]
+            ],
         }
     }
 }
@@ -33,7 +33,11 @@ impl rulesets::RuleSet for TicTacToe {
         state::State::new()
     }
 
-    fn play(&self, state: &Self::State, ply: &Self::Ply) -> Result<Self::State, rulesets::PlayError> {
+    fn play(
+        &self,
+        state: &Self::State,
+        ply: &Self::Ply,
+    ) -> Result<Self::State, rulesets::PlayError> {
         let mut result = (*state).clone();
         if let Err(error) = result.play(ply) {
             return Err(error);
@@ -47,23 +51,26 @@ impl rulesets::RuleSet for TicTacToe {
         for strip in &self.strips {
             for player in 0u8..2 {
                 if (&state.grids[player as usize] & strip) == *strip {
-                    return rulesets::Status::Win{player}
+                    return rulesets::Status::Win { player };
                 }
                 if (&state.grids[player as usize] & strip) == zero {
                     ongoing = true;
                 }
             }
         }
-        if ongoing { rulesets::Status::Ongoing } else { rulesets::Status::Draw }
+        if ongoing {
+            rulesets::Status::Ongoing
+        } else {
+            rulesets::Status::Draw
+        }
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use super::TicTacToe;
     use super::super::plies;
     use super::super::state;
+    use super::TicTacToe;
     use crate::rulesets;
     use crate::rulesets::RuleSet;
 
@@ -71,7 +78,7 @@ mod tests {
     fn test_invalid_move() {
         let game = TicTacToe::new();
         let state = game.initial_state();
-        let ply = plies::Ply{index: 3};
+        let ply = plies::Ply { index: 3 };
         let resulting_state = game.play(&state, &ply).unwrap();
         let result = game.play(&resulting_state, &ply);
         assert!(result.is_err());

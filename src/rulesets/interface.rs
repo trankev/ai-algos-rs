@@ -4,7 +4,7 @@ use std::rc;
 pub enum Status {
     Ongoing,
     Draw,
-    Win{player: u8},
+    Win { player: u8 },
 }
 
 pub trait RuleSet {
@@ -16,7 +16,7 @@ pub trait RuleSet {
     fn status(&self, state: &Self::State) -> Status;
 }
 
-pub trait PlyIterator<Rules: RuleSet>: Iterator<Item=Rules::Ply> {
+pub trait PlyIterator<Rules: RuleSet>: Iterator<Item = Rules::Ply> {
     fn new(state: rc::Rc<Rules::State>) -> Self;
 }
 

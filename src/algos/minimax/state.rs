@@ -6,8 +6,15 @@ pub enum State<Ply: Copy> {
     Win,
     Loss,
     Draw,
-    Heuristic{value: f32},
-    TreeSearch{value: f32, depth: u8, ply: Ply, next: rc::Rc<State<Ply>>},
+    Heuristic {
+        value: f32,
+    },
+    TreeSearch {
+        value: f32,
+        depth: u8,
+        ply: Ply,
+        next: rc::Rc<State<Ply>>,
+    },
     Unset,
 }
 
@@ -16,7 +23,12 @@ impl<Ply: Copy> State<Ply> {
         State::TreeSearch {
             value: -next.score(),
             depth: match next {
-                State::TreeSearch{value: _, depth, ply: _, next: _} => depth + 1,
+                State::TreeSearch {
+                    value: _,
+                    depth,
+                    ply: _,
+                    next: _,
+                } => depth + 1,
                 _ => 1,
             },
             next: rc::Rc::new(next),
@@ -29,8 +41,13 @@ impl<Ply: Copy> State<Ply> {
             State::Win => f32::INFINITY,
             State::Loss => f32::NEG_INFINITY,
             State::Draw => 0.0,
-            State::Heuristic{value} => *value,
-            State::TreeSearch{value, depth: _, ply: _, next: _} => *value,
+            State::Heuristic { value } => *value,
+            State::TreeSearch {
+                value,
+                depth: _,
+                ply: _,
+                next: _,
+            } => *value,
             State::Unset => f32::NAN,
         }
     }
@@ -49,7 +66,13 @@ impl<Ply: Copy> State<Ply> {
     }
 
     fn list_plies(&self, list: &mut Vec<Ply>) {
-        if let State::TreeSearch{value: _, depth: _, ply, next} = self {
+        if let State::TreeSearch {
+            value: _,
+            depth: _,
+            ply,
+            next,
+        } = self
+        {
             list.push(*ply);
             next.list_plies(list);
         }

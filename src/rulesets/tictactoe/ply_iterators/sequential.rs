@@ -1,8 +1,8 @@
-use crate::rulesets::tictactoe;
 use crate::rulesets;
+use crate::rulesets::tictactoe;
 use std::rc;
 
-pub struct SequentialPlyIterator<> {
+pub struct SequentialPlyIterator {
     state: rc::Rc<tictactoe::State>,
     current_index: u8,
 }
@@ -30,7 +30,7 @@ impl Iterator for SequentialPlyIterator {
         }
         let to_return = self.current_index;
         self.current_index += 1;
-        Some(tictactoe::Ply{index: to_return})
+        Some(tictactoe::Ply { index: to_return })
     }
 }
 
@@ -48,14 +48,16 @@ mod tests {
         let state = rc::Rc::new(state::State::from_indices(&[4, 1], &[6, 7], 0));
         let iterator = SequentialPlyIterator::new(state);
         let expected: collections::HashSet<plies::Ply> = [
-            plies::Ply{index: 0},
-            plies::Ply{index: 2},
-            plies::Ply{index: 3},
-            plies::Ply{index: 5},
-            plies::Ply{index: 8},
-        ].iter().cloned().collect();
+            plies::Ply { index: 0 },
+            plies::Ply { index: 2 },
+            plies::Ply { index: 3 },
+            plies::Ply { index: 5 },
+            plies::Ply { index: 8 },
+        ]
+        .iter()
+        .cloned()
+        .collect();
         let result: collections::HashSet<plies::Ply> = iterator.collect();
         assert_eq!(result, expected);
-        
     }
 }
