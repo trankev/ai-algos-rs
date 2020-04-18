@@ -5,6 +5,7 @@ use tensorflow::train::Optimizer;
 
 pub struct NeuralNetwork {
     session: tf::Session,
+    input: tf::Operation,
     probabilities: tf::Output,
     chosen_action: tf::Operation,
     action_holder: tf::Operation,
@@ -16,7 +17,7 @@ pub struct NeuralNetwork {
 impl NeuralNetwork {
     pub fn new(dimensions: &[u64]) -> Result<NeuralNetwork, tf::Status> {
         let mut scope = tf::Scope::new_root_scope();
-        let (variables, output_layer, chosen_action) = build_model(&scope, dimensions)?;
+        let (variables, input, output_layer, chosen_action) = build_model(&scope, dimensions)?;
         let (minimizer_vars, action_holder, reward_holder, loss, minimize) =
             setup_training(&scope, &output_layer, &variables)?;
         let options = tf::SessionOptions::new();
@@ -25,6 +26,7 @@ impl NeuralNetwork {
         initialize(&session, &variables, &minimizer_vars)?;
         Ok(NeuralNetwork {
             session,
+            input,
             probabilities: output_layer,
             chosen_action,
             action_holder,
@@ -32,6 +34,20 @@ impl NeuralNetwork {
             minimize,
             loss,
         })
+    }
+
+    pub fn play(&self, state: &[usize]) -> Result<i64, tf::Status> {
+        let mut input_tensor = tf::Tensor::new(&[1, 19]);
+        for index in state {
+            input_tensor[*index] = 1.0;
+        }
+
+        let mut run_args = tf::SessionRunArgs::new();
+        let action_fetch = run_args.request_fetch(&self.chosen_action, 0);
+        run_args.add_feed(&self.input, 0, &input_tensor);
+        self.session.run(&mut run_args)?;
+        let action = run_args.fetch::<i64>(action_fetch)?[0];
+        Ok(action)
     }
 }
 
@@ -98,14 +114,14 @@ fn setup_training(
 fn build_model(
     scope: &tf::Scope,
     dimensions: &[u64],
-) -> Result<(Vec<tf::Variable>, tf::Output, tf::Operation), tf::Status> {
+) -> Result<(Vec<tf::Variable>, tf::Operation, tf::Output, tf::Operation), tf::Status> {
     let mut scope = scope.new_sub_scope("model");
     let input = tf_ops::Placeholder::new()
         .dtype(tf::DataType::Double)
         .shape(tf::Shape::from(&[1u64, dimensions[0]][..]))
         .build(&mut scope.with_op_name("input"))?;
     let mut variables = Vec::new();
-    let layer = input;
+    let layer = input.clone();
     for index in 0..(dimensions.len() - 2) {
         let (vars, layer) = build_layer(
             &scope,
@@ -126,11 +142,11 @@ fn build_model(
     )?;
     variables.extend(vars);
     let chosen_action = tf_ops::arg_max(
-        tf_ops::squeeze(layer.clone(), &mut scope)?.into(),
+        layer.clone(),
         tf_ops::constant(1, &mut scope)?.into(),
         &mut scope.with_op_name("chosen_action"),
     )?;
-    Ok((variables, layer, chosen_action))
+    Ok((variables, input, layer, chosen_action))
 }
 
 fn build_layer<IntoOutput: Into<tf::Output>>(
@@ -174,7 +190,9 @@ mod tests {
 
     #[test]
     fn test_build_graph() -> Result<(), Box<dyn error::Error>> {
-        NeuralNetwork::new(&[19, 9])?;
+        let nn = NeuralNetwork::new(&[19, 9])?;
+        let action = nn.play(&[0])?;
+        assert_eq!(action, -1);
         Ok(())
     }
 }
