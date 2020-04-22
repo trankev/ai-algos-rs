@@ -1,3 +1,3 @@
-mod cross_product;
+mod dot_product;
 
-pub use cross_product::cross_product;
+pub use dot_product::dot_product;

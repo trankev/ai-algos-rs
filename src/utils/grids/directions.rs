@@ -30,7 +30,7 @@ impl DirectionIterator {
 
     pub fn step_forward_directions(&mut self) -> Option<()> {
         while let Some(()) = self.step_directions() {
-            let cross = vectors::cross_product(&self.current_value, &self.positive_plane);
+            let cross = vectors::dot_product(&self.current_value, &self.positive_plane);
             if cross > 0 {
                 return Some(());
             }
