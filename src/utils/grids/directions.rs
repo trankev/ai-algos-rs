@@ -17,7 +17,7 @@ impl DirectionIterator {
         result
     }
 
-    pub fn step_directions(&mut self) -> Option<()> {
+    pub fn iterate_directions(&mut self) -> Option<()> {
         for index in 0..self.current_value.len() {
             self.current_value[index] += 1;
             if self.current_value[index] <= 1 {
@@ -28,8 +28,8 @@ impl DirectionIterator {
         None
     }
 
-    pub fn step_forward_directions(&mut self) -> Option<()> {
-        while let Some(()) = self.step_directions() {
+    pub fn iterate_forward_directions(&mut self) -> Option<()> {
+        while let Some(()) = self.iterate_directions() {
             let cross = vectors::dot_product(&self.current_value, &self.positive_plane);
             if cross > 0 {
                 return Some(());
@@ -43,7 +43,7 @@ impl Iterator for DirectionIterator {
     type Item = Vec<isize>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.step_forward_directions() {
+        match self.iterate_forward_directions() {
             Some(()) => Some(self.current_value.clone()),
             None => None,
         }

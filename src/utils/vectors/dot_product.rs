@@ -1,5 +1,6 @@
 pub fn dot_product(vector_a: &[isize], vector_b: &[isize]) -> isize {
-    vector_a.iter()
+    vector_a
+        .iter()
         .zip(vector_b.iter())
         .map(|(value_a, value_b)| value_a * value_b)
         .sum()

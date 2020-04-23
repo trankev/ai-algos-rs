@@ -55,7 +55,12 @@ impl NeuralNetwork {
         Ok(action)
     }
 
-    pub fn learn(&self, input_tensor: &InputType, action: i64, reward: f64) -> Result<f64, tf::Status> {
+    pub fn learn(
+        &self,
+        input_tensor: &InputType,
+        action: i64,
+        reward: f64,
+    ) -> Result<f64, tf::Status> {
         let action_value = tf::Tensor::new(&[1][..]).with_values(&[action as i32])?;
         let reward_value = tf::Tensor::new(&[1][..]).with_values(&[reward])?;
         let mut run_args = tf::SessionRunArgs::new();
@@ -104,13 +109,16 @@ fn setup_training(
     scope: &tf::Scope,
     output_layer: &tf::Operation,
     variables: &Vec<tf::Variable>,
-) -> Result<(
-    Vec<tf::Variable>,
-    tf::Operation,
-    tf::Operation,
-    tf::Operation,
-    tf::Operation,
-), tf::Status> {
+) -> Result<
+    (
+        Vec<tf::Variable>,
+        tf::Operation,
+        tf::Operation,
+        tf::Operation,
+        tf::Operation,
+    ),
+    tf::Status,
+> {
     let mut scope = scope.new_sub_scope("training");
     let reward_holder = tf_ops::Placeholder::new()
         .dtype(tf::DataType::Double)
@@ -147,7 +155,15 @@ fn setup_training(
 fn build_model(
     scope: &tf::Scope,
     dimensions: &[u64],
-) -> Result<(Vec<tf::Variable>, tf::Operation, tf::Operation, tf::Operation), tf::Status> {
+) -> Result<
+    (
+        Vec<tf::Variable>,
+        tf::Operation,
+        tf::Operation,
+        tf::Operation,
+    ),
+    tf::Status,
+> {
     let mut scope = scope.new_sub_scope("model");
     let input = tf_ops::Placeholder::new()
         .dtype(tf::DataType::Double)
@@ -195,7 +211,7 @@ fn build_layer(
         .initial_value(
             tf_ops::RandomStandardNormal::new()
                 .dtype(tf::DataType::Double)
-                .build(weight_shape.into(), &mut scope)?
+                .build(weight_shape.into(), &mut scope)?,
         )
         .data_type(tf::DataType::Double)
         .shape(tf::Shape::from(&[input_size, output_size][..]))
@@ -210,9 +226,10 @@ fn build_layer(
                 tf_ops::mat_mul(input.into(), weights.output().clone(), &mut scope)?.into(),
                 biases.output().clone(),
                 &mut scope,
-            )?.into(),
+            )?
+            .into(),
             &mut scope,
-        )?
+        )?,
     ))
 }
 
