@@ -3,6 +3,7 @@ use super::state;
 use crate::rulesets;
 use crate::utils::bitarray;
 use crate::utils::bitarray::BitArray;
+use crate::utils::grids;
 
 pub struct TicTacToe {
     strips: Vec<bitarray::BitArray9>,
@@ -10,18 +11,13 @@ pub struct TicTacToe {
 
 impl TicTacToe {
     pub fn new() -> TicTacToe {
-        TicTacToe {
-            strips: vec![
-                bitarray::BitArray9::from_indices(&[0, 1, 2]),
-                bitarray::BitArray9::from_indices(&[3, 4, 5]),
-                bitarray::BitArray9::from_indices(&[6, 7, 8]),
-                bitarray::BitArray9::from_indices(&[0, 3, 6]),
-                bitarray::BitArray9::from_indices(&[1, 4, 7]),
-                bitarray::BitArray9::from_indices(&[2, 5, 8]),
-                bitarray::BitArray9::from_indices(&[0, 4, 8]),
-                bitarray::BitArray9::from_indices(&[2, 4, 6]),
-            ],
-        }
+        let strips = grids::CellRuns::new(vec![3, 3], 3)
+            .map(|indices| {
+                let uindices = indices.iter().map(|&x| x as u8).collect::<Vec<_>>();
+                bitarray::BitArray9::from_indices(&uindices)
+            })
+            .collect();
+        TicTacToe { strips }
     }
 }
 
