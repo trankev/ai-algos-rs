@@ -1,4 +1,4 @@
-pub fn strip_length(dimensions: &Vec<isize>, direction: &Vec<isize>, start: &Vec<isize>) -> isize {
+pub fn strip_length(dimensions: &[isize], direction: &[isize], start: &[isize]) -> isize {
     direction
         .iter()
         .zip(dimensions.iter())

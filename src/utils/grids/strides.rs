@@ -1,4 +1,4 @@
-pub fn compute_strides(dimensions: &Vec<isize>) -> Vec<isize> {
+pub fn compute_strides(dimensions: &[isize]) -> Vec<isize> {
     dimensions
         .iter()
         .scan(1, |mut acc, &value| {
