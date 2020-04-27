@@ -6,7 +6,7 @@ use crate::utils::bitarray::BitArray;
 use crate::utils::grids;
 
 pub struct TicTacToe {
-    strips: Vec<bitarray::BitArray9>,
+    strips: [bitarray::BitArray9; 8],
 }
 
 impl TicTacToe {
@@ -16,8 +16,14 @@ impl TicTacToe {
                 let uindices = indices.iter().map(|&x| x as u8).collect::<Vec<_>>();
                 bitarray::BitArray9::from_indices(&uindices)
             })
-            .collect();
-        TicTacToe { strips }
+            .collect::<Vec<_>>();
+        let mut result = TicTacToe {
+            strips: [bitarray::BitArray9::zero(); 8],
+        };
+        for (index, value) in strips.iter().enumerate() {
+            result.strips[index] = *value;
+        }
+        result
     }
 }
 
