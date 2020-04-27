@@ -9,3 +9,8 @@ edition = "2018"
 [dependencies]
 tensorflow = {version = "*", features = ["experimental_training"]}
 rand = "*"
+pre-commit = "*"
+
+[package.metadata.precommit]
+fmt = "cargo fmt 2>&1"
+test = "cargo test 2>&1"
