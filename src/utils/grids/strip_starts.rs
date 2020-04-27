@@ -3,7 +3,7 @@ pub struct StripStartIterator {
     direction: Vec<isize>,
     current_plane: Vec<isize>,
     starting_position: Vec<isize>,
-    current_position: Vec<isize>,
+    pub current_position: Vec<isize>,
 }
 
 impl StripStartIterator {
@@ -16,8 +16,14 @@ impl StripStartIterator {
             starting_position: vec![0; dimensions_sizes],
             current_position: vec![0; dimensions_sizes],
         };
-        result.current_plane[0] = -1;
+        if dimensions_sizes > 0 {
+            result.current_plane[0] = -1;
+        }
         result
+    }
+
+    pub fn empty() -> StripStartIterator {
+        StripStartIterator::new(Vec::new(), Vec::new())
     }
 
     fn iterate_planes(&mut self) -> Option<()> {
@@ -86,7 +92,7 @@ impl StripStartIterator {
         None
     }
 
-    pub fn iterate_strip_starts(&mut self) -> Option<()> {
+    pub fn iterate(&mut self) -> Option<()> {
         if let Some(()) = self.iterate_positions() {
             return Some(());
         }
@@ -102,7 +108,7 @@ impl Iterator for StripStartIterator {
     type Item = Vec<isize>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.iterate_strip_starts() {
+        match self.iterate() {
             Some(()) => Some(self.current_position.clone()),
             None => None,
         }

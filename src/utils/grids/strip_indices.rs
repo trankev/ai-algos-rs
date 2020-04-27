@@ -1,9 +1,7 @@
 use crate::utils::grids;
 use crate::utils::vectors;
-use std::iter;
-use std::ops;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct StripIndices {
     step: isize,
     current: isize,
@@ -22,13 +20,20 @@ impl StripIndices {
             remaining_count: strip_length,
         }
     }
+
+    pub fn empty() -> StripIndices {
+        StripIndices {
+            step: 0,
+            current: 0,
+            remaining_count: 0,
+        }
+    }
 }
 
 impl Iterator for StripIndices {
     type Item = isize;
 
     fn next(&mut self) -> Option<Self::Item> {
-        println!("{:?}", self);
         if self.remaining_count == 0 {
             return None;
         }
