@@ -12,5 +12,5 @@ rand = "*"
 pre-commit = "*"
 
 [package.metadata.precommit]
-fmt = "cargo fmt 2>&1"
+fmt = "cargo fmt -- --check 2>&1"
 test = "cargo test 2>&1"
