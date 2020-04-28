@@ -1,10 +1,11 @@
 use crate::utils::grids;
+use crate::utils::grids::strips;
 
 pub struct StripIterator {
     dimensions: Vec<isize>,
     directions: grids::DirectionIterator,
-    strip_starts: grids::StripStartIterator,
-    pub strips: grids::StripIndices,
+    strip_starts: strips::StartIterator,
+    pub strips: strips::Indices,
 }
 
 impl StripIterator {
@@ -13,14 +14,14 @@ impl StripIterator {
         StripIterator {
             dimensions,
             directions,
-            strip_starts: grids::StripStartIterator::empty(),
-            strips: grids::StripIndices::empty(),
+            strip_starts: strips::StartIterator::empty(),
+            strips: strips::Indices::empty(),
         }
     }
 
     pub fn iterate(&mut self) -> Option<()> {
         if let Some(()) = self.strip_starts.iterate() {
-            self.strips = grids::StripIndices::new(
+            self.strips = strips::Indices::new(
                 &self.dimensions,
                 &self.directions.current_value,
                 &self.strip_starts.current_position,
@@ -28,7 +29,7 @@ impl StripIterator {
             return Some(());
         }
         if let Some(()) = self.directions.iterate_forward() {
-            self.strip_starts = grids::StripStartIterator::new(
+            self.strip_starts = strips::StartIterator::new(
                 self.dimensions.clone(),
                 self.directions.current_value.clone(),
             );
@@ -39,7 +40,7 @@ impl StripIterator {
 }
 
 impl Iterator for StripIterator {
-    type Item = grids::StripIndices;
+    type Item = strips::Indices;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iterate() {

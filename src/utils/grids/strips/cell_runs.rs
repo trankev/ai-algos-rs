@@ -1,15 +1,15 @@
-use crate::utils::grids;
+use crate::utils::grids::strips;
 
 pub struct CellRuns {
     size: usize,
-    strips: grids::StripIterator,
+    strips: strips::StripIterator,
     current_strip: Vec<isize>,
     current_index: isize,
 }
 
 impl CellRuns {
     pub fn new(dimensions: Vec<isize>, size: usize) -> CellRuns {
-        let strips = grids::StripIterator::new(dimensions.clone());
+        let strips = strips::StripIterator::new(dimensions.clone());
         CellRuns {
             size,
             strips,

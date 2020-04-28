@@ -1,4 +1,4 @@
-pub struct StripStartIterator {
+pub struct StartIterator {
     dimensions: Vec<isize>,
     direction: Vec<isize>,
     current_plane: Vec<isize>,
@@ -6,10 +6,10 @@ pub struct StripStartIterator {
     pub current_position: Vec<isize>,
 }
 
-impl StripStartIterator {
-    pub fn new(dimensions: Vec<isize>, direction: Vec<isize>) -> StripStartIterator {
+impl StartIterator {
+    pub fn new(dimensions: Vec<isize>, direction: Vec<isize>) -> StartIterator {
         let dimensions_sizes = dimensions.len();
-        let mut result = StripStartIterator {
+        let mut result = StartIterator {
             dimensions,
             direction,
             current_plane: vec![0; dimensions_sizes],
@@ -22,8 +22,8 @@ impl StripStartIterator {
         result
     }
 
-    pub fn empty() -> StripStartIterator {
-        StripStartIterator::new(Vec::new(), Vec::new())
+    pub fn empty() -> StartIterator {
+        StartIterator::new(Vec::new(), Vec::new())
     }
 
     fn iterate_planes(&mut self) -> Option<()> {
@@ -104,7 +104,7 @@ impl StripStartIterator {
     }
 }
 
-impl Iterator for StripStartIterator {
+impl Iterator for StartIterator {
     type Item = Vec<isize>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -127,7 +127,7 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (dimensions, direction, expected_values) = $value;
-                    let iterator = StripStartIterator::new(dimensions, direction);
+                    let iterator = StartIterator::new(dimensions, direction);
                     let result: collections::HashSet<_> = iterator.collect();
                     let expected = collections::HashSet::from_iter(expected_values.iter().cloned());
                     assert_eq!(result, expected);
