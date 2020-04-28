@@ -1,7 +1,7 @@
 pub fn compute_strides(dimensions: &[isize]) -> Vec<isize> {
     dimensions
         .iter()
-        .scan(1, |mut acc, &value| {
+        .scan(1, |acc, &value| {
             let result = *acc;
             *acc *= value;
             Some(result)

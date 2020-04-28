@@ -172,7 +172,7 @@ fn build_model(
     let mut variables = Vec::new();
     let layer = input.clone();
     for index in 0..(dimensions.len() - 2) {
-        let (vars, layer) = build_layer(
+        let (vars, _layer) = build_layer(
             &scope,
             layer.clone(),
             dimensions[index],
@@ -244,7 +244,7 @@ mod tests {
         let input = nn.build_input(&[0]);
         let action = nn.play(&input)?;
         nn.learn(&input, action, 1.0)?;
-        nn.get_probabilities(&input);
+        nn.get_probabilities(&input)?;
         Ok(())
     }
 }
