@@ -1,12 +1,7 @@
+use crate::utils::grids::symmetries;
 use itertools::structs;
 use itertools::Itertools;
 use std::ops;
-
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct Symmetry {
-    destination: Vec<bool>,
-    permutation: Vec<isize>,
-}
 
 pub struct Symmetries {
     dimensions: Vec<isize>,
@@ -63,11 +58,11 @@ impl Symmetries {
 }
 
 impl Iterator for Symmetries {
-    type Item = Symmetry;
+    type Item = symmetries::Symmetry;
 
-    fn next(&mut self) -> Option<Symmetry> {
+    fn next(&mut self) -> Option<Self::Item> {
         match self.iterate() {
-            Some(()) => Some(Symmetry {
+            Some(()) => Some(symmetries::Symmetry {
                 destination: self.destination.clone(),
                 permutation: self.permutation.clone(),
             }),
@@ -86,35 +81,35 @@ mod tests {
         let symmetries = Symmetries::new(vec![3, 3]);
         let result = symmetries.collect::<collections::HashSet<_>>();
         let expected = [
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![false, false],
                 permutation: vec![0, 1],
             },
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![false, false],
                 permutation: vec![1, 0],
             },
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![false, true],
                 permutation: vec![0, 1],
             },
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![false, true],
                 permutation: vec![1, 0],
             },
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![true, false],
                 permutation: vec![0, 1],
             },
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![true, false],
                 permutation: vec![1, 0],
             },
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![true, true],
                 permutation: vec![0, 1],
             },
-            Symmetry {
+            symmetries::Symmetry {
                 destination: vec![true, true],
                 permutation: vec![1, 0],
             },
