@@ -6,7 +6,7 @@ pub struct BitArray9 {
     bits: u16,
 }
 
-impl BitArray<'_, '_, '_, '_> for BitArray9 {
+impl BitArray<'_> for BitArray9 {
     type Index = u8;
     fn zero() -> BitArray9 {
         BitArray9 { bits: 0 }
@@ -34,30 +34,30 @@ impl BitArray<'_, '_, '_, '_> for BitArray9 {
     }
 }
 
-impl<'a, 'b> ops::BitAnd<&'b BitArray9> for &'a BitArray9 {
+impl<'a> ops::BitAnd<&'a BitArray9> for &'a BitArray9 {
     type Output = BitArray9;
 
-    fn bitand(self, rhs: &'b BitArray9) -> BitArray9 {
+    fn bitand(self, rhs: &'a BitArray9) -> BitArray9 {
         BitArray9 {
             bits: self.bits & rhs.bits,
         }
     }
 }
 
-impl<'a, 'b> ops::BitOr<&'b BitArray9> for &'a BitArray9 {
+impl<'a> ops::BitOr<&'a BitArray9> for &'a BitArray9 {
     type Output = BitArray9;
 
-    fn bitor(self, rhs: &'b BitArray9) -> BitArray9 {
+    fn bitor(self, rhs: &'a BitArray9) -> BitArray9 {
         BitArray9 {
             bits: self.bits | rhs.bits,
         }
     }
 }
 
-impl<'a, 'b> ops::BitXor<&'b BitArray9> for &'a BitArray9 {
+impl<'a> ops::BitXor<&'a BitArray9> for &'a BitArray9 {
     type Output = BitArray9;
 
-    fn bitxor(self, rhs: &'b BitArray9) -> BitArray9 {
+    fn bitxor(self, rhs: &'a BitArray9) -> BitArray9 {
         BitArray9 {
             bits: self.bits ^ rhs.bits,
         }

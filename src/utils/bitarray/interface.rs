@@ -1,9 +1,9 @@
 use std::ops;
 
-pub trait BitArray<'a, 'b, 'c, 'd>: Clone + Copy + PartialEq
+pub trait BitArray<'a>: Clone + Copy + PartialEq
 where
-    Self: 'a + 'b + 'c + 'd,
-    &'a Self: ops::BitAnd<&'b Self> + ops::BitOr<&'c Self> + ops::BitXor<&'d Self>,
+    Self: 'a,
+    &'a Self: ops::BitAnd<&'a Self> + ops::BitOr<&'a Self> + ops::BitXor<&'a Self>,
 {
     type Index;
     fn zero() -> Self;
