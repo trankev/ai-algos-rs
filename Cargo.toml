@@ -11,6 +11,7 @@ tensorflow = {version = "*", features = ["experimental_training"]}
 rand = "*"
 pre-commit = "*"
 itertools = "*"
+auto_ops = "*"
 
 [package.metadata.precommit]
 fmt = "cargo fmt -- --check 2>&1"

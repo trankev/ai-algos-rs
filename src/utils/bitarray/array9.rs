@@ -1,12 +1,12 @@
 use super::BitArray;
-use std::ops;
+use auto_ops::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BitArray9 {
     bits: u16,
 }
 
-impl BitArray<'_> for BitArray9 {
+impl BitArray for BitArray9 {
     type Index = u8;
     fn zero() -> BitArray9 {
         BitArray9 { bits: 0 }
@@ -34,35 +34,23 @@ impl BitArray<'_> for BitArray9 {
     }
 }
 
-impl<'a> ops::BitAnd<&'a BitArray9> for &'a BitArray9 {
-    type Output = BitArray9;
-
-    fn bitand(self, rhs: &'a BitArray9) -> BitArray9 {
-        BitArray9 {
-            bits: self.bits & rhs.bits,
-        }
+impl_op_ex!(&|a: &BitArray9, b: &BitArray9| -> BitArray9 {
+    BitArray9 {
+        bits: a.bits & b.bits,
     }
-}
+});
 
-impl<'a> ops::BitOr<&'a BitArray9> for &'a BitArray9 {
-    type Output = BitArray9;
-
-    fn bitor(self, rhs: &'a BitArray9) -> BitArray9 {
-        BitArray9 {
-            bits: self.bits | rhs.bits,
-        }
+impl_op_ex!(| |a: &BitArray9, b: &BitArray9| -> BitArray9 {
+    BitArray9 {
+        bits: a.bits | b.bits,
     }
-}
+});
 
-impl<'a> ops::BitXor<&'a BitArray9> for &'a BitArray9 {
-    type Output = BitArray9;
-
-    fn bitxor(self, rhs: &'a BitArray9) -> BitArray9 {
-        BitArray9 {
-            bits: self.bits ^ rhs.bits,
-        }
+impl_op_ex!(^ |a: &BitArray9, b: &BitArray9| -> BitArray9 {
+    BitArray9 {
+        bits: a.bits ^ b.bits,
     }
-}
+});
 
 #[cfg(test)]
 mod tests {
