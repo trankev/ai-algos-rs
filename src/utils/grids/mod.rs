@@ -5,6 +5,7 @@ mod strip_indices;
 mod strip_length;
 mod strip_starts;
 mod strips;
+mod symmetries;
 
 pub use cell_runs::CellRuns;
 pub use directions::DirectionIterator;

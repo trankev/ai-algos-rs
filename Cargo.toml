@@ -10,6 +10,7 @@ edition = "2018"
 tensorflow = {version = "*", features = ["experimental_training"]}
 rand = "*"
 pre-commit = "*"
+itertools = "*"
 
 [package.metadata.precommit]
 fmt = "cargo fmt -- --check 2>&1"
