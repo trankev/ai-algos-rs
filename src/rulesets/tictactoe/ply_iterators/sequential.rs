@@ -7,7 +7,7 @@ pub struct SequentialPlyIterator {
     current_index: usize,
 }
 
-impl rulesets::PlyIterator<tictactoe::TicTacToe> for SequentialPlyIterator {
+impl rulesets::PlyIterator<tictactoe::RuleSet> for SequentialPlyIterator {
     fn new(state: rc::Rc<tictactoe::State>) -> SequentialPlyIterator {
         SequentialPlyIterator {
             state,

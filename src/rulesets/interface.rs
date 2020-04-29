@@ -7,7 +7,7 @@ pub enum Status {
     Win { player: u8 },
 }
 
-pub trait RuleSet {
+pub trait BaseRuleSet {
     type State;
     type Ply: Copy;
 
@@ -16,7 +16,7 @@ pub trait RuleSet {
     fn status(&self, state: &Self::State) -> Status;
 }
 
-pub trait PlyIterator<Rules: RuleSet>: Iterator<Item = Rules::Ply> {
+pub trait PlyIterator<Rules: BaseRuleSet>: Iterator<Item = Rules::Ply> {
     fn new(state: rc::Rc<Rules::State>) -> Self;
 }
 

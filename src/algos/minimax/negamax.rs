@@ -3,11 +3,11 @@ use crate::rulesets;
 use std::f32;
 use std::rc;
 
-pub struct Negamax<RuleSet: rulesets::RuleSet> {
+pub struct Negamax<RuleSet: rulesets::BaseRuleSet> {
     ruleset: RuleSet,
 }
 
-impl<RuleSet: rulesets::RuleSet> Negamax<RuleSet> {
+impl<RuleSet: rulesets::BaseRuleSet> Negamax<RuleSet> {
     pub fn compute<PlyIterator: rulesets::PlyIterator<RuleSet>>(
         &self,
         state: rc::Rc<RuleSet::State>,
@@ -67,7 +67,7 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (p1_indices, p2_indices, current_player, expected_indices, expected_score) = $value;
-                    let ruleset = tictactoe::TicTacToe::new();
+                    let ruleset = tictactoe::RuleSet::new();
                     let state = rc::Rc::new(tictactoe::State::from_indices(&p1_indices, &p2_indices, current_player));
                     let algo = Negamax{ruleset};
                     let result = algo.compute::<

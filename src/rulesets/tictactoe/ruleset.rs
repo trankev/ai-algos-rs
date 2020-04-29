@@ -5,16 +5,16 @@ use crate::utils::bitarray;
 use crate::utils::bitarray::BitArray;
 use crate::utils::grids::strips;
 
-pub struct TicTacToe {
+pub struct RuleSet {
     strips: [bitarray::BitArray9; 8],
 }
 
-impl TicTacToe {
-    pub fn new() -> TicTacToe {
+impl RuleSet {
+    pub fn new() -> RuleSet {
         let strips = strips::CellRuns::new(vec![3, 3], 3)
             .map(|indices| bitarray::BitArray9::from_indices(&indices))
             .collect::<Vec<_>>();
-        let mut result = TicTacToe {
+        let mut result = RuleSet {
             strips: [bitarray::BitArray9::zero(); 8],
         };
         for (index, value) in strips.iter().enumerate() {
@@ -24,7 +24,7 @@ impl TicTacToe {
     }
 }
 
-impl rulesets::RuleSet for TicTacToe {
+impl rulesets::BaseRuleSet for RuleSet {
     type State = state::State;
     type Ply = plies::Ply;
 
@@ -69,9 +69,9 @@ impl rulesets::RuleSet for TicTacToe {
 mod tests {
     use super::super::plies;
     use super::super::state;
-    use super::TicTacToe;
+    use super::RuleSet as TicTacToe;
     use crate::rulesets;
-    use crate::rulesets::RuleSet;
+    use crate::rulesets::BaseRuleSet;
 
     #[test]
     fn test_invalid_move() {

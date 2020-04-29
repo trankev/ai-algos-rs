@@ -4,5 +4,5 @@ mod ruleset;
 mod state;
 
 pub use plies::Ply;
-pub use ruleset::TicTacToe;
+pub use ruleset::RuleSet;
 pub use state::State;
