@@ -18,8 +18,8 @@ impl State {
     }
 
     pub fn from_indices(
-        player1_indices: &[u8],
-        player2_indices: &[u8],
+        player1_indices: &[usize],
+        player2_indices: &[usize],
         current_player: u8,
     ) -> State {
         State {
@@ -31,20 +31,20 @@ impl State {
         }
     }
 
-    pub fn is_empty(&self, index: u8) -> bool {
+    pub fn is_empty(&self, index: usize) -> bool {
         self.grids.iter().all(|&grid| !grid.isset(index))
     }
 
     pub fn play(&mut self, ply: &plies::Ply) -> Result<(), rulesets::PlayError> {
         for grid in &self.grids {
-            if grid.isset(ply.index) {
+            if grid.isset(ply.index as usize) {
                 return Err(rulesets::PlayError {
                     message: "Cell is occupied",
                     field: "index",
                 });
             }
         }
-        self.grids[self.current_player as usize].set(ply.index);
+        self.grids[self.current_player as usize].set(ply.index as usize);
         self.current_player = 1 - self.current_player;
         Ok(())
     }

@@ -4,7 +4,7 @@ use std::rc;
 
 pub struct SequentialPlyIterator {
     state: rc::Rc<tictactoe::State>,
-    current_index: u8,
+    current_index: usize,
 }
 
 impl rulesets::PlyIterator<tictactoe::TicTacToe> for SequentialPlyIterator {
@@ -30,7 +30,9 @@ impl Iterator for SequentialPlyIterator {
         }
         let to_return = self.current_index;
         self.current_index += 1;
-        Some(tictactoe::Ply { index: to_return })
+        Some(tictactoe::Ply {
+            index: to_return as u8,
+        })
     }
 }
 

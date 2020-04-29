@@ -12,10 +12,7 @@ pub struct TicTacToe {
 impl TicTacToe {
     pub fn new() -> TicTacToe {
         let strips = strips::CellRuns::new(vec![3, 3], 3)
-            .map(|indices| {
-                let uindices = indices.iter().map(|&x| x as u8).collect::<Vec<_>>();
-                bitarray::BitArray9::from_indices(&uindices)
-            })
+            .map(|indices| bitarray::BitArray9::from_indices(&indices))
             .collect::<Vec<_>>();
         let mut result = TicTacToe {
             strips: [bitarray::BitArray9::zero(); 8],

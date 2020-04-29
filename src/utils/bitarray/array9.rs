@@ -7,12 +7,11 @@ pub struct BitArray9 {
 }
 
 impl BitArray for BitArray9 {
-    type Index = u8;
     fn zero() -> BitArray9 {
         BitArray9 { bits: 0 }
     }
 
-    fn from_indices(indices: &[Self::Index]) -> Self {
+    fn from_indices(indices: &[usize]) -> Self {
         let mut result = BitArray9::zero();
         for index in indices {
             result.set(*index);
@@ -20,7 +19,7 @@ impl BitArray for BitArray9 {
         result
     }
 
-    fn isset(&self, index: Self::Index) -> bool {
+    fn isset(&self, index: usize) -> bool {
         debug_assert!(
             index < 9,
             format!("BitArray index out of bound: {} >= 9", index)
@@ -29,7 +28,7 @@ impl BitArray for BitArray9 {
         self.bits & mask == mask
     }
 
-    fn set(&mut self, index: Self::Index) {
+    fn set(&mut self, index: usize) {
         self.bits |= 1u16 << index;
     }
 }

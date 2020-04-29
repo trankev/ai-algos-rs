@@ -3,7 +3,7 @@ use crate::utils::grids::strips;
 pub struct CellRuns {
     size: usize,
     strips: strips::StripIterator,
-    current_strip: Vec<isize>,
+    current_strip: Vec<usize>,
     current_index: isize,
 }
 
@@ -20,7 +20,7 @@ impl CellRuns {
 }
 
 impl Iterator for CellRuns {
-    type Item = Vec<isize>;
+    type Item = Vec<usize>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.current_index += 1;

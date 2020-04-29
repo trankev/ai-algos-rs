@@ -32,13 +32,13 @@ impl Indices {
 }
 
 impl Iterator for Indices {
-    type Item = isize;
+    type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.remaining_count == 0 {
             return None;
         }
-        let result = self.current;
+        let result = self.current as usize;
         self.current += self.step;
         self.remaining_count -= 1;
         Some(result)

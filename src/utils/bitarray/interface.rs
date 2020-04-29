@@ -7,9 +7,8 @@ where
     for<'a> &'a Self: ops::BitAnd<Self> + ops::BitOr<Self> + ops::BitXor<Self>,
     for<'a, 'b> &'a Self: ops::BitAnd<&'b Self> + ops::BitOr<&'b Self> + ops::BitXor<&'b Self>,
 {
-    type Index;
     fn zero() -> Self;
-    fn from_indices(indices: &[Self::Index]) -> Self;
-    fn isset(&self, index: Self::Index) -> bool;
-    fn set(&mut self, index: Self::Index);
+    fn from_indices(indices: &[usize]) -> Self;
+    fn isset(&self, index: usize) -> bool;
+    fn set(&mut self, index: usize);
 }

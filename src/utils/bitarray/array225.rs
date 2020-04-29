@@ -2,9 +2,9 @@ use super::BitArray;
 use auto_ops::*;
 use std::mem;
 
-const BIT_COUNT: u8 = 225;
+const BIT_COUNT: usize = 225;
 type IntegerType = u64;
-const INTEGER_SIZE: u8 = 8 * mem::size_of::<IntegerType>() as u8;
+const INTEGER_SIZE: usize = 8 * mem::size_of::<IntegerType>();
 const ARRAY_SIZE: usize = (BIT_COUNT / INTEGER_SIZE) as usize + 1;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -13,14 +13,13 @@ pub struct BitArray225 {
 }
 
 impl BitArray for BitArray225 {
-    type Index = u8;
     fn zero() -> BitArray225 {
         BitArray225 {
             bits: [0; ARRAY_SIZE],
         }
     }
 
-    fn from_indices(indices: &[Self::Index]) -> Self {
+    fn from_indices(indices: &[usize]) -> Self {
         let mut result = BitArray225::zero();
         for index in indices {
             result.set(*index);
@@ -28,7 +27,7 @@ impl BitArray for BitArray225 {
         result
     }
 
-    fn isset(&self, index: Self::Index) -> bool {
+    fn isset(&self, index: usize) -> bool {
         debug_assert!(
             index < BIT_COUNT,
             format!("BitArray index out of bound: {} >= {}", index, BIT_COUNT)
@@ -39,7 +38,7 @@ impl BitArray for BitArray225 {
         self.bits[integer as usize] & mask == mask
     }
 
-    fn set(&mut self, index: Self::Index) {
+    fn set(&mut self, index: usize) {
         let integer = index / INTEGER_SIZE;
         let offset = index % INTEGER_SIZE;
         self.bits[integer as usize] |= 1 << offset;
