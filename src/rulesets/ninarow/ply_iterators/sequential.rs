@@ -1,6 +1,6 @@
 use crate::rulesets;
-use crate::rulesets::gomoku;
-use crate::rulesets::gomoku::variants;
+use crate::rulesets::ninarow;
+use crate::rulesets::ninarow::variants;
 use crate::utils::bitarray;
 use std::ops;
 use std::rc;
@@ -19,11 +19,11 @@ where
         + ops::BitOr<&'b ArrayType, Output = ArrayType>
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    state: rc::Rc<<gomoku::RuleSet<ArrayType, Variant> as rulesets::BaseRuleSet>::State>,
+    state: rc::Rc<<ninarow::RuleSet<ArrayType, Variant> as rulesets::BaseRuleSet>::State>,
     current_index: usize,
 }
 
-impl<ArrayType, Variant> rulesets::PlyIterator<gomoku::RuleSet<ArrayType, Variant>>
+impl<ArrayType, Variant> rulesets::PlyIterator<ninarow::RuleSet<ArrayType, Variant>>
     for SequentialPlyIterator<ArrayType, Variant>
 where
     Variant: variants::BaseVariant,
@@ -39,7 +39,7 @@ where
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
     fn new(
-        state: rc::Rc<<gomoku::RuleSet<ArrayType, Variant> as rulesets::BaseRuleSet>::State>,
+        state: rc::Rc<<ninarow::RuleSet<ArrayType, Variant> as rulesets::BaseRuleSet>::State>,
     ) -> SequentialPlyIterator<ArrayType, Variant> {
         SequentialPlyIterator {
             state,
@@ -62,7 +62,7 @@ where
         + ops::BitOr<&'b ArrayType, Output = ArrayType>
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    type Item = gomoku::Ply;
+    type Item = ninarow::Ply;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -76,7 +76,7 @@ where
         }
         let to_return = self.current_index;
         self.current_index += 1;
-        Some(gomoku::Ply {
+        Some(ninarow::Ply {
             index: to_return as u8,
         })
     }
@@ -88,26 +88,26 @@ pub type GomokuPlyIterator = SequentialPlyIterator<bitarray::BitArray225, varian
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rulesets::gomoku;
+    use crate::rulesets::ninarow;
     use crate::rulesets::PlyIterator;
     use std::collections;
     use std::rc;
 
     #[test]
     fn test_iterate() {
-        let state = rc::Rc::new(gomoku::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0));
+        let state = rc::Rc::new(ninarow::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0));
         let iterator = TicTacToePlyIterator::new(state);
-        let expected: collections::HashSet<gomoku::Ply> = [
-            gomoku::Ply { index: 0 },
-            gomoku::Ply { index: 2 },
-            gomoku::Ply { index: 3 },
-            gomoku::Ply { index: 5 },
-            gomoku::Ply { index: 8 },
+        let expected: collections::HashSet<ninarow::Ply> = [
+            ninarow::Ply { index: 0 },
+            ninarow::Ply { index: 2 },
+            ninarow::Ply { index: 3 },
+            ninarow::Ply { index: 5 },
+            ninarow::Ply { index: 8 },
         ]
         .iter()
         .cloned()
         .collect();
-        let result: collections::HashSet<gomoku::Ply> = iterator.collect();
+        let result: collections::HashSet<ninarow::Ply> = iterator.collect();
         assert_eq!(result, expected);
     }
 }

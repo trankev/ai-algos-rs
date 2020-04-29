@@ -56,8 +56,8 @@ impl<RuleSet: rulesets::BaseRuleSet> Negamax<RuleSet> {
 #[cfg(test)]
 mod tests {
     use super::Negamax;
-    use crate::rulesets::gomoku;
-    use crate::rulesets::gomoku::ply_iterators;
+    use crate::rulesets::ninarow;
+    use crate::rulesets::ninarow::ply_iterators;
     use std::f32;
     use std::rc;
 
@@ -67,15 +67,15 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (p1_indices, p2_indices, current_player, expected_indices, expected_score) = $value;
-                    let ruleset = gomoku::TicTacToe::new();
-                    let state = rc::Rc::new(gomoku::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player));
+                    let ruleset = ninarow::TicTacToe::new();
+                    let state = rc::Rc::new(ninarow::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player));
                     let algo = Negamax{ruleset};
                     let result = algo.compute::<
                         ply_iterators::TicTacToePlyIterator
                     >(state, current_player);
                     assert_eq!(result.score(), expected_score);
-                    let expected_plies: Vec<gomoku::Ply> = expected_indices.iter().map(
-                        |index| gomoku::Ply{index: *index}
+                    let expected_plies: Vec<ninarow::Ply> = expected_indices.iter().map(
+                        |index| ninarow::Ply{index: *index}
                     ).collect();
                     let plies = result.plies();
                     assert_eq!(plies, expected_plies);

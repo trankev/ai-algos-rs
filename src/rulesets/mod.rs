@@ -1,6 +1,5 @@
-pub mod gomoku;
 mod interface;
-pub mod tictactoe;
+pub mod ninarow;
 
 pub use interface::BaseRuleSet;
 pub use interface::PlayError;
