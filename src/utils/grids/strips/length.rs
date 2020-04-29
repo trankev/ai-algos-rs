@@ -8,7 +8,7 @@ pub fn length(dimensions: &[isize], direction: &[isize], start: &[isize]) -> isi
             if direction < 0 {
                 start + 1
             } else {
-                dimension - start
+                dimension as isize - start
             }
         })
         .min()

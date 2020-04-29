@@ -9,10 +9,10 @@ pub struct StripIterator {
 }
 
 impl StripIterator {
-    pub fn new(dimensions: Vec<isize>) -> StripIterator {
+    pub fn new(dimensions: Vec<usize>) -> StripIterator {
         let directions = grids::DirectionIterator::new(dimensions.len());
         StripIterator {
-            dimensions,
+            dimensions: dimensions.iter().map(|&x| x as isize).collect(),
             directions,
             strip_starts: strips::StartIterator::empty(),
             strips: strips::Indices::empty(),

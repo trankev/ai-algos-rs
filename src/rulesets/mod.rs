@@ -1,3 +1,4 @@
+pub mod gomoku;
 mod interface;
 pub mod tictactoe;
 

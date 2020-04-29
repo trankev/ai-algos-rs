@@ -62,7 +62,7 @@ impl StartIterator {
             .zip(self.current_plane.iter())
             .map(|((dimension, orientation), &plane)| {
                 if *orientation < 0 {
-                    dimension - 1 - plane
+                    *dimension - 1 - plane
                 } else {
                     plane
                 }
@@ -83,7 +83,7 @@ impl StartIterator {
                 }
             } else {
                 self.current_position[index] += 1;
-                if self.current_position[index] < self.dimensions[index] {
+                if self.current_position[index] < self.dimensions[index] as isize {
                     return Some(());
                 }
             }

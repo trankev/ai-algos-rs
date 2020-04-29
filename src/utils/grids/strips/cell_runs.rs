@@ -8,8 +8,8 @@ pub struct CellRuns {
 }
 
 impl CellRuns {
-    pub fn new(dimensions: Vec<isize>, size: usize) -> CellRuns {
-        let strips = strips::StripIterator::new(dimensions.clone());
+    pub fn new(dimensions: Vec<usize>, size: usize) -> CellRuns {
+        let strips = strips::StripIterator::new(dimensions);
         CellRuns {
             size,
             strips,

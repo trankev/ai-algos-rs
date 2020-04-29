@@ -24,7 +24,7 @@ impl Positions {
             .zip(self.dimensions.iter().rev());
         for (value, dimension) in iterator {
             *value += 1;
-            if *value < *dimension {
+            if *value < *dimension as isize {
                 return Some(());
             }
             *value = 0;
