@@ -1,18 +1,42 @@
-use super::constants;
 use super::plies;
 use crate::rulesets;
-use crate::utils::bitarray::BitArray;
+use crate::utils::bitarray;
+use std::ops;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct State {
-    pub grids: [constants::ArrayType; 2],
+pub struct State<ArrayType>
+where
+    ArrayType: bitarray::BitArray,
+    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
+        + ops::BitOr<&'a ArrayType, Output = ArrayType>
+        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
+    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
+        + ops::BitOr<ArrayType, Output = ArrayType>
+        + ops::BitXor<ArrayType, Output = ArrayType>,
+    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
+        + ops::BitOr<&'b ArrayType, Output = ArrayType>
+        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
+{
+    pub grids: [ArrayType; 2],
     pub current_player: u8,
 }
 
-impl State {
-    pub fn new() -> State {
+impl<ArrayType> State<ArrayType>
+where
+    ArrayType: bitarray::BitArray,
+    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
+        + ops::BitOr<&'a ArrayType, Output = ArrayType>
+        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
+    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
+        + ops::BitOr<ArrayType, Output = ArrayType>
+        + ops::BitXor<ArrayType, Output = ArrayType>,
+    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
+        + ops::BitOr<&'b ArrayType, Output = ArrayType>
+        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
+{
+    pub fn new() -> State<ArrayType> {
         State {
-            grids: [constants::ArrayType::zero(); 2],
+            grids: [ArrayType::zero(); 2],
             current_player: 0,
         }
     }
@@ -21,11 +45,11 @@ impl State {
         player1_indices: &[usize],
         player2_indices: &[usize],
         current_player: u8,
-    ) -> State {
+    ) -> State<ArrayType> {
         State {
             grids: [
-                constants::ArrayType::from_indices(player1_indices),
-                constants::ArrayType::from_indices(player2_indices),
+                ArrayType::from_indices(player1_indices),
+                ArrayType::from_indices(player2_indices),
             ],
             current_player,
         }
@@ -50,23 +74,27 @@ impl State {
     }
 }
 
+pub type TicTacToeState = State<bitarray::BitArray9>;
+pub type GomokuState = State<bitarray::BitArray225>;
+
 #[cfg(test)]
 mod tests {
-    use super::super::constants;
     use super::super::plies;
-    use super::State;
+    use super::super::variants;
+    use super::super::variants::BaseVariant;
+    use super::*;
 
     #[test]
     fn test_is_empty_empty() {
-        let state = State::new();
-        for index in 0..constants::CELL_COUNT {
+        let state = TicTacToeState::new();
+        for index in 0..variants::TicTacToe::CELL_COUNT {
             assert!(state.is_empty(index));
         }
     }
 
     #[test]
     fn test_is_empty_filled() {
-        let state = State::from_indices(&[4, 1], &[0, 8], 0);
+        let state = TicTacToeState::from_indices(&[4, 1], &[0, 8], 0);
         assert!(!state.is_empty(0));
         assert!(!state.is_empty(1));
         assert!(state.is_empty(2));
@@ -75,8 +103,8 @@ mod tests {
 
     #[test]
     fn test_from_indices() {
-        let from_indices = State::from_indices(&[4, 1], &[8, 7], 0);
-        let mut from_scratch = State::new();
+        let from_indices = TicTacToeState::from_indices(&[4, 1], &[8, 7], 0);
+        let mut from_scratch = TicTacToeState::new();
         for index in &[4, 8, 1, 7] {
             from_scratch.play(&plies::Ply { index: *index }).unwrap();
         }

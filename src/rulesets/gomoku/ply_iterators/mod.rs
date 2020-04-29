@@ -1,3 +1,4 @@
 mod sequential;
 
-pub use sequential::SequentialPlyIterator;
+pub use sequential::GomokuPlyIterator;
+pub use sequential::TicTacToePlyIterator;
