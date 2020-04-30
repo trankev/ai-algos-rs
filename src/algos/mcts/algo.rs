@@ -14,6 +14,7 @@ pub struct MCTS<RuleSet: rulesets::BaseRuleSet> {
     ruleset: RuleSet,
     tree: stable_graph::StableGraph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     rng: rngs::ThreadRng,
+    root: Option<stable_graph::NodeIndex<u32>>,
 }
 
 impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
@@ -22,23 +23,22 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
             ruleset,
             tree: stable_graph::StableGraph::new(),
             rng: rand::thread_rng(),
+            root: None,
         }
     }
 
-    pub fn compute<PlyIterator: rulesets::PlyIterator<RuleSet>>(
-        &mut self,
-        state: rc::Rc<RuleSet::State>,
-        player: u8,
-    ) {
+    pub fn set_state(&mut self, state: rc::Rc<RuleSet::State>) {
         let index = self.tree.add_node(nodes::Node::new(state));
-        self.iterate::<PlyIterator>(index, player);
+        self.root = Some(index);
     }
 
-    fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(
-        &mut self,
-        node: stable_graph::NodeIndex<u32>,
-        player: u8,
-    ) {
+    pub fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(&mut self, player: u8) {
+        let node = match self.root {
+            Some(node) => node,
+            None => {
+                return;
+            }
+        };
         let selected = selection::select(&self.tree, node);
         expansion::expand::<RuleSet, PlyIterator>(&mut self.tree, &self.ruleset, selected);
         let to_simulate = match self.tree.neighbors(selected).choose(&mut self.rng) {
@@ -62,6 +62,7 @@ mod tests {
         let ruleset = ninarow::TicTacToe::new();
         let state = rc::Rc::new(ruleset.initial_state());
         let mut algo = MCTS::new(ruleset);
-        algo.compute::<ply_iterators::TicTacToePlyIterator>(state, 0);
+        algo.set_state(state);
+        algo.iterate::<ply_iterators::TicTacToePlyIterator>(0);
     }
 }
