@@ -2,13 +2,18 @@ use super::edges;
 use super::expansion;
 use super::nodes;
 use super::selection;
+use super::simulation;
 use crate::rulesets;
 use petgraph::stable_graph;
+use rand;
+use rand::rngs;
+use rand::seq::IteratorRandom;
 use std::rc;
 
 pub struct MCTS<RuleSet: rulesets::BaseRuleSet> {
     ruleset: RuleSet,
     tree: stable_graph::StableGraph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
+    rng: rngs::ThreadRng,
 }
 
 impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
@@ -16,6 +21,7 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
         MCTS {
             ruleset,
             tree: stable_graph::StableGraph::new(),
+            rng: rand::thread_rng(),
         }
     }
 
@@ -35,6 +41,12 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
     ) {
         let selected = selection::select(&self.tree, node);
         expansion::expand::<RuleSet, PlyIterator>(&mut self.tree, &self.ruleset, selected);
+        let to_simulate = match self.tree.neighbors(selected).choose(&mut self.rng) {
+            Some(node) => node,
+            None => selected,
+        };
+        let state = self.tree.node_weight(to_simulate).unwrap().state.clone();
+        simulation::simulate::<RuleSet, PlyIterator>(&self.ruleset, state, &mut self.rng);
     }
 }
 
