@@ -1,4 +1,5 @@
 use super::edges;
+use super::expansion;
 use super::nodes;
 use super::selection;
 use crate::rulesets;
@@ -24,11 +25,16 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
         player: u8,
     ) {
         let index = self.tree.add_node(nodes::Node::new(state));
-        self.iterate(index, player);
+        self.iterate::<PlyIterator>(index, player);
     }
 
-    fn iterate(&mut self, node: stable_graph::NodeIndex<u32>, player: u8) {
+    fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(
+        &mut self,
+        node: stable_graph::NodeIndex<u32>,
+        player: u8,
+    ) {
         let selected = selection::select(&self.tree, node);
+        expansion::expand::<RuleSet, PlyIterator>(&mut self.tree, &self.ruleset, selected);
     }
 }
 
