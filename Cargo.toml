@@ -12,6 +12,8 @@ rand = "*"
 pre-commit = "*"
 itertools = "*"
 auto_ops = "*"
+petgraph = "*"
+more-asserts = "*"
 
 [package.metadata.precommit]
 fmt = "cargo fmt -- --check 2>&1"
