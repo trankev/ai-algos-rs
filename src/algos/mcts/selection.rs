@@ -14,7 +14,12 @@ pub fn select<State, Edge>(
         .neighbors(node)
         .map(|child_index| {
             let child_weight = tree.node_weight(child_index).unwrap();
-            let value = uct_value::uct_value(weight.visits, child_weight.visits, child_weight.wins);
+            let value = uct_value::uct_value(
+                weight.visits,
+                child_weight.visits,
+                child_weight.wins,
+                child_weight.draws,
+            );
             (child_index, value)
         })
         .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()); // assumes no NaN values
