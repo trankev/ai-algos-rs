@@ -1,6 +1,7 @@
+use std::fmt;
 use std::ops;
 
-pub trait BitArray: Clone + Copy + PartialEq
+pub trait BitArray: Clone + Copy + fmt::Debug + PartialEq
 where
     Self: ops::BitAnd<Self, Output = Self>
         + ops::BitOr<Self, Output = Self>

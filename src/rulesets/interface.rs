@@ -1,3 +1,4 @@
+use std::fmt;
 use std::rc;
 
 pub type Player = u8;
@@ -33,9 +34,12 @@ pub enum PlayerStatus {
     Loss,
 }
 
+pub trait StateTrait: fmt::Debug {}
+pub trait PlyTrait: Copy + fmt::Debug {}
+
 pub trait BaseRuleSet {
-    type State;
-    type Ply: Copy;
+    type State: StateTrait;
+    type Ply: PlyTrait;
 
     fn initial_state(&self) -> Self::State;
     fn play(&self, state: &Self::State, ply: &Self::Ply) -> Result<Self::State, PlayError>;

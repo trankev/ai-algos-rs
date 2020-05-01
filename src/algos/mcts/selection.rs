@@ -24,7 +24,7 @@ pub fn select<State, Edge>(
         })
         .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()); // assumes no NaN values
     match neighbors {
-        Some((child_index, _)) => child_index,
+        Some((child_index, _)) => select(tree, child_index),
         None => node,
     }
 }

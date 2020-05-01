@@ -1,3 +1,4 @@
+use super::backpropagation;
 use super::edges;
 use super::expansion;
 use super::nodes;
@@ -32,7 +33,10 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
         self.root = Some(index);
     }
 
-    pub fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(&mut self, player: u8) {
+    pub fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(
+        &mut self,
+        player: rulesets::Player,
+    ) {
         let node = match self.root {
             Some(node) => node,
             None => {
@@ -46,7 +50,68 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
             None => selected,
         };
         let state = self.tree.node_weight(to_simulate).unwrap().state.clone();
-        simulation::simulate::<RuleSet, PlyIterator>(&self.ruleset, state, &mut self.rng);
+        let status =
+            simulation::simulate::<RuleSet, PlyIterator>(&self.ruleset, state, &mut self.rng);
+        let player_status = status.player_pov(&player);
+        backpropagation::backpropagate(&mut self.tree, to_simulate, &player_status);
+    }
+
+    pub fn play_scores(&self) {
+        let parent = match self.root {
+            Some(node) => node,
+            None => {
+                return;
+            }
+        };
+        let mut scores = self
+            .tree
+            .neighbors(parent)
+            .map(|node_index| {
+                let node_weight = self.tree.node_weight(node_index).unwrap();
+                let edge = self.tree.find_edge(parent, node_index).unwrap();
+                let edge_weight = self.tree.edge_weight(edge).unwrap();
+                (node_weight.score(), node_index, edge_weight.ply)
+            })
+            .collect::<Vec<_>>();
+        scores.sort_by(|(score_a, _, _), (score_b, _, _)| score_a.partial_cmp(score_b).unwrap());
+        for (score, node_index, ply) in scores {
+            let scenario = self.best_play(node_index, true);
+            println!("{:?}: {:?} => {:?}", ply, score, scenario);
+        }
+    }
+
+    fn best_play(
+        &self,
+        mut current_node: stable_graph::NodeIndex<u32>,
+        mut reverse: bool,
+    ) -> Vec<RuleSet::Ply> {
+        let mut result = Vec::new();
+        loop {
+            let neighbours = self.tree.neighbors(current_node).map(|node_index| {
+                let node_weight = self.tree.node_weight(node_index).unwrap();
+                let edge = self.tree.find_edge(current_node, node_index).unwrap();
+                let edge_weight = self.tree.edge_weight(edge).unwrap();
+                (node_weight.score(), node_index, edge_weight.ply)
+            });
+            let best_neighbour = if reverse {
+                neighbours.min_by(|(score_a, _, _), (score_b, _, _)| {
+                    score_a.partial_cmp(score_b).unwrap()
+                })
+            } else {
+                neighbours.max_by(|(score_a, _, _), (score_b, _, _)| {
+                    score_a.partial_cmp(score_b).unwrap()
+                })
+            };
+            current_node = match best_neighbour {
+                Some((_, node_index, ply)) => {
+                    result.push(ply);
+                    reverse = !reverse;
+                    node_index
+                }
+                None => break,
+            }
+        }
+        result
     }
 }
 

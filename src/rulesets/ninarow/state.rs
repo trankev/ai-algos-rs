@@ -74,6 +74,21 @@ where
     }
 }
 
+impl<ArrayType> rulesets::StateTrait for State<ArrayType>
+where
+    ArrayType: bitarray::BitArray,
+    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
+        + ops::BitOr<&'a ArrayType, Output = ArrayType>
+        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
+    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
+        + ops::BitOr<ArrayType, Output = ArrayType>
+        + ops::BitXor<ArrayType, Output = ArrayType>,
+    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
+        + ops::BitOr<&'b ArrayType, Output = ArrayType>
+        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
+{
+}
+
 pub type TicTacToeState = State<bitarray::BitArray9>;
 pub type GomokuState = State<bitarray::BitArray225>;
 

@@ -1,4 +1,5 @@
 mod algo;
+mod backpropagation;
 mod edges;
 mod expansion;
 mod nodes;

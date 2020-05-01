@@ -16,4 +16,8 @@ impl<State> Node<State> {
             draws: 0.0,
         }
     }
+
+    pub fn score(&self) -> f32 {
+        (self.wins + self.draws / 2.0) / (self.visits + 1.0)
+    }
 }
