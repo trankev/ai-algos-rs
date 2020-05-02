@@ -1,7 +1,8 @@
 use std::fmt;
+use std::hash;
 use std::ops;
 
-pub trait BitArray: Clone + Copy + fmt::Debug + PartialEq
+pub trait BitArray: Clone + Copy + fmt::Debug + Eq + hash::Hash + PartialEq
 where
     Self: ops::BitAnd<Self, Output = Self>
         + ops::BitOr<Self, Output = Self>
@@ -17,7 +18,24 @@ where
         + ops::BitXor<&'b Self, Output = Self>,
 {
     fn zero() -> Self;
-    fn from_indices(indices: &[usize]) -> Self;
     fn isset(&self, index: usize) -> bool;
     fn set(&mut self, index: usize);
+
+    fn from_indices(indices: &[usize]) -> Self {
+        let mut result = Self::zero();
+        for index in indices {
+            result.set(*index);
+        }
+        result
+    }
+
+    fn swap(&self, permutation: &[usize]) -> Self {
+        let mut result = Self::zero();
+        for (index, &target) in permutation.iter().enumerate() {
+            if self.isset(index) {
+                result.set(target);
+            }
+        }
+        result
+    }
 }

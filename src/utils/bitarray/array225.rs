@@ -7,7 +7,7 @@ type IntegerType = u64;
 const INTEGER_SIZE: usize = 8 * mem::size_of::<IntegerType>();
 const ARRAY_SIZE: usize = (BIT_COUNT / INTEGER_SIZE) as usize + 1;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct BitArray225 {
     bits: [u64; ARRAY_SIZE],
 }
@@ -17,14 +17,6 @@ impl BitArray for BitArray225 {
         BitArray225 {
             bits: [0; ARRAY_SIZE],
         }
-    }
-
-    fn from_indices(indices: &[usize]) -> Self {
-        let mut result = BitArray225::zero();
-        for index in indices {
-            result.set(*index);
-        }
-        result
     }
 
     fn isset(&self, index: usize) -> bool {

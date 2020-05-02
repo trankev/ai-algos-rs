@@ -50,6 +50,9 @@ pub trait RuleSetTrait: Sized {
 pub trait Permutable: RuleSetTrait {
     type Permutation;
     type PermutationIterator: PermutationIteratorTrait<Self>;
+
+    fn swap_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State;
+    fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State;
 }
 
 pub trait PlyIteratorTrait<Rules: RuleSetTrait>: Iterator<Item = Rules::Ply> {

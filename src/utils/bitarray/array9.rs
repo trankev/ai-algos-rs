@@ -1,7 +1,7 @@
 use super::BitArray;
 use auto_ops::*;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct BitArray9 {
     bits: u16,
 }
@@ -9,14 +9,6 @@ pub struct BitArray9 {
 impl BitArray for BitArray9 {
     fn zero() -> BitArray9 {
         BitArray9 { bits: 0 }
-    }
-
-    fn from_indices(indices: &[usize]) -> Self {
-        let mut result = BitArray9::zero();
-        for index in indices {
-            result.set(*index);
-        }
-        result
     }
 
     fn isset(&self, index: usize) -> bool {
@@ -106,5 +98,13 @@ mod tests {
         let array2 = BitArray9::from_indices(&[2, 3]);
         let expected = BitArray9::from_indices(&[3]);
         assert_eq!(&array1 & &array2, expected);
+    }
+
+    #[test]
+    fn test_swap() {
+        let array = BitArray9::from_indices(&[0, 1, 2]);
+        let result = array.swap(&[8, 5, 2, 7, 4, 1, 6, 3, 0]);
+        let expected = BitArray9::from_indices(&[2, 5, 8]);
+        assert_eq!(result, expected);
     }
 }

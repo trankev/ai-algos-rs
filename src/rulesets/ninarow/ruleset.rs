@@ -133,6 +133,19 @@ where
 {
     type Permutation = permutation::Permutation;
     type PermutationIterator = permutation_iterators::PermutationIterator;
+
+    fn swap_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
+        let permutations =
+            &self.symmetries.permutations[permutation.grid_permutation_index as usize];
+        state.swap(permutations, permutation.switched_players)
+    }
+
+    fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
+        let permutation_index =
+            self.symmetries.reverses[permutation.grid_permutation_index as usize];
+        let permutations = &self.symmetries.permutations[permutation_index];
+        state.swap(permutations, permutation.switched_players)
+    }
 }
 
 pub type TicTacToe = RuleSet<bitarray::BitArray9, variants::TicTacToe>;
@@ -142,7 +155,10 @@ pub type Gomoku = RuleSet<bitarray::BitArray225, variants::Gomoku>;
 mod tests {
     use super::super::plies;
     use super::*;
+    use crate::rulesets::Permutable;
+    use crate::rulesets::PermutationIteratorTrait;
     use crate::rulesets::RuleSetTrait;
+    use std::collections;
 
     #[test]
     fn test_invalid_move() {
@@ -175,5 +191,20 @@ mod tests {
         p1_win: ([4, 1, 0, 2], [5, 7, 8], 1, rulesets::Status::Win{player: 0}),
         p2_win: ([1, 2, 5], [4, 0, 8], 0, rulesets::Status::Win{player: 1}),
         draw: ([4, 1, 6, 5], [8, 7, 2, 3], 0, rulesets::Status::Draw),
+    }
+
+    #[test]
+    fn test_swap_state() {
+        let game = TicTacToe::new();
+        let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
+        let permutations = <TicTacToe as rulesets::Permutable>::PermutationIterator::new(&game);
+        let mut permutation_set = collections::HashSet::new();
+        for permutation in permutations {
+            let permuted = game.swap_state(&state, &permutation);
+            let reverse = game.reverse_state(&permuted, &permutation);
+            permutation_set.insert(permuted);
+            assert_eq!(state, reverse);
+        }
+        assert_eq!(permutation_set.len(), 16);
     }
 }

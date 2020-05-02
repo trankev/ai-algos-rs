@@ -3,7 +3,7 @@ use crate::rulesets;
 use crate::utils::bitarray;
 use std::ops;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct State<ArrayType>
 where
     ArrayType: bitarray::BitArray,
@@ -71,6 +71,22 @@ where
         self.grids[self.current_player as usize].set(ply.index as usize);
         self.current_player = 1 - self.current_player;
         Ok(())
+    }
+
+    pub fn swap(&self, grid_permutation: &[usize], switch_players: bool) -> Self {
+        let permuted_grid1 = self.grids[0].swap(grid_permutation);
+        let permuted_grid2 = self.grids[1].swap(grid_permutation);
+        if switch_players {
+            State {
+                grids: [permuted_grid2, permuted_grid1],
+                current_player: 1 - self.current_player,
+            }
+        } else {
+            State {
+                grids: [permuted_grid1, permuted_grid2],
+                current_player: self.current_player,
+            }
+        }
     }
 }
 
