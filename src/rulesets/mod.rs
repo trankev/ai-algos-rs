@@ -1,6 +1,8 @@
 mod interface;
 pub mod ninarow;
 
+pub use interface::Permutable;
+pub use interface::PermutationIteratorTrait;
 pub use interface::PlayError;
 pub use interface::Player;
 pub use interface::PlayerStatus;

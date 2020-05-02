@@ -1,3 +1,5 @@
+use super::permutation;
+use super::permutation_iterators;
 use super::plies;
 use super::ply_iterators;
 use super::state;
@@ -5,6 +7,7 @@ use super::variants;
 use crate::rulesets;
 use crate::utils::bitarray;
 use crate::utils::grids::strips;
+use crate::utils::grids::symmetries;
 use std::marker;
 use std::ops;
 
@@ -23,6 +26,7 @@ where
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
     variant: marker::PhantomData<Variant>,
+    symmetries: symmetries::SymmetryTable,
     strips: Vec<ArrayType>,
 }
 
@@ -41,16 +45,20 @@ where
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
     pub fn new() -> RuleSet<ArrayType, Variant> {
-        let strips = strips::CellRuns::new(
-            vec![Variant::GRID_SIZE, Variant::GRID_SIZE],
-            Variant::RUN_COUNT,
-        )
-        .map(|indices| ArrayType::from_indices(&indices))
-        .collect::<Vec<_>>();
+        let dimensions = vec![Variant::GRID_SIZE, Variant::GRID_SIZE];
+        let symmetries = symmetries::SymmetryTable::new(&dimensions);
+        let strips = strips::CellRuns::new(dimensions, Variant::RUN_COUNT)
+            .map(|indices| ArrayType::from_indices(&indices))
+            .collect::<Vec<_>>();
         RuleSet {
             strips,
+            symmetries,
             variant: marker::PhantomData,
         }
+    }
+
+    pub fn grid_symmetry_count(&self) -> usize {
+        self.symmetries.permutations.len()
     }
 }
 
@@ -107,6 +115,24 @@ where
             rulesets::Status::Draw
         }
     }
+}
+
+impl<ArrayType, Variant> rulesets::Permutable for RuleSet<ArrayType, Variant>
+where
+    Variant: variants::BaseVariant,
+    ArrayType: bitarray::BitArray,
+    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
+        + ops::BitOr<&'a ArrayType, Output = ArrayType>
+        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
+    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
+        + ops::BitOr<ArrayType, Output = ArrayType>
+        + ops::BitXor<ArrayType, Output = ArrayType>,
+    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
+        + ops::BitOr<&'b ArrayType, Output = ArrayType>
+        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
+{
+    type Permutation = permutation::Permutation;
+    type PermutationIterator = permutation_iterators::PermutationIterator;
 }
 
 pub type TicTacToe = RuleSet<bitarray::BitArray9, variants::TicTacToe>;

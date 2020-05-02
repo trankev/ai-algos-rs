@@ -11,15 +11,16 @@ pub struct SymmetryTable {
 }
 
 impl SymmetryTable {
-    pub fn new(dimensions: &Vec<isize>) -> SymmetryTable {
-        let symmetries = iterator::Symmetries::new(dimensions.clone());
-        let strides = grids::compute_strides(&dimensions);
+    pub fn new(dimensions: &Vec<usize>) -> SymmetryTable {
+        let idimensions: Vec<isize> = dimensions.iter().map(|&x| x as isize).collect();
+        let symmetries = iterator::Symmetries::new(idimensions.clone());
+        let strides = grids::compute_strides(&idimensions);
         let permutations: Vec<Vec<usize>> = symmetries
             .map(|symmetry| {
-                positions::Positions::new(dimensions.clone())
+                positions::Positions::new(idimensions.clone())
                     .map(|position| {
                         let permuted = conversion::convert_position(
-                            &dimensions,
+                            &idimensions,
                             &position,
                             &symmetry.destination,
                             &symmetry.permutation,

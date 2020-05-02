@@ -47,8 +47,17 @@ pub trait RuleSetTrait: Sized {
     fn status(&self, state: &Self::State) -> Status;
 }
 
+pub trait Permutable: RuleSetTrait {
+    type Permutation;
+    type PermutationIterator: PermutationIteratorTrait<Self>;
+}
+
 pub trait PlyIteratorTrait<Rules: RuleSetTrait>: Iterator<Item = Rules::Ply> {
     fn new(state: rc::Rc<Rules::State>) -> Self;
+}
+
+pub trait PermutationIteratorTrait<Rules: Permutable>: Iterator<Item = Rules::Permutation> {
+    fn new(ruleset: &Rules) -> Self;
 }
 
 #[derive(Debug)]
