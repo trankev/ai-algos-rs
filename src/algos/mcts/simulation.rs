@@ -4,7 +4,7 @@ use rand::rngs;
 use rand::seq::IteratorRandom;
 use std::rc;
 
-pub fn simulate<RuleSet: rulesets::BaseRuleSet>(
+pub fn simulate<RuleSet: rulesets::RuleSetTrait>(
     ruleset: &RuleSet,
     state: rc::Rc<RuleSet::State>,
     rng: &mut rngs::ThreadRng,

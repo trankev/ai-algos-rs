@@ -11,14 +11,14 @@ use rand::rngs;
 use rand::seq::IteratorRandom;
 use std::rc;
 
-pub struct MCTS<RuleSet: rulesets::BaseRuleSet> {
+pub struct MCTS<RuleSet: rulesets::RuleSetTrait> {
     ruleset: RuleSet,
     tree: stable_graph::StableGraph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     rng: rngs::ThreadRng,
     root: Option<stable_graph::NodeIndex<u32>>,
 }
 
-impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
+impl<RuleSet: rulesets::RuleSetTrait> MCTS<RuleSet> {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {
             ruleset,
@@ -115,7 +115,7 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
 mod tests {
     use super::*;
     use crate::rulesets::ninarow;
-    use crate::rulesets::BaseRuleSet;
+    use crate::rulesets::RuleSetTrait;
 
     #[test]
     fn test_simulate() {

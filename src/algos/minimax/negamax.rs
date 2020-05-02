@@ -4,11 +4,11 @@ use crate::rulesets::PlyIteratorTrait;
 use std::f32;
 use std::rc;
 
-pub struct Negamax<RuleSet: rulesets::BaseRuleSet> {
+pub struct Negamax<RuleSet: rulesets::RuleSetTrait> {
     ruleset: RuleSet,
 }
 
-impl<RuleSet: rulesets::BaseRuleSet> Negamax<RuleSet> {
+impl<RuleSet: rulesets::RuleSetTrait> Negamax<RuleSet> {
     pub fn compute(&self, state: rc::Rc<RuleSet::State>, player: u8) -> state::State<RuleSet::Ply> {
         self.iterate(state, player, f32::NEG_INFINITY, f32::INFINITY)
     }

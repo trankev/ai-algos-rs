@@ -5,7 +5,7 @@ use crate::rulesets::PlyIteratorTrait;
 use petgraph::stable_graph;
 use std::rc;
 
-pub fn expand<RuleSet: rulesets::BaseRuleSet>(
+pub fn expand<RuleSet: rulesets::RuleSetTrait>(
     tree: &mut stable_graph::StableGraph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: stable_graph::NodeIndex<u32>,

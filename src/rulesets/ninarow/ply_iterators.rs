@@ -19,7 +19,7 @@ where
         + ops::BitOr<&'b ArrayType, Output = ArrayType>
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    state: rc::Rc<<ninarow::RuleSet<ArrayType, Variant> as rulesets::BaseRuleSet>::State>,
+    state: rc::Rc<<ninarow::RuleSet<ArrayType, Variant> as rulesets::RuleSetTrait>::State>,
     current_index: usize,
 }
 
@@ -39,7 +39,7 @@ where
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
     fn new(
-        state: rc::Rc<<ninarow::RuleSet<ArrayType, Variant> as rulesets::BaseRuleSet>::State>,
+        state: rc::Rc<<ninarow::RuleSet<ArrayType, Variant> as rulesets::RuleSetTrait>::State>,
     ) -> PlyIterator<ArrayType, Variant> {
         PlyIterator {
             state,
@@ -93,7 +93,7 @@ mod tests {
     #[test]
     fn test_iterate() {
         let state = rc::Rc::new(ninarow::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0));
-        let iterator = <ninarow::TicTacToe as rulesets::BaseRuleSet>::PlyIterator::new(state);
+        let iterator = <ninarow::TicTacToe as rulesets::RuleSetTrait>::PlyIterator::new(state);
         let expected: collections::HashSet<ninarow::Ply> = [
             ninarow::Ply { index: 0 },
             ninarow::Ply { index: 2 },

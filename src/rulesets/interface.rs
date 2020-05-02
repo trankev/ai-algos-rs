@@ -37,7 +37,7 @@ pub enum PlayerStatus {
 pub trait StateTrait: fmt::Debug {}
 pub trait PlyTrait: Copy + fmt::Debug {}
 
-pub trait BaseRuleSet: Sized {
+pub trait RuleSetTrait: Sized {
     type State: StateTrait;
     type Ply: PlyTrait;
     type PlyIterator: PlyIteratorTrait<Self>;
@@ -47,7 +47,7 @@ pub trait BaseRuleSet: Sized {
     fn status(&self, state: &Self::State) -> Status;
 }
 
-pub trait PlyIteratorTrait<Rules: BaseRuleSet>: Iterator<Item = Rules::Ply> {
+pub trait PlyIteratorTrait<Rules: RuleSetTrait>: Iterator<Item = Rules::Ply> {
     fn new(state: rc::Rc<Rules::State>) -> Self;
 }
 

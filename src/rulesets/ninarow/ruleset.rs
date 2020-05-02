@@ -54,7 +54,7 @@ where
     }
 }
 
-impl<ArrayType, Variant> rulesets::BaseRuleSet for RuleSet<ArrayType, Variant>
+impl<ArrayType, Variant> rulesets::RuleSetTrait for RuleSet<ArrayType, Variant>
 where
     Variant: variants::BaseVariant,
     ArrayType: bitarray::BitArray,
@@ -116,7 +116,7 @@ pub type Gomoku = RuleSet<bitarray::BitArray225, variants::Gomoku>;
 mod tests {
     use super::super::plies;
     use super::*;
-    use crate::rulesets::BaseRuleSet;
+    use crate::rulesets::RuleSetTrait;
 
     #[test]
     fn test_invalid_move() {
