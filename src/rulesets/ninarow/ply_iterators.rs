@@ -5,7 +5,7 @@ use crate::utils::bitarray;
 use std::ops;
 use std::rc;
 
-pub struct SequentialPlyIterator<ArrayType, Variant>
+pub struct PlyIterator<ArrayType, Variant>
 where
     Variant: variants::BaseVariant,
     ArrayType: bitarray::BitArray,
@@ -24,7 +24,7 @@ where
 }
 
 impl<ArrayType, Variant> rulesets::PlyIterator<ninarow::RuleSet<ArrayType, Variant>>
-    for SequentialPlyIterator<ArrayType, Variant>
+    for PlyIterator<ArrayType, Variant>
 where
     Variant: variants::BaseVariant,
     ArrayType: bitarray::BitArray,
@@ -40,15 +40,15 @@ where
 {
     fn new(
         state: rc::Rc<<ninarow::RuleSet<ArrayType, Variant> as rulesets::BaseRuleSet>::State>,
-    ) -> SequentialPlyIterator<ArrayType, Variant> {
-        SequentialPlyIterator {
+    ) -> PlyIterator<ArrayType, Variant> {
+        PlyIterator {
             state,
             current_index: 0,
         }
     }
 }
 
-impl<ArrayType, Variant> Iterator for SequentialPlyIterator<ArrayType, Variant>
+impl<ArrayType, Variant> Iterator for PlyIterator<ArrayType, Variant>
 where
     Variant: variants::BaseVariant,
     ArrayType: bitarray::BitArray,
@@ -82,8 +82,8 @@ where
     }
 }
 
-pub type TicTacToePlyIterator = SequentialPlyIterator<bitarray::BitArray9, variants::TicTacToe>;
-pub type GomokuPlyIterator = SequentialPlyIterator<bitarray::BitArray225, variants::Gomoku>;
+pub type TicTacToePlyIterator = PlyIterator<bitarray::BitArray9, variants::TicTacToe>;
+pub type GomokuPlyIterator = PlyIterator<bitarray::BitArray225, variants::Gomoku>;
 
 #[cfg(test)]
 mod tests {

@@ -57,7 +57,6 @@ impl<RuleSet: rulesets::BaseRuleSet> Negamax<RuleSet> {
 mod tests {
     use super::Negamax;
     use crate::rulesets::ninarow;
-    use crate::rulesets::ninarow::ply_iterators;
     use std::f32;
     use std::rc;
 
@@ -71,7 +70,7 @@ mod tests {
                     let state = rc::Rc::new(ninarow::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player));
                     let algo = Negamax{ruleset};
                     let result = algo.compute::<
-                        ply_iterators::TicTacToePlyIterator
+                        ninarow::TicTacToePlyIterator
                     >(state, current_player);
                     assert_eq!(result.score(), expected_score);
                     let expected_plies: Vec<ninarow::Ply> = expected_indices.iter().map(

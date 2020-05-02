@@ -119,7 +119,6 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
 mod tests {
     use super::*;
     use crate::rulesets::ninarow;
-    use crate::rulesets::ninarow::ply_iterators;
     use crate::rulesets::BaseRuleSet;
 
     #[test]
@@ -128,6 +127,6 @@ mod tests {
         let state = rc::Rc::new(ruleset.initial_state());
         let mut algo = MCTS::new(ruleset);
         algo.set_state(state);
-        algo.iterate::<ply_iterators::TicTacToePlyIterator>(0);
+        algo.iterate::<ninarow::TicTacToePlyIterator>(0);
     }
 }
