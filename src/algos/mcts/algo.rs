@@ -33,10 +33,7 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
         self.root = Some(index);
     }
 
-    pub fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(
-        &mut self,
-        player: rulesets::Player,
-    ) {
+    pub fn iterate(&mut self, player: rulesets::Player) {
         let node = match self.root {
             Some(node) => node,
             None => {
@@ -44,14 +41,13 @@ impl<RuleSet: rulesets::BaseRuleSet> MCTS<RuleSet> {
             }
         };
         let selected = selection::select(&self.tree, node);
-        expansion::expand::<RuleSet, PlyIterator>(&mut self.tree, &self.ruleset, selected);
+        expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
         let to_simulate = match self.tree.neighbors(selected).choose(&mut self.rng) {
             Some(node) => node,
             None => selected,
         };
         let state = self.tree.node_weight(to_simulate).unwrap().state.clone();
-        let status =
-            simulation::simulate::<RuleSet, PlyIterator>(&self.ruleset, state, &mut self.rng);
+        let status = simulation::simulate::<RuleSet>(&self.ruleset, state, &mut self.rng);
         let player_status = status.player_pov(&player);
         backpropagation::backpropagate(&mut self.tree, to_simulate, &player_status);
     }
@@ -127,6 +123,6 @@ mod tests {
         let state = rc::Rc::new(ruleset.initial_state());
         let mut algo = MCTS::new(ruleset);
         algo.set_state(state);
-        algo.iterate::<ninarow::TicTacToePlyIterator>(0);
+        algo.iterate(0);
     }
 }

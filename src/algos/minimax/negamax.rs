@@ -1,5 +1,6 @@
 use super::state;
 use crate::rulesets;
+use crate::rulesets::PlyIteratorTrait;
 use std::f32;
 use std::rc;
 
@@ -8,15 +9,11 @@ pub struct Negamax<RuleSet: rulesets::BaseRuleSet> {
 }
 
 impl<RuleSet: rulesets::BaseRuleSet> Negamax<RuleSet> {
-    pub fn compute<PlyIterator: rulesets::PlyIterator<RuleSet>>(
-        &self,
-        state: rc::Rc<RuleSet::State>,
-        player: u8,
-    ) -> state::State<RuleSet::Ply> {
-        self.iterate::<PlyIterator>(state, player, f32::NEG_INFINITY, f32::INFINITY)
+    pub fn compute(&self, state: rc::Rc<RuleSet::State>, player: u8) -> state::State<RuleSet::Ply> {
+        self.iterate(state, player, f32::NEG_INFINITY, f32::INFINITY)
     }
 
-    fn iterate<PlyIterator: rulesets::PlyIterator<RuleSet>>(
+    fn iterate(
         &self,
         state: rc::Rc<RuleSet::State>,
         player: u8,
@@ -33,12 +30,11 @@ impl<RuleSet: rulesets::BaseRuleSet> Negamax<RuleSet> {
             }
             rulesets::Status::Draw => state::State::Draw,
             rulesets::Status::Ongoing => {
-                let available_plies = PlyIterator::new(state.clone());
+                let available_plies = RuleSet::PlyIterator::new(state.clone());
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
                     let resulting_state = rc::Rc::new(self.ruleset.play(&state, &ply).unwrap());
-                    let iteration_state =
-                        self.iterate::<PlyIterator>(resulting_state, 1 - player, -beta, -alpha);
+                    let iteration_state = self.iterate(resulting_state, 1 - player, -beta, -alpha);
                     if iteration_state.should_replace(&current_state) {
                         current_state = state::State::tree_search(ply, iteration_state);
                         alpha = alpha.max(current_state.score());
@@ -69,9 +65,7 @@ mod tests {
                     let ruleset = ninarow::TicTacToe::new();
                     let state = rc::Rc::new(ninarow::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player));
                     let algo = Negamax{ruleset};
-                    let result = algo.compute::<
-                        ninarow::TicTacToePlyIterator
-                    >(state, current_player);
+                    let result = algo.compute(state, current_player);
                     assert_eq!(result.score(), expected_score);
                     let expected_plies: Vec<ninarow::Ply> = expected_indices.iter().map(
                         |index| ninarow::Ply{index: *index}

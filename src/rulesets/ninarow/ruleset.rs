@@ -1,4 +1,5 @@
 use super::plies;
+use super::ply_iterators;
 use super::state;
 use super::variants;
 use crate::rulesets;
@@ -69,6 +70,7 @@ where
 {
     type State = state::State<ArrayType>;
     type Ply = plies::Ply;
+    type PlyIterator = ply_iterators::PlyIterator<ArrayType, Variant>;
 
     fn initial_state(&self) -> Self::State {
         state::State::new()

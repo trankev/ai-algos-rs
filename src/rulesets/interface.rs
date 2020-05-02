@@ -37,16 +37,17 @@ pub enum PlayerStatus {
 pub trait StateTrait: fmt::Debug {}
 pub trait PlyTrait: Copy + fmt::Debug {}
 
-pub trait BaseRuleSet {
+pub trait BaseRuleSet: Sized {
     type State: StateTrait;
     type Ply: PlyTrait;
+    type PlyIterator: PlyIteratorTrait<Self>;
 
     fn initial_state(&self) -> Self::State;
     fn play(&self, state: &Self::State, ply: &Self::Ply) -> Result<Self::State, PlayError>;
     fn status(&self, state: &Self::State) -> Status;
 }
 
-pub trait PlyIterator<Rules: BaseRuleSet>: Iterator<Item = Rules::Ply> {
+pub trait PlyIteratorTrait<Rules: BaseRuleSet>: Iterator<Item = Rules::Ply> {
     fn new(state: rc::Rc<Rules::State>) -> Self;
 }
 

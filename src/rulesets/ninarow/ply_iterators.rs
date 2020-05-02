@@ -23,7 +23,7 @@ where
     current_index: usize,
 }
 
-impl<ArrayType, Variant> rulesets::PlyIterator<ninarow::RuleSet<ArrayType, Variant>>
+impl<ArrayType, Variant> rulesets::PlyIteratorTrait<ninarow::RuleSet<ArrayType, Variant>>
     for PlyIterator<ArrayType, Variant>
 where
     Variant: variants::BaseVariant,
@@ -82,21 +82,18 @@ where
     }
 }
 
-pub type TicTacToePlyIterator = PlyIterator<bitarray::BitArray9, variants::TicTacToe>;
-pub type GomokuPlyIterator = PlyIterator<bitarray::BitArray225, variants::Gomoku>;
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::rulesets::ninarow;
-    use crate::rulesets::PlyIterator;
+    use crate::rulesets::PlyIteratorTrait;
     use std::collections;
     use std::rc;
 
     #[test]
     fn test_iterate() {
         let state = rc::Rc::new(ninarow::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0));
-        let iterator = TicTacToePlyIterator::new(state);
+        let iterator = <ninarow::TicTacToe as rulesets::BaseRuleSet>::PlyIterator::new(state);
         let expected: collections::HashSet<ninarow::Ply> = [
             ninarow::Ply { index: 0 },
             ninarow::Ply { index: 2 },
