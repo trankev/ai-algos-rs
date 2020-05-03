@@ -2,7 +2,8 @@ use std::fmt;
 use std::hash;
 use std::ops;
 
-pub trait BitArray: Clone + Copy + fmt::Debug + Eq + hash::Hash + PartialEq
+pub trait BitArray:
+    Clone + Copy + fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd
 where
     Self: ops::BitAnd<Self, Output = Self>
         + ops::BitOr<Self, Output = Self>

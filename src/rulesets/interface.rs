@@ -1,4 +1,5 @@
 use std::fmt;
+use std::hash;
 use std::rc;
 
 pub type Player = u8;
@@ -34,7 +35,7 @@ pub enum PlayerStatus {
     Loss,
 }
 
-pub trait StateTrait: fmt::Debug {}
+pub trait StateTrait: fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd {}
 pub trait PlyTrait: Copy + fmt::Debug {}
 
 pub trait RuleSetTrait: Sized {

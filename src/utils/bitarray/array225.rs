@@ -7,7 +7,7 @@ type IntegerType = u64;
 const INTEGER_SIZE: usize = 8 * mem::size_of::<IntegerType>();
 const ARRAY_SIZE: usize = (BIT_COUNT / INTEGER_SIZE) as usize + 1;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct BitArray225 {
     bits: [u64; ARRAY_SIZE],
 }

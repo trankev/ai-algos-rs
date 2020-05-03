@@ -12,14 +12,14 @@ use rand::rngs;
 use rand::seq::IteratorRandom;
 use std::rc;
 
-pub struct MCTS<RuleSet: rulesets::RuleSetTrait> {
+pub struct MCTS<RuleSet: rulesets::Permutable> {
     ruleset: RuleSet,
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     rng: rngs::ThreadRng,
     root: Option<graph::NodeIndex<u32>>,
 }
 
-impl<RuleSet: rulesets::RuleSetTrait> MCTS<RuleSet> {
+impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {
             ruleset,
