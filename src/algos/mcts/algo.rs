@@ -6,7 +6,7 @@ use super::selection;
 use super::simulation;
 use crate::algos;
 use crate::rulesets;
-use petgraph::stable_graph;
+use petgraph::graph;
 use rand;
 use rand::rngs;
 use rand::seq::IteratorRandom;
@@ -14,16 +14,16 @@ use std::rc;
 
 pub struct MCTS<RuleSet: rulesets::RuleSetTrait> {
     ruleset: RuleSet,
-    tree: stable_graph::StableGraph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
+    tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     rng: rngs::ThreadRng,
-    root: Option<stable_graph::NodeIndex<u32>>,
+    root: Option<graph::NodeIndex<u32>>,
 }
 
 impl<RuleSet: rulesets::RuleSetTrait> MCTS<RuleSet> {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {
             ruleset,
-            tree: stable_graph::StableGraph::new(),
+            tree: graph::Graph::new(),
             rng: rand::thread_rng(),
             root: None,
         }
@@ -87,7 +87,7 @@ impl<RuleSet: rulesets::RuleSetTrait> MCTS<RuleSet> {
 
     fn best_play(
         &self,
-        mut current_node: stable_graph::NodeIndex<u32>,
+        mut current_node: graph::NodeIndex<u32>,
         mut reverse: bool,
     ) -> Vec<RuleSet::Ply> {
         let mut result = Vec::new();

@@ -1,11 +1,11 @@
 use super::nodes;
 use super::uct_value;
-use petgraph::stable_graph;
+use petgraph::graph;
 
 pub fn select<State, Edge>(
-    tree: &stable_graph::StableGraph<nodes::Node<State>, Edge>,
-    node: stable_graph::NodeIndex<u32>,
-) -> stable_graph::NodeIndex<u32> {
+    tree: &graph::Graph<nodes::Node<State>, Edge>,
+    node: graph::NodeIndex<u32>,
+) -> graph::NodeIndex<u32> {
     let weight = tree.node_weight(node).unwrap();
     if weight.visits == 0.0 {
         return node;
@@ -36,7 +36,7 @@ mod tests {
 
     #[test]
     fn test_no_children() {
-        let mut tree = stable_graph::StableDiGraph::<nodes::Node<()>, ()>::new();
+        let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
         let root = tree.add_node(nodes::Node::new(rc::Rc::new(())));
         let result = select(&tree, root);
         assert_eq!(result, root);
@@ -44,7 +44,7 @@ mod tests {
 
     #[test]
     fn test_no_visits() {
-        let mut tree = stable_graph::StableDiGraph::<nodes::Node<()>, ()>::new();
+        let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
 
         let mut root_weight = nodes::Node::new(rc::Rc::new(()));
         root_weight.visits = 10.0;
@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn test_few_visits() {
-        let mut tree = stable_graph::StableDiGraph::<nodes::Node<()>, ()>::new();
+        let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
 
         let mut root_weight = nodes::Node::new(rc::Rc::new(()));
         root_weight.visits = 10.0;
@@ -89,7 +89,7 @@ mod tests {
 
     #[test]
     fn test_several_visits() {
-        let mut tree = stable_graph::StableDiGraph::<nodes::Node<()>, ()>::new();
+        let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
 
         let mut root_weight = nodes::Node::new(rc::Rc::new(()));
         root_weight.visits = 100.0;

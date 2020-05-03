@@ -2,13 +2,13 @@ use super::edges;
 use super::nodes;
 use crate::rulesets;
 use crate::rulesets::PlyIteratorTrait;
-use petgraph::stable_graph;
+use petgraph::graph;
 use std::rc;
 
 pub fn expand<RuleSet: rulesets::RuleSetTrait>(
-    tree: &mut stable_graph::StableGraph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
+    tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
-    node: stable_graph::NodeIndex<u32>,
+    node: graph::NodeIndex<u32>,
 ) {
     let state = tree.node_weight(node).unwrap().state.clone();
     let available_plies = RuleSet::PlyIterator::new(state.clone());

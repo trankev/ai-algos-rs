@@ -1,11 +1,11 @@
 use super::nodes;
 use crate::rulesets;
 use petgraph;
-use petgraph::stable_graph;
+use petgraph::graph;
 
 pub fn backpropagate<State, Edge>(
-    tree: &mut stable_graph::StableGraph<nodes::Node<State>, Edge>,
-    node: stable_graph::NodeIndex<u32>,
+    tree: &mut graph::Graph<nodes::Node<State>, Edge>,
+    node: graph::NodeIndex<u32>,
     status: &rulesets::PlayerStatus,
 ) {
     let mut neighbours = tree
@@ -18,8 +18,8 @@ pub fn backpropagate<State, Edge>(
 }
 
 fn update_tallies<State, Edge>(
-    tree: &mut stable_graph::StableGraph<nodes::Node<State>, Edge>,
-    node: stable_graph::NodeIndex<u32>,
+    tree: &mut graph::Graph<nodes::Node<State>, Edge>,
+    node: graph::NodeIndex<u32>,
     status: &rulesets::PlayerStatus,
 ) {
     let mut weight = tree.node_weight_mut(node).unwrap();
