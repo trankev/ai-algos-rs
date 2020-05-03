@@ -12,8 +12,12 @@ pub fn expand<RuleSet: rulesets::Permutable>(
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
 ) {
+    let weight = tree.node_weight(node).unwrap();
+    if weight.visits == 0.0 {
+        return;
+    }
+    let state = weight.state.clone();
     let mut seen = collections::HashSet::new();
-    let state = tree.node_weight(node).unwrap().state.clone();
     let available_plies = RuleSet::PlyIterator::new(state.clone());
     for ply in available_plies {
         let resulting_state = rc::Rc::new(ruleset.play(&state, &ply).unwrap());
