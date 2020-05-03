@@ -71,6 +71,8 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
                 algos::PlyConsideration {
                     ply: edge_weight.ply,
                     score: node_weight.score(),
+                    win_rate: node_weight.wins / node_weight.visits,
+                    draw_rate: node_weight.draws / node_weight.visits,
                     follow_up,
                 }
             })
