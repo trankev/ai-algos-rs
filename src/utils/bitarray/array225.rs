@@ -31,9 +31,33 @@ impl BitArray for BitArray225 {
     }
 
     fn set(&mut self, index: usize) {
+        debug_assert!(
+            index < BIT_COUNT,
+            format!("BitArray index out of bound: {} >= {}", index, BIT_COUNT)
+        );
         let integer = index / INTEGER_SIZE;
         let offset = index % INTEGER_SIZE;
         self.bits[integer as usize] |= 1 << offset;
+    }
+
+    fn swap(&self, permutation: &[usize]) -> Self {
+        let mut result = Self::zero();
+        let mut current_bit = self.bits[0];
+        let mut bit_index = 0;
+        let mut mask = 1;
+        for (index, permuted) in permutation.iter().enumerate() {
+            if current_bit & mask == mask {
+                result.set(*permuted);
+            }
+            if index % 64 == 63 {
+                mask = 1;
+                bit_index += 1;
+                current_bit = self.bits[bit_index];
+            } else {
+                mask <<= 1;
+            }
+        }
+        result
     }
 }
 
