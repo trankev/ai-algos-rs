@@ -4,6 +4,7 @@ use super::expansion;
 use super::nodes;
 use super::selection;
 use super::simulation;
+use crate::algos;
 use crate::rulesets;
 use petgraph::stable_graph;
 use rand;
@@ -52,11 +53,11 @@ impl<RuleSet: rulesets::RuleSetTrait> MCTS<RuleSet> {
         backpropagation::backpropagate(&mut self.tree, to_simulate, &player_status);
     }
 
-    pub fn play_scores(&self) {
+    pub fn play_scores(&self) -> Option<Vec<algos::PlyConsideration<RuleSet::Ply>>> {
         let parent = match self.root {
             Some(node) => node,
             None => {
-                return;
+                return None;
             }
         };
         let mut scores = self
@@ -66,14 +67,22 @@ impl<RuleSet: rulesets::RuleSetTrait> MCTS<RuleSet> {
                 let node_weight = self.tree.node_weight(node_index).unwrap();
                 let edge = self.tree.find_edge(parent, node_index).unwrap();
                 let edge_weight = self.tree.edge_weight(edge).unwrap();
-                (node_weight.score(), node_index, edge_weight.ply)
+                let follow_up = self.best_play(node_index, true);
+                algos::PlyConsideration {
+                    ply: edge_weight.ply,
+                    score: node_weight.score(),
+                    follow_up,
+                }
             })
             .collect::<Vec<_>>();
-        scores.sort_by(|(score_a, _, _), (score_b, _, _)| score_a.partial_cmp(score_b).unwrap());
-        for (score, node_index, ply) in scores {
-            let scenario = self.best_play(node_index, true);
-            println!("{:?}: {:?} => {:?}", ply, score, scenario);
-        }
+        scores.sort_by(|consideration_a, consideration_b| {
+            consideration_a
+                .score
+                .partial_cmp(&consideration_b.score)
+                .unwrap()
+                .reverse()
+        });
+        Some(scores)
     }
 
     fn best_play(
