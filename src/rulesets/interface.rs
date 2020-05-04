@@ -36,7 +36,7 @@ pub enum PlayerStatus {
 }
 
 pub trait StateTrait: fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd + Send {}
-pub trait PlyTrait: Copy + fmt::Debug {}
+pub trait PlyTrait: Copy + fmt::Debug + Send {}
 
 pub trait RuleSetTrait: Send + Sized {
     type State: StateTrait;

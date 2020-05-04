@@ -1,6 +1,7 @@
 use super::items;
 use super::iterator;
 use crate::rulesets;
+use std::rc;
 
 use super::super::edges;
 use super::super::nodes;
@@ -21,7 +22,7 @@ pub fn expand<RuleSet: rulesets::Permutable>(
     let mut iterator = iterator::Expander::new(current_state);
 
     while let Some(items::PlyAndState { ply, state }) = iterator.iterate(ruleset) {
-        let child_index = tree.add_node(nodes::Node::new(state));
+        let child_index = tree.add_node(nodes::Node::new(rc::Rc::new(state)));
         tree.add_edge(node, child_index, edges::Edge::new(ply));
     }
 }

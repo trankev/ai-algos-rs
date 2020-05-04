@@ -23,7 +23,7 @@ impl<RuleSet: rulesets::Permutable> Expander<RuleSet> {
 
     pub fn iterate(&mut self, ruleset: &RuleSet) -> Option<items::PlyAndState<RuleSet>> {
         for ply in self.ply_iterator.by_ref() {
-            let resulting_state = rc::Rc::new(ruleset.play(&self.current_state, &ply).unwrap());
+            let resulting_state = ruleset.play(&self.current_state, &ply).unwrap();
             let permutations = RuleSet::PermutationIterator::new(&ruleset);
             let witness_state = permutations
                 .map(|permutation| ruleset.swap_state(&resulting_state, &permutation))
