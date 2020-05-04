@@ -1,6 +1,6 @@
 use super::variants;
 use crate::rulesets;
-use crate::rulesets::ninarow;
+use crate::rulesets::connectn;
 use crate::utils::bitarray;
 use std::ops;
 
@@ -9,7 +9,7 @@ pub struct PermutationIterator {
     switched_player: bool,
 }
 
-impl<ArrayType, Variant> rulesets::PermutationIteratorTrait<ninarow::RuleSet<ArrayType, Variant>>
+impl<ArrayType, Variant> rulesets::PermutationIteratorTrait<connectn::RuleSet<ArrayType, Variant>>
     for PermutationIterator
 where
     Variant: variants::BaseVariant,
@@ -24,7 +24,7 @@ where
         + ops::BitOr<&'b ArrayType, Output = ArrayType>
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    fn new(ruleset: &ninarow::RuleSet<ArrayType, Variant>) -> Self {
+    fn new(ruleset: &connectn::RuleSet<ArrayType, Variant>) -> Self {
         PermutationIterator {
             permutation_count: ruleset.grid_symmetry_count(),
             switched_player: true,
@@ -33,12 +33,12 @@ where
 }
 
 impl Iterator for PermutationIterator {
-    type Item = ninarow::Permutation;
+    type Item = connectn::Permutation;
 
     fn next(&mut self) -> Option<Self::Item> {
         if !self.switched_player {
             self.switched_player = true;
-            return Some(ninarow::Permutation {
+            return Some(connectn::Permutation {
                 grid_permutation_index: self.permutation_count as u8,
                 switched_players: true,
             });
@@ -46,7 +46,7 @@ impl Iterator for PermutationIterator {
         if self.permutation_count > 0 {
             self.permutation_count -= 1;
             self.switched_player = false;
-            return Some(ninarow::Permutation {
+            return Some(connectn::Permutation {
                 grid_permutation_index: self.permutation_count as u8,
                 switched_players: false,
             });
@@ -58,23 +58,23 @@ impl Iterator for PermutationIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rulesets::ninarow;
+    use crate::rulesets::connectn;
     use crate::rulesets::PermutationIteratorTrait;
     use std::collections;
     use std::iter;
 
     #[test]
     fn test_permutations() {
-        let ruleset = ninarow::TicTacToe::new();
+        let ruleset = connectn::TicTacToe::new();
         let iterator = PermutationIterator::new(&ruleset);
         let result = iterator.collect::<collections::HashSet<_>>();
         let expected = (0u8..8)
             .flat_map(|index| {
-                iter::once(ninarow::Permutation {
+                iter::once(connectn::Permutation {
                     grid_permutation_index: index,
                     switched_players: false,
                 })
-                .chain(iter::once(ninarow::Permutation {
+                .chain(iter::once(connectn::Permutation {
                     grid_permutation_index: index,
                     switched_players: true,
                 }))

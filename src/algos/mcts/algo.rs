@@ -125,12 +125,12 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rulesets::ninarow;
+    use crate::rulesets::connectn;
     use crate::rulesets::RuleSetTrait;
 
     #[test]
     fn test_simulate() {
-        let ruleset = ninarow::TicTacToe::new();
+        let ruleset = connectn::TicTacToe::new();
         let state = rc::Rc::new(ruleset.initial_state());
         let mut algo = MCTS::new(ruleset);
         algo.set_state(state);

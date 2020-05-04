@@ -52,7 +52,7 @@ impl<RuleSet: rulesets::RuleSetTrait> Negamax<RuleSet> {
 #[cfg(test)]
 mod tests {
     use super::Negamax;
-    use crate::rulesets::ninarow;
+    use crate::rulesets::connectn;
     use std::f32;
     use std::rc;
 
@@ -62,13 +62,13 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (p1_indices, p2_indices, current_player, expected_indices, expected_score) = $value;
-                    let ruleset = ninarow::TicTacToe::new();
-                    let state = rc::Rc::new(ninarow::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player));
+                    let ruleset = connectn::TicTacToe::new();
+                    let state = rc::Rc::new(connectn::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player));
                     let algo = Negamax{ruleset};
                     let result = algo.compute(state, current_player);
                     assert_eq!(result.score(), expected_score);
-                    let expected_plies: Vec<ninarow::Ply> = expected_indices.iter().map(
-                        |index| ninarow::Ply{index: *index}
+                    let expected_plies: Vec<connectn::Ply> = expected_indices.iter().map(
+                        |index| connectn::Ply{index: *index}
                     ).collect();
                     let plies = result.plies();
                     assert_eq!(plies, expected_plies);

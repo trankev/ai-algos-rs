@@ -1,5 +1,5 @@
+pub mod connectn;
 mod interface;
-pub mod ninarow;
 
 pub use interface::Permutable;
 pub use interface::PermutationIteratorTrait;
