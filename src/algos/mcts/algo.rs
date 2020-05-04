@@ -41,7 +41,7 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
                 return;
             }
         };
-        let selected = selection::select(&self.tree, node);
+        let selected = selection::select(&self.tree, node, false);
         expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
         let to_simulate = match self.tree.neighbors(selected).choose(&mut self.rng) {
             Some(node) => node,
