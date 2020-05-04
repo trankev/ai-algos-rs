@@ -2,6 +2,12 @@ use std::fmt;
 use std::hash;
 use std::ops;
 
+pub enum MaskComparison {
+    Equal,
+    Partial,
+    Zero,
+}
+
 pub trait BitArray:
     Clone + Copy + fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd
 where
@@ -21,6 +27,7 @@ where
     fn zero() -> Self;
     fn isset(&self, index: usize) -> bool;
     fn set(&mut self, index: usize);
+    fn compare_with_mask(&self, mask: &Self) -> MaskComparison;
 
     fn from_indices(indices: &[usize]) -> Self {
         let mut result = Self::zero();

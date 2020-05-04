@@ -1,4 +1,4 @@
-use super::BitArray;
+use super::{BitArray, MaskComparison};
 use auto_ops::*;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -22,6 +22,17 @@ impl BitArray for BitArray9 {
 
     fn set(&mut self, index: usize) {
         self.bits |= 1u16 << index;
+    }
+
+    fn compare_with_mask(&self, mask: &BitArray9) -> MaskComparison {
+        let masked = self.bits & mask.bits;
+        if masked == mask.bits {
+            MaskComparison::Equal
+        } else if masked == 0 {
+            MaskComparison::Zero
+        } else {
+            MaskComparison::Partial
+        }
     }
 }
 

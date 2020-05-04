@@ -1,4 +1,4 @@
-use super::BitArray;
+use super::{BitArray, MaskComparison};
 use auto_ops::*;
 use std::mem;
 
@@ -58,6 +58,27 @@ impl BitArray for BitArray225 {
             }
         }
         result
+    }
+
+    fn compare_with_mask(&self, mask: &BitArray225) -> MaskComparison {
+        let mut is_zero = true;
+        let mut is_equal = true;
+        for index in 0..ARRAY_SIZE {
+            let masked = self.bits[index] & mask.bits[index];
+            if masked != mask.bits[index] {
+                is_equal = false;
+            }
+            if masked != 0 {
+                is_zero = false;
+            }
+        }
+        if is_equal {
+            MaskComparison::Equal
+        } else if is_zero {
+            MaskComparison::Zero
+        } else {
+            MaskComparison::Partial
+        }
     }
 }
 

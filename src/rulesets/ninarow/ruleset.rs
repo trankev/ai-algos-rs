@@ -98,14 +98,16 @@ where
 
     fn status(&self, state: &Self::State) -> rulesets::Status {
         let mut ongoing = false;
-        let zero = ArrayType::zero();
         for strip in &self.strips {
-            for player in 0u8..2 {
-                if (&state.grids[player as usize] & strip) == *strip {
-                    return rulesets::Status::Win { player };
-                }
-                if (&state.grids[player as usize] & strip) == zero {
-                    ongoing = true;
+            for player in 0..2 {
+                match state.grids[player].compare_with_mask(strip) {
+                    bitarray::MaskComparison::Equal => {
+                        return rulesets::Status::Win {
+                            player: player as u8,
+                        }
+                    }
+                    bitarray::MaskComparison::Zero => ongoing = true,
+                    _ => (),
                 }
             }
         }
