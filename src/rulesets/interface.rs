@@ -35,10 +35,10 @@ pub enum PlayerStatus {
     Loss,
 }
 
-pub trait StateTrait: fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd {}
+pub trait StateTrait: fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd + Send {}
 pub trait PlyTrait: Copy + fmt::Debug {}
 
-pub trait RuleSetTrait: Sized {
+pub trait RuleSetTrait: Send + Sized {
     type State: StateTrait;
     type Ply: PlyTrait;
     type PlyIterator: PlyIteratorTrait<Self>;

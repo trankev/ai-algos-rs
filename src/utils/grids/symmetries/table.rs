@@ -4,7 +4,7 @@ use crate::utils::grids;
 use crate::utils::grids::positions;
 use crate::utils::vectors;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SymmetryTable {
     pub permutations: Vec<Vec<usize>>,
     pub reverses: Vec<usize>,

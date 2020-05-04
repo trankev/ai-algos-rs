@@ -1,4 +1,4 @@
-pub trait BaseVariant {
+pub trait BaseVariant: Send {
     const GRID_SIZE: usize;
     const CELL_COUNT: usize = Self::GRID_SIZE * Self::GRID_SIZE;
     const RUN_COUNT: usize;

@@ -9,7 +9,7 @@ pub enum MaskComparison {
 }
 
 pub trait BitArray:
-    Clone + Copy + fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd
+    Clone + Copy + fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd + Send
 where
     Self: ops::BitAnd<Self, Output = Self>
         + ops::BitOr<Self, Output = Self>
