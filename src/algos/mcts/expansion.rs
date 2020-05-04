@@ -16,21 +16,54 @@ pub fn expand<RuleSet: rulesets::Permutable>(
     if weight.visits == 0.0 {
         return;
     }
-    let state = weight.state.clone();
-    let mut seen = collections::HashSet::new();
-    let available_plies = RuleSet::PlyIterator::new(state.clone());
-    for ply in available_plies {
-        let resulting_state = rc::Rc::new(ruleset.play(&state, &ply).unwrap());
-        let permutations = RuleSet::PermutationIterator::new(&ruleset);
-        let witness_state = permutations
-            .map(|permutation| ruleset.swap_state(&resulting_state, &permutation))
-            .min()
-            .unwrap();
-        if seen.contains(&witness_state) {
-            continue;
-        }
-        let child_index = tree.add_node(nodes::Node::new(resulting_state));
+    let current_state = weight.state.clone();
+
+    let mut iterator = Expander::new(current_state);
+
+    while let Some(PlyAndState { ply, state }) = iterator.iterate(ruleset) {
+        let child_index = tree.add_node(nodes::Node::new(state));
         tree.add_edge(node, child_index, edges::Edge::new(ply));
-        seen.insert(witness_state);
+    }
+}
+
+pub struct PlyAndState<RuleSet: rulesets::RuleSetTrait> {
+    ply: RuleSet::Ply,
+    state: rc::Rc<RuleSet::State>,
+}
+
+pub struct Expander<RuleSet: rulesets::Permutable> {
+    ply_iterator: RuleSet::PlyIterator,
+    current_state: rc::Rc<RuleSet::State>,
+    seen: collections::HashSet<RuleSet::State>,
+}
+
+impl<RuleSet: rulesets::Permutable> Expander<RuleSet> {
+    pub fn new(current_state: rc::Rc<RuleSet::State>) -> Expander<RuleSet> {
+        let ply_iterator = RuleSet::PlyIterator::new(current_state.clone());
+        Expander {
+            current_state,
+            ply_iterator,
+            seen: collections::HashSet::new(),
+        }
+    }
+
+    pub fn iterate(&mut self, ruleset: &RuleSet) -> Option<PlyAndState<RuleSet>> {
+        for ply in self.ply_iterator.by_ref() {
+            let resulting_state = rc::Rc::new(ruleset.play(&self.current_state, &ply).unwrap());
+            let permutations = RuleSet::PermutationIterator::new(&ruleset);
+            let witness_state = permutations
+                .map(|permutation| ruleset.swap_state(&resulting_state, &permutation))
+                .min()
+                .unwrap();
+            if self.seen.contains(&witness_state) {
+                continue;
+            }
+            self.seen.insert(witness_state);
+            return Some(PlyAndState {
+                ply,
+                state: resulting_state,
+            });
+        }
+        None
     }
 }
