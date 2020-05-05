@@ -3,16 +3,15 @@ use crate::rulesets;
 use crate::rulesets::PermutationIteratorTrait;
 use crate::rulesets::PlyIteratorTrait;
 use std::collections;
-use std::rc;
 
 pub struct Expander<RuleSet: rulesets::Permutable> {
+    current_state: RuleSet::State,
     ply_iterator: RuleSet::PlyIterator,
-    current_state: rc::Rc<RuleSet::State>,
     seen: collections::HashSet<RuleSet::State>,
 }
 
 impl<RuleSet: rulesets::Permutable> Expander<RuleSet> {
-    pub fn new(current_state: rc::Rc<RuleSet::State>) -> Expander<RuleSet> {
+    pub fn new(current_state: RuleSet::State) -> Expander<RuleSet> {
         let ply_iterator = RuleSet::PlyIterator::new(current_state.clone());
         Expander {
             current_state,

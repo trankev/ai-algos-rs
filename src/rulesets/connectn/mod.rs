@@ -13,4 +13,5 @@ pub use ruleset::Gomoku;
 use ruleset::RuleSet;
 pub use ruleset::TicTacToe;
 pub use state::GomokuState;
+pub use state::State;
 pub use state::TicTacToeState;

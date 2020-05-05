@@ -37,12 +37,11 @@ pub fn select<State, Edge>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::rc;
 
     #[test]
     fn test_no_children() {
         let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
-        let root = tree.add_node(nodes::Node::new(rc::Rc::new(())));
+        let root = tree.add_node(nodes::Node::new(()));
         let result = select(&tree, root, false);
         assert_eq!(result, root);
     }
@@ -51,17 +50,17 @@ mod tests {
     fn test_no_visits() {
         let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
 
-        let mut root_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut root_weight = nodes::Node::new(());
         root_weight.visits = 10.0;
         let root_index = tree.add_node(root_weight);
 
-        let mut first_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut first_weight = nodes::Node::new(());
         first_weight.visits = 10.0;
         first_weight.wins = 10.0;
         let first_index = tree.add_node(first_weight);
         tree.add_edge(root_index, first_index, ());
 
-        let second_index = tree.add_node(nodes::Node::new(rc::Rc::new(())));
+        let second_index = tree.add_node(nodes::Node::new(()));
         tree.add_edge(root_index, second_index, ());
 
         let result = select(&tree, root_index, false);
@@ -72,17 +71,17 @@ mod tests {
     fn test_few_visits() {
         let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
 
-        let mut root_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut root_weight = nodes::Node::new(());
         root_weight.visits = 10.0;
         let root_index = tree.add_node(root_weight);
 
-        let mut first_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut first_weight = nodes::Node::new(());
         first_weight.visits = 1.0;
         first_weight.wins = 0.0;
         let first_index = tree.add_node(first_weight);
         tree.add_edge(root_index, first_index, ());
 
-        let mut second_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut second_weight = nodes::Node::new(());
         second_weight.visits = 9.0;
         second_weight.wins = 8.0;
         let second_index = tree.add_node(second_weight);
@@ -96,17 +95,17 @@ mod tests {
     fn test_several_visits() {
         let mut tree = graph::Graph::<nodes::Node<()>, ()>::new();
 
-        let mut root_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut root_weight = nodes::Node::new(());
         root_weight.visits = 100.0;
         let root_index = tree.add_node(root_weight);
 
-        let mut first_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut first_weight = nodes::Node::new(());
         first_weight.visits = 50.0;
         first_weight.wins = 40.0;
         let first_index = tree.add_node(first_weight);
         tree.add_edge(root_index, first_index, ());
 
-        let mut second_weight = nodes::Node::new(rc::Rc::new(()));
+        let mut second_weight = nodes::Node::new(());
         second_weight.visits = 50.0;
         second_weight.wins = 60.0;
         let second_index = tree.add_node(second_weight);

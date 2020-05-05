@@ -10,7 +10,6 @@ use petgraph::graph;
 use rand;
 use rand::rngs;
 use rand::seq::IteratorRandom;
-use std::rc;
 
 pub struct MCTS<RuleSet: rulesets::Permutable> {
     ruleset: RuleSet,
@@ -29,7 +28,7 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
         }
     }
 
-    pub fn set_state(&mut self, state: rc::Rc<RuleSet::State>) {
+    pub fn set_state(&mut self, state: RuleSet::State) {
         let index = self.tree.add_node(nodes::Node::new(state));
         self.root = Some(index);
     }
@@ -47,7 +46,7 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
             Some(node) => node,
             None => selected,
         };
-        let state = self.tree.node_weight(to_simulate).unwrap().state.clone();
+        let state = &self.tree.node_weight(to_simulate).unwrap().state;
         let status = simulation::simulate::<RuleSet>(&self.ruleset, state, &mut self.rng);
         let player_status = status.player_pov(&player);
         backpropagation::backpropagate(&mut self.tree, to_simulate, &player_status);
@@ -131,7 +130,7 @@ mod tests {
     #[test]
     fn test_simulate() {
         let ruleset = connectn::TicTacToe::new();
-        let state = rc::Rc::new(ruleset.initial_state());
+        let state = ruleset.initial_state();
         let mut algo = MCTS::new(ruleset);
         algo.set_state(state);
         algo.iterate(0);

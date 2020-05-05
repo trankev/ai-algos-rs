@@ -2,20 +2,19 @@ use super::state;
 use crate::rulesets;
 use crate::rulesets::PlyIteratorTrait;
 use std::f32;
-use std::rc;
 
 pub struct Negamax<RuleSet: rulesets::RuleSetTrait> {
     ruleset: RuleSet,
 }
 
 impl<RuleSet: rulesets::RuleSetTrait> Negamax<RuleSet> {
-    pub fn compute(&self, state: rc::Rc<RuleSet::State>, player: u8) -> state::State<RuleSet::Ply> {
+    pub fn compute(&self, state: &RuleSet::State, player: u8) -> state::State<RuleSet::Ply> {
         self.iterate(state, player, f32::NEG_INFINITY, f32::INFINITY)
     }
 
     fn iterate(
         &self,
-        state: rc::Rc<RuleSet::State>,
+        state: &RuleSet::State,
         player: u8,
         mut alpha: f32,
         beta: f32,
@@ -33,8 +32,8 @@ impl<RuleSet: rulesets::RuleSetTrait> Negamax<RuleSet> {
                 let available_plies = RuleSet::PlyIterator::new(state.clone());
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
-                    let resulting_state = rc::Rc::new(self.ruleset.play(&state, &ply).unwrap());
-                    let iteration_state = self.iterate(resulting_state, 1 - player, -beta, -alpha);
+                    let resulting_state = self.ruleset.play(&state, &ply).unwrap();
+                    let iteration_state = self.iterate(&resulting_state, 1 - player, -beta, -alpha);
                     if iteration_state.should_replace(&current_state) {
                         current_state = state::State::tree_search(ply, iteration_state);
                         alpha = alpha.max(current_state.score());
@@ -54,7 +53,6 @@ mod tests {
     use super::Negamax;
     use crate::rulesets::connectn;
     use std::f32;
-    use std::rc;
 
     macro_rules! iterate_tests {
         ($($name:ident: $value:expr,)*) => {
@@ -63,9 +61,9 @@ mod tests {
                 fn $name() {
                     let (p1_indices, p2_indices, current_player, expected_indices, expected_score) = $value;
                     let ruleset = connectn::TicTacToe::new();
-                    let state = rc::Rc::new(connectn::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player));
+                    let state = connectn::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player);
                     let algo = Negamax{ruleset};
-                    let result = algo.compute(state, current_player);
+                    let result = algo.compute(&state, current_player);
                     assert_eq!(result.score(), expected_score);
                     let expected_plies: Vec<connectn::Ply> = expected_indices.iter().map(
                         |index| connectn::Ply{index: *index}

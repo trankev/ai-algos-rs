@@ -1,6 +1,5 @@
 use std::fmt;
 use std::hash;
-use std::rc;
 
 pub type Player = u8;
 
@@ -59,8 +58,9 @@ pub trait Permutable: RuleSetTrait {
     fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State;
 }
 
-pub trait PlyIteratorTrait<Rules: RuleSetTrait>: Iterator<Item = Rules::Ply> {
-    fn new(state: rc::Rc<Rules::State>) -> Self;
+pub trait PlyIteratorTrait<RuleSet: RuleSetTrait>: Iterator<Item = RuleSet::Ply> {
+    fn new(state: RuleSet::State) -> Self;
+    fn current_state(&self) -> &RuleSet::State;
 }
 
 pub trait PermutationIteratorTrait<Rules: Permutable>: Iterator<Item = Rules::Permutation> {

@@ -11,7 +11,6 @@ use rand;
 use rand::rngs;
 use rand::seq::IteratorRandom;
 use std::error;
-use std::rc;
 
 pub struct Master<RuleSet: rulesets::Permutable + 'static> {
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
@@ -43,7 +42,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
         }
     }
 
-    pub fn set_state(&mut self, state: rc::Rc<RuleSet::State>) {
+    pub fn set_state(&mut self, state: RuleSet::State) {
         let index = self.tree.add_node(nodes::Node::new(state));
         self.root = Some(index);
     }
@@ -72,7 +71,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
         self.expansion_request_sender
             .send(expansion::Request {
                 node_index,
-                state: (*weight.state).clone(),
+                state: weight.state.clone(),
             })
             .unwrap();
 
@@ -81,9 +80,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
             successors,
         } = self.expansion_response_receiver.recv().unwrap();
         for successor in successors {
-            let child_index = self
-                .tree
-                .add_node(nodes::Node::new(rc::Rc::new(successor.state)));
+            let child_index = self.tree.add_node(nodes::Node::new(successor.state));
             self.tree
                 .add_edge(node_index, child_index, edges::Edge::new(successor.ply));
         }
@@ -98,7 +95,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
             Some(node) => node,
             None => node_index,
         };
-        let state = (*self.tree.node_weight(to_simulate).unwrap().state).clone();
+        let state = self.tree.node_weight(to_simulate).unwrap().state.clone();
         self.simulation_request_sender
             .send(simulation::Request { node_index, state })?;
         let simulation::Response { node_index, status } =

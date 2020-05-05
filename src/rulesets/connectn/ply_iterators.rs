@@ -2,8 +2,8 @@ use crate::rulesets;
 use crate::rulesets::connectn;
 use crate::rulesets::connectn::variants;
 use crate::utils::bitarray;
+use std::marker;
 use std::ops;
-use std::rc;
 
 pub struct PlyIterator<ArrayType, Variant>
 where
@@ -19,8 +19,9 @@ where
         + ops::BitOr<&'b ArrayType, Output = ArrayType>
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    state: rc::Rc<<connectn::RuleSet<ArrayType, Variant> as rulesets::RuleSetTrait>::State>,
+    state: connectn::State<ArrayType>,
     current_index: usize,
+    variant: marker::PhantomData<Variant>,
 }
 
 impl<ArrayType, Variant> rulesets::PlyIteratorTrait<connectn::RuleSet<ArrayType, Variant>>
@@ -38,13 +39,16 @@ where
         + ops::BitOr<&'b ArrayType, Output = ArrayType>
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    fn new(
-        state: rc::Rc<<connectn::RuleSet<ArrayType, Variant> as rulesets::RuleSetTrait>::State>,
-    ) -> PlyIterator<ArrayType, Variant> {
-        PlyIterator {
+    fn new(state: connectn::State<ArrayType>) -> PlyIterator<ArrayType, Variant> {
+        PlyIterator::<ArrayType, Variant> {
             state,
             current_index: 0,
+            variant: marker::PhantomData,
         }
+    }
+
+    fn current_state(&self) -> &connectn::State<ArrayType> {
+        &self.state
     }
 }
 
@@ -88,11 +92,10 @@ mod tests {
     use crate::rulesets::connectn;
     use crate::rulesets::PlyIteratorTrait;
     use std::collections;
-    use std::rc;
 
     #[test]
     fn test_iterate() {
-        let state = rc::Rc::new(connectn::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0));
+        let state = connectn::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0);
         let iterator = <connectn::TicTacToe as rulesets::RuleSetTrait>::PlyIterator::new(state);
         let expected: collections::HashSet<connectn::Ply> = [
             connectn::Ply { index: 0 },
