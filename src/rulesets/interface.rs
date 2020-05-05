@@ -35,7 +35,10 @@ pub enum PlayerStatus {
     Loss,
 }
 
-pub trait StateTrait: fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd + Send {}
+pub trait StateTrait:
+    Clone + fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd + Send
+{
+}
 pub trait PlyTrait: Copy + fmt::Debug + Send {}
 
 pub trait RuleSetTrait: Send + Sized {

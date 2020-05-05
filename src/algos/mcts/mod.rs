@@ -3,6 +3,7 @@ mod backpropagation;
 mod edges;
 mod expansion;
 mod nodes;
+mod puct;
 mod selection;
 mod simulation;
 mod uct_value;
