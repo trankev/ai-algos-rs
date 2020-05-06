@@ -47,7 +47,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
         self.root = Some(index);
     }
 
-    pub fn iterate(&mut self, player: rulesets::Player) -> Result<(), Box<dyn error::Error>> {
+    pub fn iterate(&mut self) -> Result<(), Box<dyn error::Error>> {
         let node = match self.root {
             Some(node) => node,
             None => {
@@ -57,15 +57,13 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
         let selected = selection::select(&self.tree, node, false);
         self.expand(selected)?;
         let (to_simulate, status) = self.simulate(selected)?;
-
-        let player_status = status.player_pov(&player);
-        backpropagation::backpropagate(&mut self.tree, to_simulate, &player_status);
+        backpropagation::backpropagate(&mut self.tree, to_simulate, &status);
         Ok(())
     }
 
     fn expand(&mut self, node_index: graph::NodeIndex<u32>) -> Result<(), Box<dyn error::Error>> {
         let weight = self.tree.node_weight(node_index).unwrap();
-        if weight.visits == 0.0 {
+        if weight.visits() == 0.0 {
             return Ok(());
         }
         self.expansion_request_sender

@@ -3,10 +3,10 @@ use crate::rulesets;
 use petgraph;
 use petgraph::graph;
 
-pub fn backpropagate<State, Edge>(
+pub fn backpropagate<State: rulesets::StateTrait, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
-    status: &rulesets::PlayerStatus,
+    status: &rulesets::Status,
 ) {
     let mut neighbours = tree
         .neighbors_directed(node, petgraph::Direction::Incoming)
@@ -17,16 +17,12 @@ pub fn backpropagate<State, Edge>(
     update_tallies(tree, node, status);
 }
 
-fn update_tallies<State, Edge>(
+fn update_tallies<State: rulesets::StateTrait, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
-    status: &rulesets::PlayerStatus,
+    status: &rulesets::Status,
 ) {
-    let mut weight = tree.node_weight_mut(node).unwrap();
-    weight.visits += 1.0;
-    match status {
-        rulesets::PlayerStatus::Win => weight.wins += 1.0,
-        rulesets::PlayerStatus::Draw => weight.draws += 1.0,
-        _ => (),
-    }
+    let weight = tree.node_weight_mut(node).unwrap();
+    weight.add_visit();
+    weight.backpropagate(status);
 }

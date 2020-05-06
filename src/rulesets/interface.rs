@@ -3,7 +3,7 @@ use std::hash;
 
 pub type Player = u8;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Status {
     Ongoing,
     Draw,
@@ -37,7 +37,9 @@ pub enum PlayerStatus {
 pub trait StateTrait:
     Clone + fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd + Send
 {
+    fn current_player(&self) -> Player;
 }
+
 pub trait PlyTrait: Copy + fmt::Debug + Send {}
 
 pub trait RuleSetTrait: Send + Sized {
@@ -61,6 +63,13 @@ pub trait Permutable: RuleSetTrait {
 pub trait PlyIteratorTrait<RuleSet: RuleSetTrait>: Iterator<Item = RuleSet::Ply> {
     fn new(state: RuleSet::State) -> Self;
     fn current_state(&self) -> &RuleSet::State;
+
+    fn next_state(&mut self, ruleset: &RuleSet) -> Option<(RuleSet::Ply, RuleSet::State)> {
+        match self.next() {
+            Some(ply) => Some((ply, ruleset.play(&self.current_state(), &ply).unwrap())),
+            None => None,
+        }
+    }
 }
 
 pub trait PermutationIteratorTrait<Rules: Permutable>: Iterator<Item = Rules::Permutation> {

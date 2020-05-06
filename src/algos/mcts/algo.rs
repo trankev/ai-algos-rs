@@ -33,23 +33,24 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
         self.root = Some(index);
     }
 
-    pub fn iterate(&mut self, player: rulesets::Player) {
+    pub fn iterate(&mut self) {
         let node = match self.root {
             Some(node) => node,
             None => {
                 return;
             }
         };
-        let selected = selection::select(&self.tree, node, false);
-        expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
-        let to_simulate = match self.tree.neighbors(selected).choose(&mut self.rng) {
-            Some(node) => node,
-            None => selected,
-        };
-        let state = &self.tree.node_weight(to_simulate).unwrap().state;
-        let status = simulation::simulate::<RuleSet>(&self.ruleset, state, &mut self.rng);
-        let player_status = status.player_pov(&player);
-        backpropagation::backpropagate(&mut self.tree, to_simulate, &player_status);
+        let mut selected = selection::select(&self.tree, node, false);
+        let mut status = expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
+        if let rulesets::Status::Ongoing = status {
+            selected = match self.tree.neighbors(selected).choose(&mut self.rng) {
+                Some(node) => node,
+                None => selected,
+            };
+            let state = &self.tree.node_weight(selected).unwrap().state;
+            status = simulation::simulate::<RuleSet>(&self.ruleset, state, &mut self.rng);
+        }
+        backpropagation::backpropagate(&mut self.tree, selected, &status);
     }
 
     pub fn play_scores(&self) -> Option<Vec<algos::PlyConsideration<RuleSet::Ply>>> {
@@ -70,8 +71,8 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
                 algos::PlyConsideration {
                     ply: edge_weight.ply,
                     score: node_weight.score(),
-                    win_rate: node_weight.wins / node_weight.visits,
-                    draw_rate: node_weight.draws / node_weight.visits,
+                    win_rate: node_weight.win_rate(),
+                    draw_rate: node_weight.draw_rate(),
                     follow_up,
                 }
             })
@@ -133,6 +134,6 @@ mod tests {
         let state = ruleset.initial_state();
         let mut algo = MCTS::new(ruleset);
         algo.set_state(state);
-        algo.iterate(0);
+        algo.iterate();
     }
 }

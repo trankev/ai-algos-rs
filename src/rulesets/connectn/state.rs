@@ -103,6 +103,9 @@ where
         + ops::BitOr<&'b ArrayType, Output = ArrayType>
         + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
+    fn current_player(&self) -> rulesets::Player {
+        self.current_player
+    }
 }
 
 pub type TicTacToeState = State<bitarray::BitArray9>;
