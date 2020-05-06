@@ -7,7 +7,7 @@ mod responses;
 mod worker;
 
 pub use algo::expand;
-pub use items::PlyAndState;
+pub use items::Play;
 pub use pool::Pool;
 pub use requests::Request;
 pub use responses::Response;

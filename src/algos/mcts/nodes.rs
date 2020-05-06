@@ -22,11 +22,17 @@ pub struct Node<State: StateTrait> {
 }
 
 impl<State: StateTrait> Node<State> {
-    pub fn new(state: State) -> Node<State> {
-        Node {
-            state,
-            status: Status::NotVisited,
-        }
+    pub fn new(state: State, status: rulesets::Status) -> Node<State> {
+        let status = if let rulesets::Status::Ongoing = status {
+            Status::NotVisited
+        } else {
+            let player_status = status.player_pov(&state.current_player());
+            Status::Terminal {
+                global: status,
+                player: player_status,
+            }
+        };
+        Node { state, status }
     }
 
     pub fn is_visited(&self) -> bool {

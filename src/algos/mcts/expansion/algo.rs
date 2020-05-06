@@ -21,29 +21,20 @@ pub fn expand<RuleSet: rulesets::Permutable>(
         return weight.global_status();
     }
     if !weight.is_visited() {
-        let status = ruleset.status(&weight.state);
-        match status {
-            rulesets::Status::Ongoing => {
-                log::debug!("Not yet visited, not expanding it yet");
-                return rulesets::Status::Ongoing;
-            }
-            _ => {
-                log::debug!("Setting node as terminal");
-                weight.set_terminal(status);
-                return status;
-            }
-        }
+        log::debug!("Not yet visited, not expanding it yet");
+        return rulesets::Status::Ongoing;
     }
     let mut iterator = iterator::Expander::new(weight.state.clone());
 
-    while let Some(items::PlyAndState { ply, state }) = iterator.iterate(ruleset) {
+    while let Some(items::Play { ply, state, status }) = iterator.iterate(ruleset) {
         log::debug!(
-            "Adding node as child of {:?} (ply: {:?}, state: {:?})",
+            "Adding node as child of {:?} (ply: {:?}, status: {:?}, state: {:?})",
             node,
             ply,
+            status,
             state.ascii_representation()
         );
-        let child_index = tree.add_node(nodes::Node::new(state));
+        let child_index = tree.add_node(nodes::Node::new(state, status));
         log::debug!("Child node: {:?}", child_index);
         tree.add_edge(node, child_index, edges::Edge::new(ply));
     }

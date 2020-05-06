@@ -58,7 +58,10 @@ mod tests {
     #[test]
     fn test_no_children() {
         let mut tree = EmptyStateGraph::new();
-        let root = tree.add_node(nodes::Node::new(tests::EmptyState::new()));
+        let root = tree.add_node(nodes::Node::new(
+            tests::EmptyState::new(),
+            rulesets::Status::Ongoing,
+        ));
         let result = select(&tree, root, false);
         assert_eq!(result, root);
     }
@@ -74,7 +77,10 @@ mod tests {
         let first_index = tree.add_node(first_weight);
         tree.add_edge(root_index, first_index, ());
 
-        let second_index = tree.add_node(nodes::Node::new(tests::EmptyState::new()));
+        let second_index = tree.add_node(nodes::Node::new(
+            tests::EmptyState::new(),
+            rulesets::Status::Ongoing,
+        ));
         tree.add_edge(root_index, second_index, ());
 
         let result = select(&tree, root_index, false);

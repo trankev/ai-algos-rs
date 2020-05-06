@@ -42,8 +42,8 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
         }
     }
 
-    pub fn set_state(&mut self, state: RuleSet::State) {
-        let index = self.tree.add_node(nodes::Node::new(state));
+    pub fn set_state(&mut self, state: RuleSet::State, status: rulesets::Status) {
+        let index = self.tree.add_node(nodes::Node::new(state, status));
         self.root = Some(index);
     }
 
@@ -78,7 +78,9 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
             successors,
         } = self.expansion_response_receiver.recv().unwrap();
         for successor in successors {
-            let child_index = self.tree.add_node(nodes::Node::new(successor.state));
+            let child_index = self
+                .tree
+                .add_node(nodes::Node::new(successor.state, successor.status));
             self.tree
                 .add_edge(node_index, child_index, edges::Edge::new(successor.ply));
         }

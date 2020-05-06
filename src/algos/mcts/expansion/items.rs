@@ -1,6 +1,7 @@
 use crate::rulesets;
 
-pub struct PlyAndState<RuleSet: rulesets::RuleSetTrait> {
+pub struct Play<RuleSet: rulesets::RuleSetTrait> {
     pub ply: RuleSet::Ply,
     pub state: RuleSet::State,
+    pub status: rulesets::Status,
 }

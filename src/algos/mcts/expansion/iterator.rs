@@ -18,7 +18,7 @@ impl<RuleSet: rulesets::Permutable> Expander<RuleSet> {
         }
     }
 
-    pub fn iterate(&mut self, ruleset: &RuleSet) -> Option<items::PlyAndState<RuleSet>> {
+    pub fn iterate(&mut self, ruleset: &RuleSet) -> Option<items::Play<RuleSet>> {
         while let Some((ply, resulting_state)) = self.ply_iterator.next_state(&ruleset) {
             let permutations = RuleSet::PermutationIterator::new(&ruleset);
             let witness_state = permutations
@@ -29,9 +29,11 @@ impl<RuleSet: rulesets::Permutable> Expander<RuleSet> {
                 continue;
             }
             self.seen.insert(witness_state);
-            return Some(items::PlyAndState {
+            let status = ruleset.status(&resulting_state);
+            return Some(items::Play {
                 ply,
                 state: resulting_state,
+                status,
             });
         }
         None
