@@ -30,5 +30,9 @@ pub mod tests {
         fn current_player(&self) -> interface::Player {
             self.current_player
         }
+
+        fn ascii_representation(&self) -> String {
+            "None".into()
+        }
     }
 }

@@ -6,6 +6,7 @@ use super::selection;
 use super::simulation;
 use crate::algos;
 use crate::rulesets;
+use log;
 use petgraph::graph;
 use rand;
 use rand::rngs;
@@ -34,13 +35,20 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
     }
 
     pub fn iterate(&mut self) {
+        log::debug!("###########################################");
+        log::debug!("Starting new iteration");
         let node = match self.root {
             Some(node) => node,
             None => {
+                log::debug!("No node selected, returning");
                 return;
             }
         };
+        log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        log::debug!("Selection phase");
         let mut selected = selection::select(&self.tree, node, false);
+        log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        log::debug!("Expansion phase");
         let mut status = expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
         if let rulesets::Status::Ongoing = status {
             selected = match self.tree.neighbors(selected).choose(&mut self.rng) {
@@ -48,9 +56,14 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
                 None => selected,
             };
             let state = &self.tree.node_weight(selected).unwrap().state;
+            log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            log::debug!("Simulation phase, node {:?}", selected);
             status = simulation::simulate::<RuleSet>(&self.ruleset, state, &mut self.rng);
         }
+        log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        log::debug!("Backpropagation phase");
         backpropagation::backpropagate(&mut self.tree, selected, &status);
+        log::debug!("Ending iteration");
     }
 
     pub fn play_scores(&self) -> Option<Vec<algos::PlyConsideration<RuleSet::Ply>>> {

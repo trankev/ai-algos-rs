@@ -13,6 +13,7 @@ itertools = "*"
 auto_ops = "*"
 petgraph = "*"
 crossbeam = "*"
+log = "*"
 
 [dev-dependencies]
 more-asserts = "*"

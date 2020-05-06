@@ -1,5 +1,6 @@
 use super::nodes;
 use crate::rulesets;
+use log;
 use petgraph;
 use petgraph::graph;
 
@@ -8,6 +9,7 @@ pub fn backpropagate<State: rulesets::StateTrait, Edge>(
     node: graph::NodeIndex<u32>,
     status: &rulesets::Status,
 ) {
+    log::debug!("Backpropagating for node {:?}, status {:?}", node, status);
     let mut neighbours = tree
         .neighbors_directed(node, petgraph::Direction::Incoming)
         .detach();

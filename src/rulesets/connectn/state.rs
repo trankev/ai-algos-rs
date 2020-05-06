@@ -106,6 +106,21 @@ where
     fn current_player(&self) -> rulesets::Player {
         self.current_player
     }
+
+    fn ascii_representation(&self) -> String {
+        let grid = (0..9)
+            .map(|index| {
+                if self.grids[0].isset(index) {
+                    'X'
+                } else if self.grids[1].isset(index) {
+                    'O'
+                } else {
+                    '.'
+                }
+            })
+            .collect::<String>();
+        format!("grid: {}, to play: {}", grid, self.current_player())
+    }
 }
 
 pub type TicTacToeState = State<bitarray::BitArray9>;

@@ -38,9 +38,12 @@ pub trait StateTrait:
     Clone + fmt::Debug + Eq + hash::Hash + Ord + PartialEq + PartialOrd + Send
 {
     fn current_player(&self) -> Player;
+    fn ascii_representation(&self) -> String;
 }
 
-pub trait PlyTrait: Copy + fmt::Debug + Send {}
+pub trait PlyTrait: Copy + fmt::Debug + Send {
+    fn ascii_representation(&self) -> String;
+}
 
 pub trait RuleSetTrait: Send + Sized {
     type State: StateTrait;
