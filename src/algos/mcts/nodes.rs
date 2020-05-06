@@ -18,7 +18,7 @@ pub enum Status {
 #[derive(Debug)]
 pub struct Node<State: StateTrait> {
     pub state: State,
-    status: Status,
+    pub status: Status,
 }
 
 impl<State: StateTrait> Node<State> {
@@ -116,16 +116,16 @@ impl<State: StateTrait> Node<State> {
         match &self.status {
             Status::NotVisited => 0.5,
             Status::Terminal { global: _, player } => match player {
-                rulesets::PlayerStatus::Win => 1.0,
+                rulesets::PlayerStatus::Win => 0.0,
                 rulesets::PlayerStatus::Draw => 0.5,
-                rulesets::PlayerStatus::Loss => 0.0,
+                rulesets::PlayerStatus::Loss => 1.0,
                 _ => unreachable!(),
             },
             Status::Visited {
                 visits: _,
                 win_rate,
                 draw_rate,
-            } => win_rate + 0.5 * draw_rate,
+            } => 1.0 - win_rate - 0.5 * draw_rate,
         }
     }
 

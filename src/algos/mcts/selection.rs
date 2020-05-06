@@ -116,6 +116,6 @@ mod tests {
         tree.add_edge(root_index, second_index, ());
 
         let result = select(&tree, root_index, false);
-        assert_eq!(result, second_index);
+        assert_eq!(result, first_index);
     }
 }
