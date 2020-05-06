@@ -1,5 +1,6 @@
 use crate::rulesets;
 use crate::rulesets::PlyIteratorTrait;
+use crate::rulesets::PlyTrait;
 use crate::rulesets::StateTrait;
 use rand::rngs;
 use rand::seq::IteratorRandom;
@@ -20,7 +21,7 @@ pub fn simulate<RuleSet: rulesets::RuleSetTrait>(
             state = ruleset.play(&current_state, &ply).unwrap();
             log::debug!(
                 "Playing {:?}, resulting in state {:?}",
-                ply,
+                ply.ascii_representation(),
                 state.ascii_representation()
             );
             current_state = &state;

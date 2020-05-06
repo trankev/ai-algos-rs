@@ -7,8 +7,8 @@ pub struct Ply {
 
 impl rulesets::PlyTrait for Ply {
     fn ascii_representation(&self) -> String {
-        let row = self.index / 3;
-        let column = self.index / 3;
+        let row = self.index / 15;
+        let column = self.index % 15;
         format!("[{}, {}]", row, column)
     }
 }

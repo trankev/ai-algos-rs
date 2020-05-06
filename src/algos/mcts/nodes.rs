@@ -3,13 +3,11 @@ use crate::rulesets::StateTrait;
 
 #[derive(Debug)]
 pub enum Status {
-    NotVisited,
     Terminal {
         global: rulesets::Status,
         player: rulesets::PlayerStatus,
     },
-    Visited {
-        visits: f32,
+    Ongoing {
         win_rate: f32,
         draw_rate: f32,
     },
@@ -19,12 +17,16 @@ pub enum Status {
 pub struct Node<State: StateTrait> {
     pub state: State,
     pub status: Status,
+    pub visits: f32,
 }
 
 impl<State: StateTrait> Node<State> {
     pub fn new(state: State, status: rulesets::Status) -> Node<State> {
         let status = if let rulesets::Status::Ongoing = status {
-            Status::NotVisited
+            Status::Ongoing {
+                win_rate: 0.0,
+                draw_rate: 0.0,
+            }
         } else {
             let player_status = status.player_pov(&state.current_player());
             Status::Terminal {
@@ -32,13 +34,20 @@ impl<State: StateTrait> Node<State> {
                 player: player_status,
             }
         };
-        Node { state, status }
+        Node {
+            state,
+            status,
+            visits: 0.0,
+        }
     }
 
     pub fn is_visited(&self) -> bool {
         match self.status {
-            Status::NotVisited => false,
-            _ => true,
+            Status::Terminal {
+                global: _,
+                player: _,
+            } => true,
+            _ => self.visits > 0.0,
         }
     }
 
@@ -52,60 +61,47 @@ impl<State: StateTrait> Node<State> {
         }
     }
 
-    pub fn new_visited(state: State, visits: usize, wins: usize, draws: usize) -> Node<State> {
-        Node {
-            state,
-            status: Status::Visited {
-                visits: visits as f32,
-                win_rate: wins as f32 / visits as f32,
-                draw_rate: draws as f32 / visits as f32,
-            },
+    pub fn add_visit(&mut self) {
+        self.visits += 1.0;
+        if let Status::Ongoing {
+            mut win_rate,
+            mut draw_rate,
+        } = self.status
+        {
+            let factor = (self.visits - 1.0) / self.visits;
+            win_rate *= factor;
+            draw_rate *= factor;
+            self.status = Status::Ongoing {
+                win_rate,
+                draw_rate,
+            };
         }
     }
 
-    pub fn set_terminal(&mut self, status: rulesets::Status) {
-        let player_status = status.player_pov(&self.state.current_player());
-        self.status = Status::Terminal {
-            global: status,
-            player: player_status,
-        };
-    }
-
-    pub fn add_visit(&mut self) {
-        self.status = match self.status {
-            Status::Visited {
-                visits,
-                win_rate,
-                draw_rate,
-            } => Status::Visited {
-                visits: visits + 1.0,
-                win_rate: win_rate * visits / (visits + 1.0),
-                draw_rate: draw_rate * visits / (visits + 1.0),
+    pub fn new_visited(state: State, visits: usize, wins: usize, draws: usize) -> Node<State> {
+        Node {
+            state,
+            status: Status::Ongoing {
+                win_rate: wins as f32 / visits as f32,
+                draw_rate: draws as f32 / visits as f32,
             },
-            Status::NotVisited => Status::Visited {
-                visits: 1.0,
-                win_rate: 0.0,
-                draw_rate: 0.0,
-            },
-            _ => return,
-        };
+            visits: visits as f32,
+        }
     }
 
     pub fn backpropagate(&mut self, status: &rulesets::Status) {
         self.status = match self.status {
-            Status::Visited {
-                visits,
+            Status::Ongoing {
                 mut win_rate,
                 mut draw_rate,
             } => {
                 match status.player_pov(&self.state.current_player()) {
-                    rulesets::PlayerStatus::Win => win_rate += 1.0 / visits,
-                    rulesets::PlayerStatus::Draw => draw_rate += 1.0 / visits,
+                    rulesets::PlayerStatus::Win => win_rate += 1.0 / self.visits,
+                    rulesets::PlayerStatus::Draw => draw_rate += 1.0 / self.visits,
                     rulesets::PlayerStatus::Loss => return,
                     _ => unreachable!(),
                 }
-                Status::Visited {
-                    visits,
+                Status::Ongoing {
                     win_rate,
                     draw_rate,
                 }
@@ -120,45 +116,26 @@ impl<State: StateTrait> Node<State> {
 
     pub fn score(&self) -> f32 {
         match &self.status {
-            Status::NotVisited => 0.5,
             Status::Terminal { global: _, player } => match player {
                 rulesets::PlayerStatus::Win => 0.0,
                 rulesets::PlayerStatus::Draw => 0.5,
                 rulesets::PlayerStatus::Loss => 1.0,
                 _ => unreachable!(),
             },
-            Status::Visited {
-                visits: _,
+            Status::Ongoing {
                 win_rate,
                 draw_rate,
             } => 1.0 - win_rate - 0.5 * draw_rate,
         }
     }
 
-    pub fn visits(&self) -> f32 {
-        match self.status {
-            Status::NotVisited => 0.0,
-            Status::Terminal {
-                global: _,
-                player: _,
-            } => 1.0,
-            Status::Visited {
-                visits,
-                win_rate: _,
-                draw_rate: _,
-            } => visits,
-        }
-    }
-
     pub fn win_rate(&self) -> f32 {
         match &self.status {
-            Status::NotVisited => -1.0,
             Status::Terminal { global: _, player } => match player {
                 rulesets::PlayerStatus::Win => 1.0,
                 _ => 0.0,
             },
-            Status::Visited {
-                visits: _,
+            Status::Ongoing {
                 win_rate,
                 draw_rate: _,
             } => *win_rate,
@@ -174,13 +151,11 @@ impl<State: StateTrait> Node<State> {
 
     pub fn draw_rate(&self) -> f32 {
         match &self.status {
-            Status::NotVisited => -1.0,
             Status::Terminal { global: _, player } => match player {
                 rulesets::PlayerStatus::Draw => 1.0,
                 _ => 0.0,
             },
-            Status::Visited {
-                visits: _,
+            Status::Ongoing {
                 win_rate: _,
                 draw_rate,
             } => *draw_rate,

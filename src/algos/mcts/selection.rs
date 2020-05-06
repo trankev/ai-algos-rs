@@ -15,8 +15,7 @@ pub fn select<State: rulesets::StateTrait, Edge>(
         node,
         weight.state.ascii_representation()
     );
-    let visits = weight.visits();
-    if visits == 0.0 {
+    if !weight.is_visited() {
         log::debug!("No visits, returning self");
         return node;
     }
@@ -24,7 +23,8 @@ pub fn select<State: rulesets::StateTrait, Edge>(
         .neighbors(node)
         .map(|child_index| {
             let child_weight = tree.node_weight(child_index).unwrap();
-            let value = uct_value::uct_value(visits, child_weight.visits(), child_weight.score());
+            let value =
+                uct_value::uct_value(weight.visits, child_weight.visits, child_weight.score());
             log::debug!(
                 "Candidate: {:?}, value: {}, score: {}, state: {:?}, status: {:?}",
                 child_index,
