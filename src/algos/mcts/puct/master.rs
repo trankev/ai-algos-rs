@@ -63,26 +63,21 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
 
     fn expand(&mut self, node_index: graph::NodeIndex<u32>) -> Result<(), Box<dyn error::Error>> {
         let weight = self.tree.node_weight(node_index).unwrap();
-        if weight.visits() == 0.0 {
+        if weight.is_terminal() || !weight.is_visited() {
             return Ok(());
         }
-        self.expansion_request_sender
-            .send(expansion::Request {
-                node_index,
-                state: weight.state.clone(),
-            })
-            .unwrap();
-
-        let expansion::Response {
+        let request = expansion::Request {
             node_index,
-            successors,
-        } = self.expansion_response_receiver.recv().unwrap();
-        for successor in successors {
-            let child_index = self
-                .tree
-                .add_node(nodes::Node::new(successor.state, successor.status));
+            state: weight.state.clone(),
+        };
+        self.expansion_request_sender.send(request).unwrap();
+        let response = self.expansion_response_receiver.recv().unwrap();
+        for successor in response.successors {
+            let node_weight = nodes::Node::new(successor.state, successor.status);
+            let child_index = self.tree.add_node(node_weight);
+            let edge_weight = edges::Edge::new(successor.ply);
             self.tree
-                .add_edge(node_index, child_index, edges::Edge::new(successor.ply));
+                .add_edge(response.node_index, child_index, edge_weight);
         }
         Ok(())
     }
@@ -96,10 +91,9 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
             None => node_index,
         };
         let state = self.tree.node_weight(to_simulate).unwrap().state.clone();
-        self.simulation_request_sender
-            .send(simulation::Request { node_index, state })?;
-        let simulation::Response { node_index, status } =
-            self.simulation_response_receiver.recv()?;
-        Ok((node_index, status))
+        let request = simulation::Request { node_index, state };
+        self.simulation_request_sender.send(request)?;
+        let response = self.simulation_response_receiver.recv()?;
+        Ok((response.node_index, response.status))
     }
 }
