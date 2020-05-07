@@ -11,7 +11,6 @@ use log;
 use petgraph::graph;
 use rand;
 use rand::rngs;
-use rand::seq::IteratorRandom;
 
 pub struct MCTS<RuleSet: rulesets::Permutable> {
     ruleset: RuleSet,
@@ -53,14 +52,12 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
         log::debug!("Expansion phase");
         let mut status = expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
         if let rulesets::Status::Ongoing = status {
-            selected = match self.tree.neighbors(selected).choose(&mut self.rng) {
-                Some(node) => node,
-                None => selected,
-            };
-            let state = &self.tree.node_weight(selected).unwrap().state;
+            let (to_simulate, state) =
+                simulation::fetch_random_child::<RuleSet>(&self.tree, selected, &mut self.rng);
             log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             log::debug!("Simulation phase, node {:?}", selected);
-            status = simulation::simulate::<RuleSet>(&self.ruleset, state, &mut self.rng);
+            status = simulation::simulate::<RuleSet>(&self.ruleset, &state, &mut self.rng);
+            selected = to_simulate;
         }
         log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         log::debug!("Backpropagation phase");
