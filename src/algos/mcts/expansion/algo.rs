@@ -1,7 +1,6 @@
 use super::items;
 use super::iterator;
 use crate::rulesets;
-use crate::rulesets::StateTrait;
 use log;
 
 use super::super::edges;
@@ -9,34 +8,55 @@ use super::super::nodes;
 
 use petgraph::graph;
 
+pub enum ExpansionStatus<State> {
+    RequiresExpansion(State),
+    NotVisited,
+    Terminal(rulesets::Status),
+}
+
 pub fn expand<RuleSet: rulesets::Permutable>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
 ) -> rulesets::Status {
     log::debug!("Expanding node {:?}", node);
-    let weight = tree.node_weight_mut(node).unwrap();
-    if weight.is_terminal() {
-        log::debug!("Node is terminal, returning");
-        return weight.global_status();
-    }
-    if !weight.is_visited() {
-        log::debug!("Not yet visited, not expanding it yet");
-        return rulesets::Status::Ongoing;
-    }
-    let mut iterator = iterator::Expander::new(weight.state.clone());
+    let state = match ponder_expansion::<RuleSet>(tree, node, true) {
+        ExpansionStatus::RequiresExpansion(state) => state,
+        ExpansionStatus::NotVisited => return rulesets::Status::Ongoing,
+        ExpansionStatus::Terminal(status) => return status,
+    };
+    let mut iterator = iterator::Expander::new(state);
 
-    while let Some(items::Play { ply, state, status }) = iterator.iterate(ruleset) {
-        log::debug!(
-            "Adding node as child of {:?} (ply: {:?}, status: {:?}, state: {:?})",
-            node,
-            ply,
-            status,
-            state.ascii_representation()
-        );
-        let child_index = tree.add_node(nodes::Node::new(state, status));
-        log::debug!("Child node: {:?}", child_index);
-        tree.add_edge(node, child_index, edges::Edge::new(ply));
+    while let Some(successor) = iterator.iterate(ruleset) {
+        save_expansion(tree, node, successor);
     }
     rulesets::Status::Ongoing
+}
+
+pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
+    tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
+    node_index: graph::NodeIndex<u32>,
+    check_for_visits: bool,
+) -> ExpansionStatus<RuleSet::State> {
+    let weight = tree.node_weight(node_index).unwrap();
+    let status = weight.game_status();
+    match status {
+        rulesets::Status::Ongoing => (),
+        _ => return ExpansionStatus::Terminal(status),
+    }
+    if check_for_visits && !weight.is_visited() {
+        return ExpansionStatus::NotVisited;
+    }
+    ExpansionStatus::RequiresExpansion(weight.state.clone())
+}
+
+pub fn save_expansion<RuleSet: rulesets::RuleSetTrait>(
+    tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
+    node_index: graph::NodeIndex<u32>,
+    successor: items::Play<RuleSet>,
+) {
+    let node_weight = nodes::Node::new(successor.state, successor.status);
+    let child_index = tree.add_node(node_weight);
+    let edge_weight = edges::Edge::new(successor.ply);
+    tree.add_edge(node_index, child_index, edge_weight);
 }

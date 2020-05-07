@@ -51,6 +51,13 @@ impl<State: StateTrait> Node<State> {
         }
     }
 
+    pub fn game_status(&self) -> rulesets::Status {
+        match self.status {
+            Status::Terminal { global, player: _ } => global,
+            _ => rulesets::Status::Ongoing,
+        }
+    }
+
     pub fn is_terminal(&self) -> bool {
         match self.status {
             Status::Terminal {
