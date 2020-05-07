@@ -45,7 +45,7 @@ pub trait PlyTrait: Copy + fmt::Debug + Send {
     fn ascii_representation(&self) -> String;
 }
 
-pub trait RuleSetTrait: Send + Sized {
+pub trait RuleSetTrait: Clone + Send + Sized {
     type State: StateTrait;
     type Ply: PlyTrait;
     type PlyIterator: PlyIteratorTrait<Self>;

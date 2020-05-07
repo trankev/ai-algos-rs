@@ -9,7 +9,7 @@ use std::error;
 
 pub struct Worker<RuleSet: rulesets::RuleSetTrait> {
     ruleset: RuleSet,
-    receiver: channel::Receiver<Option<requests::Request<RuleSet>>>,
+    receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response>,
     rng: rngs::ThreadRng,
 }
@@ -17,7 +17,7 @@ pub struct Worker<RuleSet: rulesets::RuleSetTrait> {
 impl<RuleSet: rulesets::RuleSetTrait> Worker<RuleSet> {
     pub fn new(
         ruleset: RuleSet,
-        receiver: channel::Receiver<Option<requests::Request<RuleSet>>>,
+        receiver: channel::Receiver<requests::Request<RuleSet>>,
         sender: channel::Sender<responses::Response>,
     ) -> Worker<RuleSet> {
         Worker {
@@ -29,10 +29,15 @@ impl<RuleSet: rulesets::RuleSetTrait> Worker<RuleSet> {
     }
 
     pub fn run(&mut self) -> Result<(), Box<dyn error::Error>> {
-        while let Some(requests::Request { node_index, state }) = self.receiver.recv()? {
-            let status = algo::simulate(&self.ruleset, &state, &mut self.rng);
-            self.sender
-                .send(responses::Response { node_index, status })?;
+        loop {
+            match self.receiver.recv()? {
+                requests::Request::SimulationRequest { node_index, state } => {
+                    let status = algo::simulate(&self.ruleset, &state, &mut self.rng);
+                    self.sender
+                        .send(responses::Response { node_index, status })?;
+                }
+                requests::Request::Stop => break,
+            }
         }
         Ok(())
     }

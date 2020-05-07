@@ -58,16 +58,6 @@ impl<State: StateTrait> Node<State> {
         }
     }
 
-    pub fn is_terminal(&self) -> bool {
-        match self.status {
-            Status::Terminal {
-                global: _,
-                player: _,
-            } => true,
-            _ => false,
-        }
-    }
-
     pub fn add_visit(&mut self) {
         self.visits += 1.0;
         if let Status::Ongoing {
@@ -106,7 +96,7 @@ impl<State: StateTrait> Node<State> {
                     rulesets::PlayerStatus::Win => win_rate += 1.0 / self.visits,
                     rulesets::PlayerStatus::Draw => draw_rate += 1.0 / self.visits,
                     rulesets::PlayerStatus::Loss => return,
-                    _ => unreachable!(),
+                    rulesets::PlayerStatus::Ongoing => unreachable!(),
                 }
                 Status::Ongoing {
                     win_rate,
@@ -117,7 +107,6 @@ impl<State: StateTrait> Node<State> {
                 global: _,
                 player: _,
             } => return,
-            _ => unreachable!(),
         };
     }
 
@@ -127,7 +116,7 @@ impl<State: StateTrait> Node<State> {
                 rulesets::PlayerStatus::Win => 0.0,
                 rulesets::PlayerStatus::Draw => 0.5,
                 rulesets::PlayerStatus::Loss => 1.0,
-                _ => unreachable!(),
+                rulesets::PlayerStatus::Ongoing => unreachable!(),
             },
             Status::Ongoing {
                 win_rate,
@@ -146,13 +135,6 @@ impl<State: StateTrait> Node<State> {
                 win_rate,
                 draw_rate: _,
             } => *win_rate,
-        }
-    }
-
-    pub fn global_status(&self) -> rulesets::Status {
-        match &self.status {
-            Status::Terminal { global, player: _ } => *global,
-            _ => unreachable!(),
         }
     }
 

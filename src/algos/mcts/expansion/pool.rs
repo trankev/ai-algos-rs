@@ -8,9 +8,9 @@ use std::thread;
 
 pub struct Pool<RuleSet: rulesets::Permutable + 'static> {
     workers: Vec<thread::JoinHandle<()>>,
-    request_receiver: channel::Receiver<Option<requests::Request<RuleSet>>>,
-    request_sender: channel::Sender<Option<requests::Request<RuleSet>>>,
-    response_receiver: channel::Receiver<responses::Response<RuleSet>>,
+    request_receiver: channel::Receiver<requests::Request<RuleSet>>,
+    pub request_sender: channel::Sender<requests::Request<RuleSet>>,
+    pub response_receiver: channel::Receiver<responses::Response<RuleSet>>,
     response_sender: channel::Sender<responses::Response<RuleSet>>,
 }
 
@@ -36,6 +36,14 @@ impl<RuleSet: rulesets::Permutable + 'static> Pool<RuleSet> {
             worker.run().unwrap();
         })?;
         self.workers.push(handle);
+        Ok(())
+    }
+
+    pub fn stop(&mut self) -> Result<(), Box<dyn error::Error>> {
+        self.request_sender.send(requests::Request::Stop)?;
+        while let Some(worker) = self.workers.pop() {
+            worker.join().unwrap();
+        }
         Ok(())
     }
 }

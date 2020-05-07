@@ -11,6 +11,7 @@ use crate::utils::grids::symmetries;
 use std::marker;
 use std::ops;
 
+#[derive(Clone)]
 pub struct RuleSet<ArrayType, Variant>
 where
     Variant: variants::BaseVariant,
