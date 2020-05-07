@@ -108,18 +108,20 @@ where
     }
 
     fn ascii_representation(&self) -> String {
-        let grid = (0..9)
-            .map(|index| {
-                if self.grids[0].isset(index) {
-                    'X'
-                } else if self.grids[1].isset(index) {
-                    'O'
-                } else {
-                    '.'
-                }
-            })
-            .collect::<String>();
-        format!("grid: {}, to play: {}", grid, self.current_player())
+        let mut result = String::new();
+        for index in 0..225 {
+            if self.grids[0].isset(index) {
+                result.push('X');
+            } else if self.grids[1].isset(index) {
+                result.push('O');
+            } else {
+                result.push('.');
+            }
+            if index % 15 == 14 {
+                result.push('\n');
+            }
+        }
+        format!("{}\nTo play: {}", result, self.current_player())
     }
 }
 

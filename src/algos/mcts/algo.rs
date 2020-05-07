@@ -6,6 +6,7 @@ use super::selection;
 use super::simulation;
 use crate::algos;
 use crate::rulesets;
+use crate::rulesets::StateTrait;
 use log;
 use petgraph::graph;
 use rand;
@@ -124,6 +125,27 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
             }
         }
         result
+    }
+
+    pub fn walk_best(&mut self) {
+        let parent = match self.root {
+            Some(node) => node,
+            None => {
+                return;
+            }
+        };
+        let (node_index, _) = self
+            .tree
+            .neighbors(parent)
+            .map(|node_index| {
+                let node_weight = self.tree.node_weight(node_index).unwrap();
+                (node_index, node_weight.score())
+            })
+            .max_by(|(_, score_a), (_, score_b)| score_a.partial_cmp(&score_b).unwrap())
+            .unwrap();
+        self.root = Some(node_index);
+        let node_weight = self.tree.node_weight(node_index).unwrap();
+        println!("{}", node_weight.state.ascii_representation());
     }
 }
 
