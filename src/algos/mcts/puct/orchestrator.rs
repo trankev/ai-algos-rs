@@ -93,11 +93,11 @@ impl<RuleSet: rulesets::Permutable + 'static> Orchestrator<RuleSet> {
         Ok(())
     }
 
-    pub fn stop(&mut self) -> Result<(), Box<dyn error::Error>> {
+    pub fn stop(&mut self) -> Result<(usize, usize), Box<dyn error::Error>> {
         self.stop_master()?;
-        self.simulation_pool.stop()?;
-        self.expansion_pool.stop()?;
-        Ok(())
+        let simulation_count = self.simulation_pool.stop()?;
+        let expansion_count = self.expansion_pool.stop()?;
+        Ok((expansion_count, simulation_count))
     }
 
     fn stop_master(&mut self) -> Result<(), Box<dyn error::Error>> {

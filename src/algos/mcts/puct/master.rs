@@ -134,7 +134,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
         let mut expansion_jobs: isize = 0;
         let mut simulation_jobs: isize = 0;
         for _ in 0..iteration_count {
-            if simulation_jobs < 100 {
+            if simulation_jobs < simulation_threshold * 10 {
                 match self.make_selection(node)? {
                     SelectionResult::Expansion => {
                         expansion_jobs += 1;

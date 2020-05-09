@@ -9,6 +9,7 @@ pub struct Worker<RuleSet: rulesets::Permutable + 'static> {
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response<RuleSet>>,
+    pub operation_count: usize,
 }
 
 impl<RuleSet: rulesets::Permutable + 'static> Worker<RuleSet> {
@@ -21,6 +22,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Worker<RuleSet> {
             ruleset,
             receiver,
             sender,
+            operation_count: 0,
         }
     }
 
@@ -28,6 +30,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Worker<RuleSet> {
         loop {
             match self.receiver.recv()? {
                 requests::Request::ExpansionRequest { node_index, state } => {
+                    self.operation_count += 1;
                     let mut iterator = iterator::Expander::new(state);
                     let mut successors = Vec::new();
                     while let Some(item) = iterator.iterate(&self.ruleset) {

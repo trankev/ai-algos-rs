@@ -12,6 +12,7 @@ pub struct Worker<RuleSet: rulesets::RuleSetTrait> {
     receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response>,
     rng: rngs::ThreadRng,
+    pub operation_count: usize,
 }
 
 impl<RuleSet: rulesets::RuleSetTrait> Worker<RuleSet> {
@@ -25,6 +26,7 @@ impl<RuleSet: rulesets::RuleSetTrait> Worker<RuleSet> {
             receiver,
             sender,
             rng: rand::thread_rng(),
+            operation_count: 0,
         }
     }
 
@@ -32,6 +34,7 @@ impl<RuleSet: rulesets::RuleSetTrait> Worker<RuleSet> {
         loop {
             match self.receiver.recv()? {
                 requests::Request::SimulationRequest { node_index, state } => {
+                    self.operation_count += 1;
                     let status = algo::simulate(&self.ruleset, &state, &mut self.rng);
                     self.sender
                         .send(responses::Response { node_index, status })?;
