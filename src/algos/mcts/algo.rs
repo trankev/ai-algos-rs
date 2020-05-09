@@ -62,7 +62,7 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
         }
         log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         log::debug!("Backpropagation phase");
-        backpropagation::backpropagate(&mut self.tree, selected, &status);
+        backpropagation::backpropagate(&mut self.tree, selected, true, Some(&status));
         log::debug!("Ending iteration");
     }
 

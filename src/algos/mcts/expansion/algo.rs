@@ -12,6 +12,7 @@ pub enum ExpansionStatus<State> {
     RequiresExpansion(State),
     NotVisited,
     Terminal(rulesets::Status),
+    PendingExpansion,
 }
 
 pub fn expand<RuleSet: rulesets::Permutable>(
@@ -24,6 +25,7 @@ pub fn expand<RuleSet: rulesets::Permutable>(
         ExpansionStatus::RequiresExpansion(state) => state,
         ExpansionStatus::NotVisited => return rulesets::Status::Ongoing,
         ExpansionStatus::Terminal(status) => return status,
+        ExpansionStatus::PendingExpansion => unreachable!(),
     };
     let mut iterator = iterator::Expander::new(state);
 
@@ -34,11 +36,14 @@ pub fn expand<RuleSet: rulesets::Permutable>(
 }
 
 pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
-    tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
+    tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     check_for_visits: bool,
 ) -> ExpansionStatus<RuleSet::State> {
-    let weight = tree.node_weight(node_index).unwrap();
+    let weight = tree.node_weight_mut(node_index).unwrap();
+    if weight.expanding {
+        return ExpansionStatus::PendingExpansion;
+    }
     let status = weight.game_status();
     match status {
         rulesets::Status::Ongoing => (),
@@ -47,6 +52,7 @@ pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
     if check_for_visits && !weight.is_visited() {
         return ExpansionStatus::NotVisited;
     }
+    weight.expanding = true;
     ExpansionStatus::RequiresExpansion(weight.state.clone())
 }
 
@@ -55,6 +61,8 @@ pub fn save_expansion<RuleSet: rulesets::RuleSetTrait>(
     node_index: graph::NodeIndex<u32>,
     successor: items::Play<RuleSet>,
 ) {
+    let mut parent_weight = tree.node_weight_mut(node_index).unwrap();
+    parent_weight.expanding = false;
     let node_weight = nodes::Node::new(successor.state, successor.status);
     let child_index = tree.add_node(node_weight);
     let edge_weight = edges::Edge::new(successor.ply);

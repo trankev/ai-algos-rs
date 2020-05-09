@@ -21,8 +21,11 @@ pub fn select<State: rulesets::StateTrait, Edge>(
     }
     let best_neighbour = tree
         .neighbors(node)
-        .map(|child_index| {
+        .filter_map(|child_index| {
             let child_weight = tree.node_weight(child_index).unwrap();
+            if child_weight.expanding {
+                return None;
+            }
             let value =
                 uct_value::uct_value(weight.visits, child_weight.visits, child_weight.score());
             log::debug!(
@@ -33,7 +36,7 @@ pub fn select<State: rulesets::StateTrait, Edge>(
                 child_weight.state.ascii_representation(),
                 child_weight.status
             );
-            (child_index, value)
+            Some((child_index, value))
         })
         .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap());
     match best_neighbour {

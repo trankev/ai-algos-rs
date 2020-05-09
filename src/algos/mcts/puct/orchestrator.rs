@@ -45,8 +45,23 @@ impl<RuleSet: rulesets::Permutable + 'static> Orchestrator<RuleSet> {
         Ok(())
     }
 
-    pub fn iterate(&self, count: usize) -> Result<(), Box<dyn error::Error>> {
-        let request = requests::Request::Iterate { count };
+    pub fn iterate_sequentially(&self, count: usize) -> Result<(), Box<dyn error::Error>> {
+        let request = requests::Request::IterateSequentially { count };
+        self.master_request_sender.send(request)?;
+        Ok(())
+    }
+
+    pub fn iterate_parallel(
+        &self,
+        count: usize,
+        expansions_to_do: usize,
+        simulations_to_do: usize,
+    ) -> Result<(), Box<dyn error::Error>> {
+        let request = requests::Request::IterateParallel {
+            count,
+            expansions_to_do,
+            simulations_to_do,
+        };
         self.master_request_sender.send(request)?;
         Ok(())
     }

@@ -2,7 +2,14 @@ use crate::rulesets;
 
 pub enum Request<RuleSet: rulesets::RuleSetTrait> {
     SetState(RuleSet::State),
-    Iterate { count: usize },
+    IterateSequentially {
+        count: usize,
+    },
+    IterateParallel {
+        count: usize,
+        expansions_to_do: usize,
+        simulations_to_do: usize,
+    },
     ListConsiderations,
     Stop,
 }

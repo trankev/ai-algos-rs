@@ -18,6 +18,7 @@ pub struct Node<State: StateTrait> {
     pub state: State,
     pub status: Status,
     pub visits: f32,
+    pub expanding: bool,
 }
 
 impl<State: StateTrait> Node<State> {
@@ -38,6 +39,7 @@ impl<State: StateTrait> Node<State> {
             state,
             status,
             visits: 0.0,
+            expanding: false,
         }
     }
 
@@ -83,6 +85,7 @@ impl<State: StateTrait> Node<State> {
                 draw_rate: draws as f32 / visits as f32,
             },
             visits: visits as f32,
+            expanding: false,
         }
     }
 

@@ -28,7 +28,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Pool<RuleSet> {
     }
 
     pub fn spawn(&mut self, ruleset: RuleSet) -> Result<(), Box<dyn error::Error>> {
-        let worker_name = format!("mcts-expansion-{}", self.workers.len());
+        let worker_name = format!("mcts-expand-{}", self.workers.len());
         let receiver = self.request_receiver.clone();
         let sender = self.response_sender.clone();
         let handle = thread::Builder::new().name(worker_name).spawn(move || {
@@ -40,7 +40,9 @@ impl<RuleSet: rulesets::Permutable + 'static> Pool<RuleSet> {
     }
 
     pub fn stop(&mut self) -> Result<(), Box<dyn error::Error>> {
-        self.request_sender.send(requests::Request::Stop)?;
+        for _ in 0..self.workers.len() {
+            self.request_sender.send(requests::Request::Stop)?;
+        }
         while let Some(worker) = self.workers.pop() {
             worker.join().unwrap();
         }
