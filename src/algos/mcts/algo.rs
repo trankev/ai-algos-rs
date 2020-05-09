@@ -8,7 +8,6 @@ use super::simulation;
 use crate::algos;
 use crate::rulesets;
 use crate::rulesets::StateTrait;
-use log;
 use petgraph::graph;
 use rand;
 use rand::rngs;
@@ -18,6 +17,8 @@ pub struct MCTS<RuleSet: rulesets::Permutable> {
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     rng: rngs::ThreadRng,
     root: Option<graph::NodeIndex<u32>>,
+    pub expansion_count: usize,
+    pub simulation_count: usize,
 }
 
 impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
@@ -27,6 +28,8 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
             tree: graph::Graph::new(),
             rng: rand::thread_rng(),
             root: None,
+            expansion_count: 0,
+            simulation_count: 0,
         }
     }
 
@@ -37,33 +40,26 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
     }
 
     pub fn iterate(&mut self) {
-        log::debug!("###########################################");
-        log::debug!("Starting new iteration");
         let node = match self.root {
             Some(node) => node,
             None => {
-                log::debug!("No node selected, returning");
                 return;
             }
         };
-        log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        log::debug!("Selection phase");
         let mut selected = selection::select(&self.tree, node, false);
-        log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        log::debug!("Expansion phase");
-        let mut status = expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
+        let (mut status, expanded) =
+            expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
+        if expanded {
+            self.expansion_count += 1;
+        }
         if let rulesets::Status::Ongoing = status {
+            self.simulation_count += 1;
             let (to_simulate, state) =
                 simulation::fetch_random_child::<RuleSet>(&self.tree, selected, &mut self.rng);
-            log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            log::debug!("Simulation phase, node {:?}", selected);
             status = simulation::simulate::<RuleSet>(&self.ruleset, &state, &mut self.rng);
             selected = to_simulate;
         }
-        log::debug!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        log::debug!("Backpropagation phase");
         backpropagation::backpropagate(&mut self.tree, selected, true, Some(&status));
-        log::debug!("Ending iteration");
     }
 
     pub fn play_scores(&self) -> Option<Vec<algos::PlyConsideration<RuleSet::Ply>>> {

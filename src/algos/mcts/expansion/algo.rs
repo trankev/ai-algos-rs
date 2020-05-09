@@ -19,12 +19,12 @@ pub fn expand<RuleSet: rulesets::Permutable>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
-) -> rulesets::Status {
+) -> (rulesets::Status, bool) {
     log::debug!("Expanding node {:?}", node);
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
         ExpansionStatus::RequiresExpansion(state) => state,
-        ExpansionStatus::NotVisited => return rulesets::Status::Ongoing,
-        ExpansionStatus::Terminal(status) => return status,
+        ExpansionStatus::NotVisited => return (rulesets::Status::Ongoing, false),
+        ExpansionStatus::Terminal(status) => return (status, false),
         ExpansionStatus::PendingExpansion => unreachable!(),
     };
     let mut iterator = iterator::Expander::new(state);
@@ -32,7 +32,7 @@ pub fn expand<RuleSet: rulesets::Permutable>(
     while let Some(successor) = iterator.iterate(ruleset) {
         save_expansion(tree, node, successor);
     }
-    rulesets::Status::Ongoing
+    (rulesets::Status::Ongoing, true)
 }
 
 pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
