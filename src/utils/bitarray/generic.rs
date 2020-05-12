@@ -1,17 +1,24 @@
-use super::MaskComparison;
+use super::{BitArray, MaskComparison};
 use generic_array;
 use num;
 use num::traits::One;
 use num::traits::Zero;
+use std::fmt;
+use std::hash;
 use std::mem;
+use std::ops;
 use typenum::Unsigned;
 
-pub trait BitArraySettings {
+pub trait BitArraySettings: fmt::Debug + Ord + hash::Hash + Clone {
     const SIZE: usize;
-    type FirstBitType: num::PrimInt + Default;
+    type FirstBitType: num::PrimInt + Default + fmt::Debug + hash::Hash + Send;
     const INTEGER_SIZE: usize = 8 * mem::size_of::<Self::FirstBitType>();
-    type ArrayLength: generic_array::ArrayLength<Self::FirstBitType>;
-    type LastBitType: num::PrimInt + Default;
+    type ArrayLength: generic_array::ArrayLength<Self::FirstBitType>
+        + Ord
+        + fmt::Debug
+        + hash::Hash
+        + Send;
+    type LastBitType: num::PrimInt + Default + Send + fmt::Debug + hash::Hash + Send;
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -20,7 +27,7 @@ pub struct GenericBitArray<Settings: BitArraySettings> {
     last_bits: Settings::LastBitType,
 }
 
-impl<Settings: BitArraySettings> GenericBitArray<Settings> {
+impl<Settings: BitArraySettings> BitArray for GenericBitArray<Settings> {
     fn zero() -> GenericBitArray<Settings> {
         GenericBitArray {
             first_bits: generic_array::GenericArray::default(),
@@ -43,7 +50,6 @@ impl<Settings: BitArraySettings> GenericBitArray<Settings> {
         );
         let index = slot / Settings::INTEGER_SIZE;
         let offset = slot % Settings::INTEGER_SIZE;
-        println!("{} {}", index, offset);
         if index < Settings::ArrayLength::to_usize() {
             let mask = Settings::FirstBitType::one() << offset;
             self.first_bits[index] & mask == mask
@@ -60,7 +66,6 @@ impl<Settings: BitArraySettings> GenericBitArray<Settings> {
         );
         let index = slot / Settings::INTEGER_SIZE;
         let offset = slot % Settings::INTEGER_SIZE;
-        println!("{} {}", index, offset);
         if index < Settings::ArrayLength::to_usize() {
             let mask = Settings::FirstBitType::one() << offset;
             self.first_bits[index] = self.first_bits[index] | mask;
@@ -126,11 +131,179 @@ impl<Settings: BitArraySettings> GenericBitArray<Settings> {
     }
 }
 
+impl<Settings: BitArraySettings> ops::BitAnd<GenericBitArray<Settings>>
+    for GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitand(self, rhs: GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] & rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits & rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitAnd<&GenericBitArray<Settings>>
+    for GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitand(self, rhs: &GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] & rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits & rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitAnd<GenericBitArray<Settings>>
+    for &GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitand(self, rhs: GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] & rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits & rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitAnd<&GenericBitArray<Settings>>
+    for &GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitand(self, rhs: &GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] & rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits & rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitOr<GenericBitArray<Settings>>
+    for GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitor(self, rhs: GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] | rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits | rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitOr<&GenericBitArray<Settings>>
+    for GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitor(self, rhs: &GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] | rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits | rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitOr<GenericBitArray<Settings>>
+    for &GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitor(self, rhs: GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] | rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits | rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitOr<&GenericBitArray<Settings>>
+    for &GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitor(self, rhs: &GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] | rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits | rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitXor<GenericBitArray<Settings>>
+    for GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitxor(self, rhs: GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] ^ rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits ^ rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitXor<&GenericBitArray<Settings>>
+    for GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitxor(self, rhs: &GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] ^ rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits ^ rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitXor<GenericBitArray<Settings>>
+    for &GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitxor(self, rhs: GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] ^ rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits ^ rhs.last_bits;
+        result
+    }
+}
+
+impl<Settings: BitArraySettings> ops::BitXor<&GenericBitArray<Settings>>
+    for &GenericBitArray<Settings>
+{
+    type Output = GenericBitArray<Settings>;
+    fn bitxor(self, rhs: &GenericBitArray<Settings>) -> Self::Output {
+        let mut result = GenericBitArray::zero();
+        for index in 0..Settings::ArrayLength::to_usize() {
+            result.first_bits[index] = self.first_bits[index] ^ rhs.first_bits[index];
+        }
+        result.last_bits = self.last_bits ^ rhs.last_bits;
+        result
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone, Hash, Eq, Ord, PartialEq, PartialOrd)]
     struct BitArray225Settings {}
     impl BitArraySettings for BitArray225Settings {
         const SIZE: usize = 225;

@@ -36,7 +36,7 @@ where
 {
     pub fn new() -> State<ArrayType> {
         State {
-            grids: [ArrayType::zero(); 2],
+            grids: [ArrayType::zero(), ArrayType::zero()],
             current_player: 0,
         }
     }
@@ -56,7 +56,7 @@ where
     }
 
     pub fn is_empty(&self, index: usize) -> bool {
-        self.grids.iter().all(|&grid| !grid.isset(index))
+        self.grids.iter().all(|grid| !grid.isset(index))
     }
 
     pub fn play(&mut self, ply: &plies::Ply) -> Result<(), rulesets::PlayError> {
