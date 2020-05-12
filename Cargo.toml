@@ -14,6 +14,9 @@ auto_ops = "*"
 petgraph = "*"
 crossbeam = "*"
 log = "*"
+typenum = "*"
+generic-array = "*"
+num = "*"
 
 [dev-dependencies]
 more-asserts = "*"
