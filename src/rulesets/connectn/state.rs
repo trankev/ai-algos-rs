@@ -1,19 +1,20 @@
 use super::plies;
+use super::variants;
 use crate::rulesets;
 use crate::utils::bitarray;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct State<ArraySettings: bitarray::BitArraySettings> {
-    pub grids: [bitarray::BitArray<ArraySettings>; 2],
+pub struct State<Variant: variants::BaseVariant> {
+    pub grids: [bitarray::BitArray<Variant::ArraySettings>; 2],
     pub current_player: u8,
 }
 
-impl<ArraySettings: bitarray::BitArraySettings> State<ArraySettings> {
-    pub fn new() -> State<ArraySettings> {
+impl<Variant: variants::BaseVariant> State<Variant> {
+    pub fn new() -> State<Variant> {
         State {
             grids: [
-                bitarray::BitArray::<ArraySettings>::zero(),
-                bitarray::BitArray::<ArraySettings>::zero(),
+                bitarray::BitArray::<Variant::ArraySettings>::zero(),
+                bitarray::BitArray::<Variant::ArraySettings>::zero(),
             ],
             current_player: 0,
         }
@@ -23,11 +24,11 @@ impl<ArraySettings: bitarray::BitArraySettings> State<ArraySettings> {
         player1_indices: &[usize],
         player2_indices: &[usize],
         current_player: u8,
-    ) -> State<ArraySettings> {
+    ) -> State<Variant> {
         State {
             grids: [
-                bitarray::BitArray::<ArraySettings>::from_indices(player1_indices),
-                bitarray::BitArray::<ArraySettings>::from_indices(player2_indices),
+                bitarray::BitArray::<Variant::ArraySettings>::from_indices(player1_indices),
+                bitarray::BitArray::<Variant::ArraySettings>::from_indices(player2_indices),
             ],
             current_player,
         }
@@ -68,14 +69,14 @@ impl<ArraySettings: bitarray::BitArraySettings> State<ArraySettings> {
     }
 }
 
-impl<ArraySettings: bitarray::BitArraySettings> rulesets::StateTrait for State<ArraySettings> {
+impl<Variant: variants::BaseVariant> rulesets::StateTrait for State<Variant> {
     fn current_player(&self) -> rulesets::Player {
         self.current_player
     }
 
     fn ascii_representation(&self) -> String {
         let mut result = String::new();
-        for index in 0..225 {
+        for index in 0..Variant::GRID_SIZE {
             if self.grids[0].isset(index) {
                 result.push('X');
             } else if self.grids[1].isset(index) {
@@ -83,7 +84,7 @@ impl<ArraySettings: bitarray::BitArraySettings> rulesets::StateTrait for State<A
             } else {
                 result.push('.');
             }
-            if index % 15 == 14 {
+            if index % Variant::GRID_SIZE == Variant::GRID_SIZE {
                 result.push('\n');
             }
         }
@@ -91,8 +92,8 @@ impl<ArraySettings: bitarray::BitArraySettings> rulesets::StateTrait for State<A
     }
 }
 
-pub type TicTacToeState = State<bitarray::BitArray9Settings>;
-pub type GomokuState = State<bitarray::BitArray225Settings>;
+pub type TicTacToeState = State<variants::TicTacToe>;
+pub type GomokuState = State<variants::Gomoku>;
 
 #[cfg(test)]
 mod tests {

@@ -1,21 +1,16 @@
 use super::variants;
 use crate::rulesets;
 use crate::rulesets::connectn;
-use crate::utils::bitarray;
 
 pub struct PermutationIterator {
     permutation_count: usize,
     switched_player: bool,
 }
 
-impl<ArraySettings, Variant>
-    rulesets::PermutationIteratorTrait<connectn::RuleSet<ArraySettings, Variant>>
+impl<Variant: variants::BaseVariant> rulesets::PermutationIteratorTrait<connectn::RuleSet<Variant>>
     for PermutationIterator
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
 {
-    fn new(ruleset: &connectn::RuleSet<ArraySettings, Variant>) -> Self {
+    fn new(ruleset: &connectn::RuleSet<Variant>) -> Self {
         PermutationIterator {
             permutation_count: ruleset.grid_symmetry_count(),
             switched_player: true,

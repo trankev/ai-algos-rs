@@ -1,43 +1,28 @@
 use crate::rulesets;
 use crate::rulesets::connectn;
 use crate::rulesets::connectn::variants;
-use crate::utils::bitarray;
-use std::marker;
 
-pub struct PlyIterator<ArraySettings, Variant>
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
-{
-    state: connectn::State<ArraySettings>,
+pub struct PlyIterator<Variant: variants::BaseVariant> {
+    state: connectn::State<Variant>,
     current_index: usize,
-    variant: marker::PhantomData<Variant>,
 }
 
-impl<ArraySettings, Variant> rulesets::PlyIteratorTrait<connectn::RuleSet<ArraySettings, Variant>>
-    for PlyIterator<ArraySettings, Variant>
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
+impl<Variant: variants::BaseVariant> rulesets::PlyIteratorTrait<connectn::RuleSet<Variant>>
+    for PlyIterator<Variant>
 {
-    fn new(state: connectn::State<ArraySettings>) -> PlyIterator<ArraySettings, Variant> {
-        PlyIterator::<ArraySettings, Variant> {
+    fn new(state: connectn::State<Variant>) -> PlyIterator<Variant> {
+        PlyIterator::<Variant> {
             state,
             current_index: 0,
-            variant: marker::PhantomData,
         }
     }
 
-    fn current_state(&self) -> &connectn::State<ArraySettings> {
+    fn current_state(&self) -> &connectn::State<Variant> {
         &self.state
     }
 }
 
-impl<ArraySettings, Variant> Iterator for PlyIterator<ArraySettings, Variant>
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
-{
+impl<Variant: variants::BaseVariant> Iterator for PlyIterator<Variant> {
     type Item = connectn::Ply;
 
     fn next(&mut self) -> Option<Self::Item> {

@@ -8,35 +8,21 @@ use crate::rulesets;
 use crate::utils::bitarray;
 use crate::utils::grids::strips;
 use crate::utils::grids::symmetries;
-use std::marker;
 
 #[derive(Clone)]
-pub struct RuleSet<ArraySettings, Variant>
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
-{
-    variant: marker::PhantomData<Variant>,
+pub struct RuleSet<Variant: variants::BaseVariant> {
     symmetries: symmetries::SymmetryTable,
-    strips: Vec<bitarray::BitArray<ArraySettings>>,
+    strips: Vec<bitarray::BitArray<Variant::ArraySettings>>,
 }
 
-impl<ArraySettings, Variant> RuleSet<ArraySettings, Variant>
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
-{
-    pub fn new() -> RuleSet<ArraySettings, Variant> {
+impl<Variant: variants::BaseVariant> RuleSet<Variant> {
+    pub fn new() -> RuleSet<Variant> {
         let dimensions = vec![Variant::GRID_SIZE, Variant::GRID_SIZE];
         let symmetries = symmetries::SymmetryTable::new(&dimensions);
         let strips = strips::CellRuns::new(dimensions, Variant::RUN_COUNT)
-            .map(|indices| bitarray::BitArray::<ArraySettings>::from_indices(&indices))
+            .map(|indices| bitarray::BitArray::<Variant::ArraySettings>::from_indices(&indices))
             .collect::<Vec<_>>();
-        RuleSet {
-            strips,
-            symmetries,
-            variant: marker::PhantomData,
-        }
+        RuleSet { strips, symmetries }
     }
 
     pub fn grid_symmetry_count(&self) -> usize {
@@ -44,14 +30,10 @@ where
     }
 }
 
-impl<ArraySettings, Variant> rulesets::RuleSetTrait for RuleSet<ArraySettings, Variant>
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
-{
-    type State = state::State<ArraySettings>;
+impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for RuleSet<Variant> {
+    type State = state::State<Variant>;
     type Ply = plies::Ply;
-    type PlyIterator = ply_iterators::PlyIterator<ArraySettings, Variant>;
+    type PlyIterator = ply_iterators::PlyIterator<Variant>;
 
     fn initial_state(&self) -> Self::State {
         state::State::new()
@@ -92,11 +74,7 @@ where
     }
 }
 
-impl<ArraySettings, Variant> rulesets::Permutable for RuleSet<ArraySettings, Variant>
-where
-    ArraySettings: bitarray::BitArraySettings,
-    Variant: variants::BaseVariant,
-{
+impl<Variant: variants::BaseVariant> rulesets::Permutable for RuleSet<Variant> {
     type Permutation = permutation::Permutation;
     type PermutationIterator = permutation_iterators::PermutationIterator;
 
@@ -114,8 +92,8 @@ where
     }
 }
 
-pub type TicTacToe = RuleSet<bitarray::BitArray9Settings, variants::TicTacToe>;
-pub type Gomoku = RuleSet<bitarray::BitArray225Settings, variants::Gomoku>;
+pub type TicTacToe = RuleSet<variants::TicTacToe>;
+pub type Gomoku = RuleSet<variants::Gomoku>;
 
 #[cfg(test)]
 mod tests {
