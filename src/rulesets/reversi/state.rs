@@ -1,13 +1,23 @@
+use super::variants;
 use crate::rulesets;
 use crate::utils::bitarray;
 
 #[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
-pub struct State<ArraySettings: bitarray::BitArraySettings> {
-    grids: [bitarray::BitArray<ArraySettings>; 2],
+pub struct State<Variant: variants::BaseVariant> {
+    grids: [bitarray::BitArray<Variant::ArraySettings>; 2],
     current_player: rulesets::Player,
 }
 
-impl<ArraySettings: bitarray::BitArraySettings> rulesets::StateTrait for State<ArraySettings> {
+impl<Variant: variants::BaseVariant> State<Variant> {
+    pub fn new() -> State<Variant> {
+        State {
+            grids: [bitarray::BitArray::zero(), bitarray::BitArray::zero()],
+            current_player: 0,
+        }
+    }
+}
+
+impl<Variant: variants::BaseVariant> rulesets::StateTrait for State<Variant> {
     fn current_player(&self) -> rulesets::Player {
         self.current_player
     }
