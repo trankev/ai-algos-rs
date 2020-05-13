@@ -1,7 +1,6 @@
 use super::nodes;
 use super::uct_value;
 use crate::rulesets;
-use log;
 use petgraph::graph;
 
 pub fn select<State: rulesets::StateTrait, Edge>(
@@ -10,13 +9,7 @@ pub fn select<State: rulesets::StateTrait, Edge>(
     reverse: bool,
 ) -> graph::NodeIndex<u32> {
     let weight = tree.node_weight(node).unwrap();
-    log::debug!(
-        "Selection for node {:?}, state {:?}",
-        node,
-        weight.state.ascii_representation()
-    );
     if !weight.is_visited() {
-        log::debug!("No visits, returning self");
         return node;
     }
     let best_neighbour = tree
@@ -28,26 +21,12 @@ pub fn select<State: rulesets::StateTrait, Edge>(
             }
             let value =
                 uct_value::uct_value(weight.visits, child_weight.visits, child_weight.score());
-            log::debug!(
-                "Candidate: {:?}, value: {}, score: {}, state: {:?}, status: {:?}",
-                child_index,
-                value,
-                child_weight.score(),
-                child_weight.state.ascii_representation(),
-                child_weight.status
-            );
             Some((child_index, value))
         })
         .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap());
     match best_neighbour {
-        Some((child_index, _)) => {
-            log::debug!("Selected {:?}", child_index);
-            select(tree, child_index, !reverse)
-        }
-        None => {
-            log::debug!("No children, keeping self");
-            node
-        }
+        Some((child_index, _)) => select(tree, child_index, !reverse),
+        None => node,
     }
 }
 

@@ -1,7 +1,6 @@
 use super::items;
 use super::iterator;
 use crate::rulesets;
-use log;
 
 use super::super::edges;
 use super::super::nodes;
@@ -20,7 +19,6 @@ pub fn expand<RuleSet: rulesets::Permutable>(
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
 ) -> (rulesets::Status, bool) {
-    log::debug!("Expanding node {:?}", node);
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
         ExpansionStatus::RequiresExpansion(state) => state,
         ExpansionStatus::NotVisited => return (rulesets::Status::Ongoing, false),
