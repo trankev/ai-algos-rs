@@ -1,5 +1,6 @@
 pub mod connectn;
 mod interface;
+pub mod reversi;
 
 pub use interface::Permutable;
 pub use interface::PermutationIteratorTrait;

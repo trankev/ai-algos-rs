@@ -17,3 +17,12 @@ impl settings::BitArraySettings for BitArray9Settings {
     type ArrayLength = typenum::U0;
     type LastBitType = u16;
 }
+
+#[derive(Debug, Clone, Hash, Eq, Ord, PartialEq, PartialOrd)]
+pub struct BitArray64Settings {}
+impl settings::BitArraySettings for BitArray64Settings {
+    const SIZE: usize = 64;
+    type FirstBitType = u64;
+    type ArrayLength = typenum::U0;
+    type LastBitType = u64;
+}
