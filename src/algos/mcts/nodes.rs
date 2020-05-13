@@ -8,7 +8,7 @@ pub enum Status {
         player: rulesets::PlayerStatus,
     },
     Ongoing {
-        win_rate: f32,
+        score: f32,
         draw_rate: f32,
     },
 }
@@ -25,7 +25,7 @@ impl<State: StateTrait> Node<State> {
     pub fn new(state: State, status: rulesets::Status) -> Node<State> {
         let status = if let rulesets::Status::Ongoing = status {
             Status::Ongoing {
-                win_rate: 0.0,
+                score: 0.0,
                 draw_rate: 0.0,
             }
         } else {
@@ -63,17 +63,14 @@ impl<State: StateTrait> Node<State> {
     pub fn add_visit(&mut self) {
         self.visits += 1.0;
         if let Status::Ongoing {
-            mut win_rate,
+            mut score,
             mut draw_rate,
         } = self.status
         {
             let factor = (self.visits - 1.0) / self.visits;
-            win_rate *= factor;
+            score *= factor;
             draw_rate *= factor;
-            self.status = Status::Ongoing {
-                win_rate,
-                draw_rate,
-            };
+            self.status = Status::Ongoing { score, draw_rate };
         }
     }
 
@@ -81,7 +78,7 @@ impl<State: StateTrait> Node<State> {
         Node {
             state,
             status: Status::Ongoing {
-                win_rate: wins as f32 / visits as f32,
+                score: (visits as f32 - wins as f32 - 0.5 * draws as f32) / visits as f32,
                 draw_rate: draws as f32 / visits as f32,
             },
             visits: visits as f32,
@@ -92,19 +89,19 @@ impl<State: StateTrait> Node<State> {
     pub fn backpropagate(&mut self, status: &rulesets::Status) {
         self.status = match self.status {
             Status::Ongoing {
-                mut win_rate,
+                mut score,
                 mut draw_rate,
             } => {
                 match status.player_pov(&self.state.current_player()) {
-                    rulesets::PlayerStatus::Win => win_rate += 1.0 / self.visits,
-                    rulesets::PlayerStatus::Draw => draw_rate += 1.0 / self.visits,
-                    rulesets::PlayerStatus::Loss => return,
+                    rulesets::PlayerStatus::Loss => score += 1.0 / self.visits,
+                    rulesets::PlayerStatus::Draw => {
+                        score += 0.5 / self.visits;
+                        draw_rate += 1.0 / self.visits;
+                    }
+                    rulesets::PlayerStatus::Win => return,
                     rulesets::PlayerStatus::Ongoing => unreachable!(),
                 }
-                Status::Ongoing {
-                    win_rate,
-                    draw_rate,
-                }
+                Status::Ongoing { score, draw_rate }
             }
             Status::Terminal {
                 global: _,
@@ -122,22 +119,19 @@ impl<State: StateTrait> Node<State> {
                 rulesets::PlayerStatus::Ongoing => unreachable!(),
             },
             Status::Ongoing {
-                win_rate,
-                draw_rate,
-            } => 1.0 - win_rate - 0.5 * draw_rate,
+                score,
+                draw_rate: _,
+            } => *score,
         }
     }
 
     pub fn win_rate(&self) -> f32 {
         match &self.status {
             Status::Terminal { global: _, player } => match player {
-                rulesets::PlayerStatus::Win => 1.0,
+                rulesets::PlayerStatus::Loss => 1.0,
                 _ => 0.0,
             },
-            Status::Ongoing {
-                win_rate,
-                draw_rate: _,
-            } => *win_rate,
+            Status::Ongoing { score, draw_rate } => score - 0.5 * draw_rate,
         }
     }
 
@@ -148,7 +142,7 @@ impl<State: StateTrait> Node<State> {
                 _ => 0.0,
             },
             Status::Ongoing {
-                win_rate: _,
+                score: _,
                 draw_rate,
             } => *draw_rate,
         }
