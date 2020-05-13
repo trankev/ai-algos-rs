@@ -10,7 +10,6 @@ edition = "2018"
 tensorflow = {version = "*", features = ["experimental_training"]}
 rand = "*"
 itertools = "*"
-auto_ops = "*"
 petgraph = "*"
 crossbeam = "*"
 log = "*"

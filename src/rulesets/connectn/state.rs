@@ -1,42 +1,20 @@
 use super::plies;
 use crate::rulesets;
 use crate::utils::bitarray;
-use std::ops;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct State<ArrayType>
-where
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
-{
-    pub grids: [ArrayType; 2],
+pub struct State<ArraySettings: bitarray::BitArraySettings> {
+    pub grids: [bitarray::BitArray<ArraySettings>; 2],
     pub current_player: u8,
 }
 
-impl<ArrayType> State<ArrayType>
-where
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
-{
-    pub fn new() -> State<ArrayType> {
+impl<ArraySettings: bitarray::BitArraySettings> State<ArraySettings> {
+    pub fn new() -> State<ArraySettings> {
         State {
-            grids: [ArrayType::zero(), ArrayType::zero()],
+            grids: [
+                bitarray::BitArray::<ArraySettings>::zero(),
+                bitarray::BitArray::<ArraySettings>::zero(),
+            ],
             current_player: 0,
         }
     }
@@ -45,11 +23,11 @@ where
         player1_indices: &[usize],
         player2_indices: &[usize],
         current_player: u8,
-    ) -> State<ArrayType> {
+    ) -> State<ArraySettings> {
         State {
             grids: [
-                ArrayType::from_indices(player1_indices),
-                ArrayType::from_indices(player2_indices),
+                bitarray::BitArray::<ArraySettings>::from_indices(player1_indices),
+                bitarray::BitArray::<ArraySettings>::from_indices(player2_indices),
             ],
             current_player,
         }
@@ -90,19 +68,7 @@ where
     }
 }
 
-impl<ArrayType> rulesets::StateTrait for State<ArrayType>
-where
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
-{
+impl<ArraySettings: bitarray::BitArraySettings> rulesets::StateTrait for State<ArraySettings> {
     fn current_player(&self) -> rulesets::Player {
         self.current_player
     }
@@ -125,8 +91,8 @@ where
     }
 }
 
-pub type TicTacToeState = State<bitarray::BitArray9>;
-pub type GomokuState = State<bitarray::BitArray225>;
+pub type TicTacToeState = State<bitarray::BitArray9Settings>;
+pub type GomokuState = State<bitarray::BitArray225Settings>;
 
 #[cfg(test)]
 mod tests {

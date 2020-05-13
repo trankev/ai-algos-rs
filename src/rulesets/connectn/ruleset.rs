@@ -9,47 +9,28 @@ use crate::utils::bitarray;
 use crate::utils::grids::strips;
 use crate::utils::grids::symmetries;
 use std::marker;
-use std::ops;
 
 #[derive(Clone)]
-pub struct RuleSet<ArrayType, Variant>
+pub struct RuleSet<ArraySettings, Variant>
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
     variant: marker::PhantomData<Variant>,
     symmetries: symmetries::SymmetryTable,
-    strips: Vec<ArrayType>,
+    strips: Vec<bitarray::BitArray<ArraySettings>>,
 }
 
-impl<ArrayType, Variant> RuleSet<ArrayType, Variant>
+impl<ArraySettings, Variant> RuleSet<ArraySettings, Variant>
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    pub fn new() -> RuleSet<ArrayType, Variant> {
+    pub fn new() -> RuleSet<ArraySettings, Variant> {
         let dimensions = vec![Variant::GRID_SIZE, Variant::GRID_SIZE];
         let symmetries = symmetries::SymmetryTable::new(&dimensions);
         let strips = strips::CellRuns::new(dimensions, Variant::RUN_COUNT)
-            .map(|indices| ArrayType::from_indices(&indices))
+            .map(|indices| bitarray::BitArray::<ArraySettings>::from_indices(&indices))
             .collect::<Vec<_>>();
         RuleSet {
             strips,
@@ -63,23 +44,14 @@ where
     }
 }
 
-impl<ArrayType, Variant> rulesets::RuleSetTrait for RuleSet<ArrayType, Variant>
+impl<ArraySettings, Variant> rulesets::RuleSetTrait for RuleSet<ArraySettings, Variant>
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    type State = state::State<ArrayType>;
+    type State = state::State<ArraySettings>;
     type Ply = plies::Ply;
-    type PlyIterator = ply_iterators::PlyIterator<ArrayType, Variant>;
+    type PlyIterator = ply_iterators::PlyIterator<ArraySettings, Variant>;
 
     fn initial_state(&self) -> Self::State {
         state::State::new()
@@ -120,19 +92,10 @@ where
     }
 }
 
-impl<ArrayType, Variant> rulesets::Permutable for RuleSet<ArrayType, Variant>
+impl<ArraySettings, Variant> rulesets::Permutable for RuleSet<ArraySettings, Variant>
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
     type Permutation = permutation::Permutation;
     type PermutationIterator = permutation_iterators::PermutationIterator;
@@ -151,8 +114,8 @@ where
     }
 }
 
-pub type TicTacToe = RuleSet<bitarray::BitArray9, variants::TicTacToe>;
-pub type Gomoku = RuleSet<bitarray::BitArray225, variants::Gomoku>;
+pub type TicTacToe = RuleSet<bitarray::BitArray9Settings, variants::TicTacToe>;
+pub type Gomoku = RuleSet<bitarray::BitArray225Settings, variants::Gomoku>;
 
 #[cfg(test)]
 mod tests {

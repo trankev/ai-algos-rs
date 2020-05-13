@@ -2,29 +2,20 @@ use super::variants;
 use crate::rulesets;
 use crate::rulesets::connectn;
 use crate::utils::bitarray;
-use std::ops;
 
 pub struct PermutationIterator {
     permutation_count: usize,
     switched_player: bool,
 }
 
-impl<ArrayType, Variant> rulesets::PermutationIteratorTrait<connectn::RuleSet<ArrayType, Variant>>
+impl<ArraySettings, Variant>
+    rulesets::PermutationIteratorTrait<connectn::RuleSet<ArraySettings, Variant>>
     for PermutationIterator
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    fn new(ruleset: &connectn::RuleSet<ArrayType, Variant>) -> Self {
+    fn new(ruleset: &connectn::RuleSet<ArraySettings, Variant>) -> Self {
         PermutationIterator {
             permutation_count: ruleset.grid_symmetry_count(),
             switched_player: true,

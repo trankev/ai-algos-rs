@@ -3,68 +3,40 @@ use crate::rulesets::connectn;
 use crate::rulesets::connectn::variants;
 use crate::utils::bitarray;
 use std::marker;
-use std::ops;
 
-pub struct PlyIterator<ArrayType, Variant>
+pub struct PlyIterator<ArraySettings, Variant>
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    state: connectn::State<ArrayType>,
+    state: connectn::State<ArraySettings>,
     current_index: usize,
     variant: marker::PhantomData<Variant>,
 }
 
-impl<ArrayType, Variant> rulesets::PlyIteratorTrait<connectn::RuleSet<ArrayType, Variant>>
-    for PlyIterator<ArrayType, Variant>
+impl<ArraySettings, Variant> rulesets::PlyIteratorTrait<connectn::RuleSet<ArraySettings, Variant>>
+    for PlyIterator<ArraySettings, Variant>
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
-    fn new(state: connectn::State<ArrayType>) -> PlyIterator<ArrayType, Variant> {
-        PlyIterator::<ArrayType, Variant> {
+    fn new(state: connectn::State<ArraySettings>) -> PlyIterator<ArraySettings, Variant> {
+        PlyIterator::<ArraySettings, Variant> {
             state,
             current_index: 0,
             variant: marker::PhantomData,
         }
     }
 
-    fn current_state(&self) -> &connectn::State<ArrayType> {
+    fn current_state(&self) -> &connectn::State<ArraySettings> {
         &self.state
     }
 }
 
-impl<ArrayType, Variant> Iterator for PlyIterator<ArrayType, Variant>
+impl<ArraySettings, Variant> Iterator for PlyIterator<ArraySettings, Variant>
 where
+    ArraySettings: bitarray::BitArraySettings,
     Variant: variants::BaseVariant,
-    ArrayType: bitarray::BitArray,
-    for<'a> ArrayType: ops::BitAnd<&'a ArrayType, Output = ArrayType>
-        + ops::BitOr<&'a ArrayType, Output = ArrayType>
-        + ops::BitXor<&'a ArrayType, Output = ArrayType>,
-    for<'a> &'a ArrayType: ops::BitAnd<ArrayType, Output = ArrayType>
-        + ops::BitOr<ArrayType, Output = ArrayType>
-        + ops::BitXor<ArrayType, Output = ArrayType>,
-    for<'a, 'b> &'a ArrayType: ops::BitAnd<&'b ArrayType, Output = ArrayType>
-        + ops::BitOr<&'b ArrayType, Output = ArrayType>
-        + ops::BitXor<&'b ArrayType, Output = ArrayType>,
 {
     type Item = connectn::Ply;
 
