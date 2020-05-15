@@ -1,11 +1,11 @@
 use super::edges;
 use super::nodes;
 use crate::algos;
-use crate::rulesets;
+use crate::interface;
 
 use petgraph::graph;
 
-pub fn play_scores<RuleSet: rulesets::RuleSetTrait>(
+pub fn play_scores<RuleSet: interface::RuleSetTrait>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     parent: graph::NodeIndex<u32>,
 ) -> Vec<algos::PlyConsideration<RuleSet::Ply>> {
@@ -35,7 +35,7 @@ pub fn play_scores<RuleSet: rulesets::RuleSetTrait>(
     scores
 }
 
-fn best_play<RuleSet: rulesets::RuleSetTrait>(
+fn best_play<RuleSet: interface::RuleSetTrait>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     mut current_node: graph::NodeIndex<u32>,
 ) -> Vec<RuleSet::Ply> {

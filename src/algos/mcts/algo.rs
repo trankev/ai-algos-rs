@@ -6,13 +6,13 @@ use super::nodes;
 use super::selection;
 use super::simulation;
 use crate::algos;
-use crate::rulesets;
-use crate::rulesets::StateTrait;
+use crate::interface;
+use crate::interface::StateTrait;
 use petgraph::graph;
 use rand;
 use rand::rngs;
 
-pub struct MCTS<RuleSet: rulesets::Permutable> {
+pub struct MCTS<RuleSet: interface::Permutable> {
     ruleset: RuleSet,
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     rng: rngs::ThreadRng,
@@ -21,7 +21,7 @@ pub struct MCTS<RuleSet: rulesets::Permutable> {
     pub simulation_count: usize,
 }
 
-impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
+impl<RuleSet: interface::Permutable> MCTS<RuleSet> {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {
             ruleset,
@@ -52,7 +52,7 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
         if expanded {
             self.expansion_count += 1;
         }
-        if let rulesets::Status::Ongoing = status {
+        if let interface::Status::Ongoing = status {
             self.simulation_count += 1;
             let (to_simulate, state) =
                 simulation::fetch_random_child::<RuleSet>(&self.tree, selected, &mut self.rng);
@@ -97,8 +97,8 @@ impl<RuleSet: rulesets::Permutable> MCTS<RuleSet> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::interface::RuleSetTrait;
     use crate::rulesets::connectn;
-    use crate::rulesets::RuleSetTrait;
 
     #[test]
     fn test_simulate() {

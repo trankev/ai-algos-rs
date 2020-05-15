@@ -1,15 +1,15 @@
 use super::items;
-use crate::rulesets;
-use crate::rulesets::PermutationIteratorTrait;
-use crate::rulesets::PlyIteratorTrait;
+use crate::interface;
+use crate::interface::PermutationIteratorTrait;
+use crate::interface::PlyIteratorTrait;
 use std::collections;
 
-pub struct Expander<RuleSet: rulesets::Permutable> {
+pub struct Expander<RuleSet: interface::Permutable> {
     ply_iterator: RuleSet::PlyIterator,
     seen: collections::HashSet<RuleSet::State>,
 }
 
-impl<RuleSet: rulesets::Permutable> Expander<RuleSet> {
+impl<RuleSet: interface::Permutable> Expander<RuleSet> {
     pub fn new(ruleset: &RuleSet, current_state: RuleSet::State) -> Expander<RuleSet> {
         let ply_iterator = RuleSet::PlyIterator::new(ruleset, current_state);
         Expander {

@@ -1,18 +1,18 @@
 use super::iterator;
 use super::requests;
 use super::responses;
-use crate::rulesets;
+use crate::interface;
 use crossbeam::channel;
 use std::error;
 
-pub struct Worker<RuleSet: rulesets::Permutable + 'static> {
+pub struct Worker<RuleSet: interface::Permutable + 'static> {
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response<RuleSet>>,
     pub operation_count: usize,
 }
 
-impl<RuleSet: rulesets::Permutable + 'static> Worker<RuleSet> {
+impl<RuleSet: interface::Permutable + 'static> Worker<RuleSet> {
     pub fn new(
         ruleset: RuleSet,
         receiver: channel::Receiver<requests::Request<RuleSet>>,

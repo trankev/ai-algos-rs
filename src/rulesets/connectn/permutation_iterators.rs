@@ -1,5 +1,5 @@
 use super::variants;
-use crate::rulesets;
+use crate::interface;
 use crate::rulesets::connectn;
 
 pub struct PermutationIterator {
@@ -7,7 +7,7 @@ pub struct PermutationIterator {
     switched_player: bool,
 }
 
-impl<Variant: variants::BaseVariant> rulesets::PermutationIteratorTrait<connectn::RuleSet<Variant>>
+impl<Variant: variants::BaseVariant> interface::PermutationIteratorTrait<connectn::RuleSet<Variant>>
     for PermutationIterator
 {
     fn new(ruleset: &connectn::RuleSet<Variant>) -> Self {
@@ -44,8 +44,8 @@ impl Iterator for PermutationIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::interface::PermutationIteratorTrait;
     use crate::rulesets::connectn;
-    use crate::rulesets::PermutationIteratorTrait;
     use std::collections;
     use std::iter;
 

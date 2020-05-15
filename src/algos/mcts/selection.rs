@@ -1,9 +1,9 @@
 use super::nodes;
 use super::uct_value;
-use crate::rulesets;
+use crate::interface;
 use petgraph::graph;
 
-pub fn select<State: rulesets::StateTrait, Edge>(
+pub fn select<State: interface::StateTrait, Edge>(
     tree: &graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     reverse: bool,
@@ -33,7 +33,7 @@ pub fn select<State: rulesets::StateTrait, Edge>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rulesets::tests;
+    use crate::tests;
 
     type EmptyStateGraph = graph::Graph<nodes::Node<tests::EmptyState>, ()>;
 
@@ -42,7 +42,7 @@ mod tests {
         let mut tree = EmptyStateGraph::new();
         let root = tree.add_node(nodes::Node::new(
             tests::EmptyState::new(),
-            rulesets::Status::Ongoing,
+            interface::Status::Ongoing,
         ));
         let result = select(&tree, root, false);
         assert_eq!(result, root);
@@ -61,7 +61,7 @@ mod tests {
 
         let second_index = tree.add_node(nodes::Node::new(
             tests::EmptyState::new(),
-            rulesets::Status::Ongoing,
+            interface::Status::Ongoing,
         ));
         tree.add_edge(root_index, second_index, ());
 

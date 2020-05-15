@@ -1,6 +1,6 @@
 use super::plies;
 use super::variants;
-use crate::rulesets;
+use crate::interface;
 use crate::utils::bitarray;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -38,10 +38,10 @@ impl<Variant: variants::BaseVariant> State<Variant> {
         self.grids.iter().all(|grid| !grid.isset(index))
     }
 
-    pub fn play(&mut self, ply: &plies::Ply) -> Result<(), rulesets::PlayError> {
+    pub fn play(&mut self, ply: &plies::Ply) -> Result<(), interface::PlayError> {
         for grid in &self.grids {
             if grid.isset(ply.index as usize) {
-                return Err(rulesets::PlayError {
+                return Err(interface::PlayError {
                     message: "Cell is occupied",
                     field: "index",
                 });
@@ -69,8 +69,8 @@ impl<Variant: variants::BaseVariant> State<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> rulesets::StateTrait for State<Variant> {
-    fn current_player(&self) -> rulesets::Player {
+impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
+    fn current_player(&self) -> interface::Player {
         self.current_player
     }
 

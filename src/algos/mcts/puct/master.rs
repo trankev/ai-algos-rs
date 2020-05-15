@@ -8,7 +8,7 @@ use super::super::simulation;
 use super::requests;
 use super::responses;
 use crate::algos;
-use crate::rulesets;
+use crate::interface;
 use crossbeam::channel;
 use petgraph::graph;
 use rand;
@@ -21,7 +21,7 @@ enum SelectionResult {
     Nothing,
 }
 
-pub struct Master<RuleSet: rulesets::Permutable + 'static> {
+pub struct Master<RuleSet: interface::Permutable + 'static> {
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     root: Option<graph::NodeIndex<u32>>,
     ruleset: RuleSet,
@@ -36,7 +36,7 @@ pub struct Master<RuleSet: rulesets::Permutable + 'static> {
     simulation_response_receiver: channel::Receiver<simulation::Response>,
 }
 
-impl<RuleSet: rulesets::Permutable + 'static> Master<RuleSet> {
+impl<RuleSet: interface::Permutable + 'static> Master<RuleSet> {
     pub fn new(
         ruleset: RuleSet,
         master_request_receiver: channel::Receiver<requests::Request<RuleSet>>,

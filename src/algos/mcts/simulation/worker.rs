@@ -1,13 +1,13 @@
 use super::algo;
 use super::requests;
 use super::responses;
-use crate::rulesets;
+use crate::interface;
 use crossbeam::channel;
 use rand;
 use rand::rngs;
 use std::error;
 
-pub struct Worker<RuleSet: rulesets::RuleSetTrait> {
+pub struct Worker<RuleSet: interface::RuleSetTrait> {
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response>,
@@ -15,7 +15,7 @@ pub struct Worker<RuleSet: rulesets::RuleSetTrait> {
     pub operation_count: usize,
 }
 
-impl<RuleSet: rulesets::RuleSetTrait> Worker<RuleSet> {
+impl<RuleSet: interface::RuleSetTrait> Worker<RuleSet> {
     pub fn new(
         ruleset: RuleSet,
         receiver: channel::Receiver<requests::Request<RuleSet>>,

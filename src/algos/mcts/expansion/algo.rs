@@ -1,6 +1,6 @@
 use super::items;
 use super::iterator;
-use crate::rulesets;
+use crate::interface;
 
 use super::super::edges;
 use super::super::nodes;
@@ -10,18 +10,18 @@ use petgraph::graph;
 pub enum ExpansionStatus<State> {
     RequiresExpansion(State),
     NotVisited,
-    Terminal(rulesets::Status),
+    Terminal(interface::Status),
     PendingExpansion,
 }
 
-pub fn expand<RuleSet: rulesets::Permutable>(
+pub fn expand<RuleSet: interface::Permutable>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
-) -> (rulesets::Status, bool) {
+) -> (interface::Status, bool) {
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
         ExpansionStatus::RequiresExpansion(state) => state,
-        ExpansionStatus::NotVisited => return (rulesets::Status::Ongoing, false),
+        ExpansionStatus::NotVisited => return (interface::Status::Ongoing, false),
         ExpansionStatus::Terminal(status) => return (status, false),
         ExpansionStatus::PendingExpansion => unreachable!(),
     };
@@ -30,10 +30,10 @@ pub fn expand<RuleSet: rulesets::Permutable>(
     while let Some(successor) = iterator.iterate(ruleset) {
         save_expansion(tree, node, successor);
     }
-    (rulesets::Status::Ongoing, true)
+    (interface::Status::Ongoing, true)
 }
 
-pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
+pub fn ponder_expansion<RuleSet: interface::RuleSetTrait>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     check_for_visits: bool,
@@ -44,7 +44,7 @@ pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
     }
     let status = weight.game_status();
     match status {
-        rulesets::Status::Ongoing => (),
+        interface::Status::Ongoing => (),
         _ => return ExpansionStatus::Terminal(status),
     }
     if check_for_visits && !weight.is_visited() {
@@ -54,7 +54,7 @@ pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
     ExpansionStatus::RequiresExpansion(weight.state.clone())
 }
 
-pub fn save_expansion<RuleSet: rulesets::RuleSetTrait>(
+pub fn save_expansion<RuleSet: interface::RuleSetTrait>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     successor: items::Play<RuleSet>,

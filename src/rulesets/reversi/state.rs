@@ -1,11 +1,11 @@
 use super::variants;
-use crate::rulesets;
+use crate::interface;
 use crate::utils::bitarray;
 
 #[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
 pub struct State<Variant: variants::BaseVariant> {
     pub grids: [bitarray::BitArray<Variant::ArraySettings>; 2],
-    pub current_player: rulesets::Player,
+    pub current_player: interface::Player,
 }
 
 impl<Variant: variants::BaseVariant> State<Variant> {
@@ -34,8 +34,8 @@ impl<Variant: variants::BaseVariant> State<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> rulesets::StateTrait for State<Variant> {
-    fn current_player(&self) -> rulesets::Player {
+impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
+    fn current_player(&self) -> interface::Player {
         self.current_player
     }
 

@@ -1,13 +1,13 @@
 use super::state;
-use crate::rulesets;
-use crate::rulesets::PlyIteratorTrait;
+use crate::interface;
+use crate::interface::PlyIteratorTrait;
 use std::f32;
 
-pub struct Negamax<RuleSet: rulesets::RuleSetTrait> {
+pub struct Negamax<RuleSet: interface::RuleSetTrait> {
     ruleset: RuleSet,
 }
 
-impl<RuleSet: rulesets::RuleSetTrait> Negamax<RuleSet> {
+impl<RuleSet: interface::RuleSetTrait> Negamax<RuleSet> {
     pub fn compute(&self, state: &RuleSet::State, player: u8) -> state::State<RuleSet::Ply> {
         self.iterate(state, player, f32::NEG_INFINITY, f32::INFINITY)
     }
@@ -20,15 +20,15 @@ impl<RuleSet: rulesets::RuleSetTrait> Negamax<RuleSet> {
         beta: f32,
     ) -> state::State<RuleSet::Ply> {
         match self.ruleset.status(&state) {
-            rulesets::Status::Win { player: winner } => {
+            interface::Status::Win { player: winner } => {
                 if winner == player {
                     state::State::Win
                 } else {
                     state::State::Loss
                 }
             }
-            rulesets::Status::Draw => state::State::Draw,
-            rulesets::Status::Ongoing => {
+            interface::Status::Draw => state::State::Draw,
+            interface::Status::Ongoing => {
                 let available_plies = RuleSet::PlyIterator::new(&self.ruleset, state.clone());
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {

@@ -4,7 +4,7 @@ use super::plies;
 use super::ply_iterators;
 use super::state;
 use super::variants;
-use crate::rulesets;
+use crate::interface;
 use crate::utils::bitarray;
 use crate::utils::grids::strips;
 use crate::utils::grids::symmetries;
@@ -30,7 +30,7 @@ impl<Variant: variants::BaseVariant> RuleSet<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for RuleSet<Variant> {
+impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant> {
     type State = state::State<Variant>;
     type Ply = plies::Ply;
     type PlyIterator = ply_iterators::PlyIterator<Variant>;
@@ -43,7 +43,7 @@ impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for RuleSet<Variant>
         &self,
         state: &Self::State,
         ply: &Self::Ply,
-    ) -> Result<Self::State, rulesets::PlayError> {
+    ) -> Result<Self::State, interface::PlayError> {
         let mut result = (*state).clone();
         if let Err(error) = result.play(ply) {
             return Err(error);
@@ -51,13 +51,13 @@ impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for RuleSet<Variant>
         Ok(result)
     }
 
-    fn status(&self, state: &Self::State) -> rulesets::Status {
+    fn status(&self, state: &Self::State) -> interface::Status {
         let mut ongoing = false;
         for strip in &self.strips {
             for player in 0..2 {
                 match state.grids[player].compare_with_mask(strip) {
                     bitarray::MaskComparison::Equal => {
-                        return rulesets::Status::Win {
+                        return interface::Status::Win {
                             player: player as u8,
                         }
                     }
@@ -67,14 +67,14 @@ impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for RuleSet<Variant>
             }
         }
         if ongoing {
-            rulesets::Status::Ongoing
+            interface::Status::Ongoing
         } else {
-            rulesets::Status::Draw
+            interface::Status::Draw
         }
     }
 }
 
-impl<Variant: variants::BaseVariant> rulesets::Permutable for RuleSet<Variant> {
+impl<Variant: variants::BaseVariant> interface::Permutable for RuleSet<Variant> {
     type Permutation = permutation::Permutation;
     type PermutationIterator = permutation_iterators::PermutationIterator;
 
@@ -99,9 +99,9 @@ pub type Gomoku = RuleSet<variants::Gomoku>;
 mod tests {
     use super::super::plies;
     use super::*;
-    use crate::rulesets::Permutable;
-    use crate::rulesets::PermutationIteratorTrait;
-    use crate::rulesets::RuleSetTrait;
+    use crate::interface::Permutable;
+    use crate::interface::PermutationIteratorTrait;
+    use crate::interface::RuleSetTrait;
     use std::collections;
 
     #[test]
@@ -130,18 +130,18 @@ mod tests {
     }
 
     status_tests! {
-        new_game: ([], [], 0, rulesets::Status::Ongoing),
-        ongoing: ([4, 1, 6, 5], [8, 7, 2], 1, rulesets::Status::Ongoing),
-        p1_win: ([4, 1, 0, 2], [5, 7, 8], 1, rulesets::Status::Win{player: 0}),
-        p2_win: ([1, 2, 5], [4, 0, 8], 0, rulesets::Status::Win{player: 1}),
-        draw: ([4, 1, 6, 5], [8, 7, 2, 3], 0, rulesets::Status::Draw),
+        new_game: ([], [], 0, interface::Status::Ongoing),
+        ongoing: ([4, 1, 6, 5], [8, 7, 2], 1, interface::Status::Ongoing),
+        p1_win: ([4, 1, 0, 2], [5, 7, 8], 1, interface::Status::Win{player: 0}),
+        p2_win: ([1, 2, 5], [4, 0, 8], 0, interface::Status::Win{player: 1}),
+        draw: ([4, 1, 6, 5], [8, 7, 2, 3], 0, interface::Status::Draw),
     }
 
     #[test]
     fn test_swap_state() {
         let game = TicTacToe::new();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
-        let permutations = <TicTacToe as rulesets::Permutable>::PermutationIterator::new(&game);
+        let permutations = <TicTacToe as interface::Permutable>::PermutationIterator::new(&game);
         let mut permutation_set = collections::HashSet::new();
         for permutation in permutations {
             let permuted = game.swap_state(&state, &permutation);

@@ -2,7 +2,7 @@ use super::plies;
 use super::ruleset;
 use super::state;
 use super::variants;
-use crate::rulesets;
+use crate::interface;
 use crate::utils::grids::strips;
 use std::collections;
 use std::sync;
@@ -10,7 +10,7 @@ use std::sync;
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum CellState {
     Empty { index: usize },
-    Player(rulesets::Player),
+    Player(interface::Player),
 }
 
 pub struct PlyIterator<Variant: variants::BaseVariant> {
@@ -23,7 +23,7 @@ pub struct PlyIterator<Variant: variants::BaseVariant> {
 }
 
 impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
-    fn iterate_strip(&mut self) -> Option<(rulesets::Player, usize)> {
+    fn iterate_strip(&mut self) -> Option<(interface::Player, usize)> {
         for index in self.current_strip.by_ref() {
             let mut cell_state = CellState::Empty { index };
             for player in 0..2 {
@@ -53,7 +53,7 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
         None
     }
 
-    fn iterate_grid(&mut self) -> Option<(rulesets::Player, usize)> {
+    fn iterate_grid(&mut self) -> Option<(interface::Player, usize)> {
         while let Some((player, index)) = self.iterate_strip() {
             return Some((player, index));
         }
@@ -75,7 +75,7 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> rulesets::PlyIteratorTrait<ruleset::Reversi<Variant>>
+impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<ruleset::Reversi<Variant>>
     for PlyIterator<Variant>
 {
     fn new(ruleset: &ruleset::Reversi<Variant>, state: state::State<Variant>) -> Self {
@@ -115,9 +115,9 @@ mod tests {
     use super::super::plies;
     use super::super::ruleset;
     use super::*;
-    use crate::rulesets::PlyIteratorTrait;
-    use crate::rulesets::RuleSetTrait;
-    use crate::rulesets::StateTrait;
+    use crate::interface::PlyIteratorTrait;
+    use crate::interface::RuleSetTrait;
+    use crate::interface::StateTrait;
     use std::collections;
 
     #[test]

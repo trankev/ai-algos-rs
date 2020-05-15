@@ -4,13 +4,13 @@ use super::master;
 use super::requests;
 use super::responses;
 use crate::algos;
-use crate::rulesets;
+use crate::interface;
 use crossbeam::channel;
 use std::error;
 use std::mem;
 use std::thread;
 
-pub struct Orchestrator<RuleSet: rulesets::Permutable + 'static> {
+pub struct Orchestrator<RuleSet: interface::Permutable + 'static> {
     ruleset: RuleSet,
     master_handle: Option<thread::JoinHandle<()>>,
     master_request_sender: channel::Sender<requests::Request<RuleSet>>,
@@ -21,7 +21,7 @@ pub struct Orchestrator<RuleSet: rulesets::Permutable + 'static> {
     simulation_pool: simulation::Pool<RuleSet>,
 }
 
-impl<RuleSet: rulesets::Permutable + 'static> Orchestrator<RuleSet> {
+impl<RuleSet: interface::Permutable + 'static> Orchestrator<RuleSet> {
     pub fn new(ruleset: RuleSet) -> Orchestrator<RuleSet> {
         let expansion_pool = expansion::Pool::new();
         let simulation_pool = simulation::Pool::new();
