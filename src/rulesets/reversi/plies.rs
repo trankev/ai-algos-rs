@@ -1,6 +1,6 @@
 use crate::rulesets;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Ply {
     Place(usize),
     Pass,

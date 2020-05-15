@@ -4,8 +4,8 @@ use crate::utils::bitarray;
 
 #[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
 pub struct State<Variant: variants::BaseVariant> {
-    grids: [bitarray::BitArray<Variant::ArraySettings>; 2],
-    current_player: rulesets::Player,
+    pub grids: [bitarray::BitArray<Variant::ArraySettings>; 2],
+    pub current_player: rulesets::Player,
 }
 
 impl<Variant: variants::BaseVariant> State<Variant> {
@@ -16,6 +16,20 @@ impl<Variant: variants::BaseVariant> State<Variant> {
                 bitarray::BitArray::from_indices(Variant::PLAYER_POSITIONS[1]),
             ],
             current_player: 0,
+        }
+    }
+
+    pub fn from_indices(
+        player1_indices: &[usize],
+        player2_indices: &[usize],
+        current_player: u8,
+    ) -> State<Variant> {
+        State {
+            grids: [
+                bitarray::BitArray::<Variant::ArraySettings>::from_indices(player1_indices),
+                bitarray::BitArray::<Variant::ArraySettings>::from_indices(player2_indices),
+            ],
+            current_player,
         }
     }
 }
