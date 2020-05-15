@@ -16,7 +16,7 @@ pub fn simulate<RuleSet: rulesets::RuleSetTrait>(
     loop {
         let status = ruleset.status(current_state);
         if let rulesets::Status::Ongoing = status {
-            let available_plies = RuleSet::PlyIterator::new(current_state.clone());
+            let available_plies = RuleSet::PlyIterator::new(ruleset, current_state.clone());
             let ply = available_plies.choose(rng).unwrap();
             state = ruleset.play(&current_state, &ply).unwrap();
             current_state = &state;

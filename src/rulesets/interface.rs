@@ -64,7 +64,7 @@ pub trait Permutable: RuleSetTrait {
 }
 
 pub trait PlyIteratorTrait<RuleSet: RuleSetTrait>: Iterator<Item = RuleSet::Ply> {
-    fn new(state: RuleSet::State) -> Self;
+    fn new(ruleset: &RuleSet, state: RuleSet::State) -> Self;
     fn current_state(&self) -> &RuleSet::State;
 
     fn next_state(&mut self, ruleset: &RuleSet) -> Option<(RuleSet::Ply, RuleSet::State)> {

@@ -25,7 +25,7 @@ pub fn expand<RuleSet: rulesets::Permutable>(
         ExpansionStatus::Terminal(status) => return (status, false),
         ExpansionStatus::PendingExpansion => unreachable!(),
     };
-    let mut iterator = iterator::Expander::new(state);
+    let mut iterator = iterator::Expander::new(ruleset, state);
 
     while let Some(successor) = iterator.iterate(ruleset) {
         save_expansion(tree, node, successor);

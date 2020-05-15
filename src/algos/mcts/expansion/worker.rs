@@ -31,7 +31,7 @@ impl<RuleSet: rulesets::Permutable + 'static> Worker<RuleSet> {
             match self.receiver.recv()? {
                 requests::Request::ExpansionRequest { node_index, state } => {
                     self.operation_count += 1;
-                    let mut iterator = iterator::Expander::new(state);
+                    let mut iterator = iterator::Expander::new(&self.ruleset, state);
                     let mut successors = Vec::new();
                     while let Some(item) = iterator.iterate(&self.ruleset) {
                         successors.push(item);

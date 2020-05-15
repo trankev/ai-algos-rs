@@ -5,7 +5,7 @@ mod length;
 mod starts;
 
 pub use cell_runs::CellRuns;
-use indices::Indices;
-use iterator::StripIterator;
+pub use indices::Indices;
+pub use iterator::StripIterator;
 use length::length;
 use starts::StartIterator;

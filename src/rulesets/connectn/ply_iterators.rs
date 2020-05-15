@@ -10,7 +10,10 @@ pub struct PlyIterator<Variant: variants::BaseVariant> {
 impl<Variant: variants::BaseVariant> rulesets::PlyIteratorTrait<connectn::RuleSet<Variant>>
     for PlyIterator<Variant>
 {
-    fn new(state: connectn::State<Variant>) -> PlyIterator<Variant> {
+    fn new(
+        _ruleset: &connectn::RuleSet<Variant>,
+        state: connectn::State<Variant>,
+    ) -> PlyIterator<Variant> {
         PlyIterator::<Variant> {
             state,
             current_index: 0,
@@ -52,8 +55,10 @@ mod tests {
 
     #[test]
     fn test_iterate() {
+        let ruleset = connectn::TicTacToe::new();
         let state = connectn::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0);
-        let iterator = <connectn::TicTacToe as rulesets::RuleSetTrait>::PlyIterator::new(state);
+        let iterator =
+            <connectn::TicTacToe as rulesets::RuleSetTrait>::PlyIterator::new(&ruleset, state);
         let expected: collections::HashSet<connectn::Ply> = [
             connectn::Ply { index: 0 },
             connectn::Ply { index: 2 },

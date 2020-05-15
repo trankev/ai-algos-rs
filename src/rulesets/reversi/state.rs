@@ -11,7 +11,10 @@ pub struct State<Variant: variants::BaseVariant> {
 impl<Variant: variants::BaseVariant> State<Variant> {
     pub fn new() -> State<Variant> {
         State {
-            grids: [bitarray::BitArray::zero(), bitarray::BitArray::zero()],
+            grids: [
+                bitarray::BitArray::from_indices(Variant::PLAYER_POSITIONS[0]),
+                bitarray::BitArray::from_indices(Variant::PLAYER_POSITIONS[1]),
+            ],
             current_player: 0,
         }
     }

@@ -4,7 +4,9 @@ use crate::utils::vectors;
 
 #[derive(Clone, Debug)]
 pub struct Indices {
-    step: isize,
+    pub start: isize,
+    pub length: isize,
+    pub step: isize,
     current: isize,
     remaining_count: isize,
 }
@@ -14,11 +16,13 @@ impl Indices {
         let strides = grids::compute_strides(dimensions);
         let step = vectors::dot_product(&strides, direction);
         let start = vectors::dot_product(&strides, origin);
-        let strip_length = strips::length(dimensions, direction, origin);
+        let length = strips::length(dimensions, direction, origin);
         Indices {
             current: start,
+            start,
+            length,
             step,
-            remaining_count: strip_length,
+            remaining_count: length,
         }
     }
 
@@ -26,8 +30,15 @@ impl Indices {
         Indices {
             step: 0,
             current: 0,
+            start: 0,
+            length: 0,
             remaining_count: 0,
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.current = self.start;
+        self.remaining_count = self.length;
     }
 }
 

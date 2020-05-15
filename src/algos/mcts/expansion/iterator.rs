@@ -10,8 +10,8 @@ pub struct Expander<RuleSet: rulesets::Permutable> {
 }
 
 impl<RuleSet: rulesets::Permutable> Expander<RuleSet> {
-    pub fn new(current_state: RuleSet::State) -> Expander<RuleSet> {
-        let ply_iterator = RuleSet::PlyIterator::new(current_state);
+    pub fn new(ruleset: &RuleSet, current_state: RuleSet::State) -> Expander<RuleSet> {
+        let ply_iterator = RuleSet::PlyIterator::new(ruleset, current_state);
         Expander {
             ply_iterator,
             seen: collections::HashSet::new(),

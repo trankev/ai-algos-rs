@@ -1,9 +1,11 @@
-pub fn compute_strides(dimensions: &[isize]) -> Vec<isize> {
+use num;
+
+pub fn compute_strides<T: num::PrimInt>(dimensions: &[T]) -> Vec<T> {
     dimensions
         .iter()
-        .scan(1, |acc, &value| {
+        .scan(num::one::<T>(), |acc, value| {
             let result = *acc;
-            *acc *= value;
+            *acc = *acc * *value;
             Some(result)
         })
         .collect()

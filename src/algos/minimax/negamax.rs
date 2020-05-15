@@ -29,7 +29,7 @@ impl<RuleSet: rulesets::RuleSetTrait> Negamax<RuleSet> {
             }
             rulesets::Status::Draw => state::State::Draw,
             rulesets::Status::Ongoing => {
-                let available_plies = RuleSet::PlyIterator::new(state.clone());
+                let available_plies = RuleSet::PlyIterator::new(&self.ruleset, state.clone());
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
                     let resulting_state = self.ruleset.play(&state, &ply).unwrap();
