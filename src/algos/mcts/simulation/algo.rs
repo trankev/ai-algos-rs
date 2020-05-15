@@ -2,6 +2,7 @@ use super::super::edges;
 use super::super::nodes;
 use crate::interface;
 use crate::interface::PlyIteratorTrait;
+use crate::tools::ply_iterator;
 use petgraph::graph;
 use rand::rngs;
 use rand::seq::IteratorRandom;
@@ -16,7 +17,7 @@ pub fn simulate<RuleSet: interface::RuleSetTrait>(
     loop {
         let status = ruleset.status(current_state);
         if let interface::Status::Ongoing = status {
-            let available_plies = RuleSet::PlyIterator::new(ruleset, current_state.clone());
+            let available_plies = ply_iterator::PlyIterator::new(ruleset, current_state);
             let ply = available_plies.choose(rng).unwrap();
             state = ruleset.play(&current_state, &ply).unwrap();
             current_state = &state;

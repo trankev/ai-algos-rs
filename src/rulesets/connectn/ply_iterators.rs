@@ -1,10 +1,11 @@
 use crate::interface;
 use crate::rulesets::connectn;
 use crate::rulesets::connectn::variants;
+use std::marker;
 
 pub struct PlyIterator<Variant: variants::BaseVariant> {
-    state: connectn::State<Variant>,
     current_index: usize,
+    variant: marker::PhantomData<Variant>,
 }
 
 impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<connectn::RuleSet<Variant>>
@@ -12,28 +13,24 @@ impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<connectn::RuleS
 {
     fn new(
         _ruleset: &connectn::RuleSet<Variant>,
-        state: connectn::State<Variant>,
+        _state: &connectn::State<Variant>,
     ) -> PlyIterator<Variant> {
         PlyIterator::<Variant> {
-            state,
             current_index: 0,
+            variant: marker::PhantomData,
         }
     }
 
-    fn current_state(&self) -> &connectn::State<Variant> {
-        &self.state
-    }
-}
-
-impl<Variant: variants::BaseVariant> Iterator for PlyIterator<Variant> {
-    type Item = connectn::Ply;
-
-    fn next(&mut self) -> Option<Self::Item> {
+    fn iterate(
+        &mut self,
+        _ruleset: &connectn::RuleSet<Variant>,
+        state: &connectn::State<Variant>,
+    ) -> Option<connectn::Ply> {
         loop {
             if self.current_index >= Variant::CELL_COUNT {
                 return None;
             }
-            if self.state.is_empty(self.current_index) {
+            if state.is_empty(self.current_index) {
                 break;
             }
             self.current_index += 1;
@@ -57,8 +54,8 @@ mod tests {
     fn test_iterate() {
         let ruleset = connectn::TicTacToe::new();
         let state = connectn::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0);
-        let iterator =
-            <connectn::TicTacToe as interface::RuleSetTrait>::PlyIterator::new(&ruleset, state);
+        let mut iterator =
+            <connectn::TicTacToe as interface::RuleSetTrait>::PlyIterator::new(&ruleset, &state);
         let expected: collections::HashSet<connectn::Ply> = [
             connectn::Ply { index: 0 },
             connectn::Ply { index: 2 },
@@ -69,7 +66,10 @@ mod tests {
         .iter()
         .cloned()
         .collect();
-        let result: collections::HashSet<connectn::Ply> = iterator.collect();
+        let mut result = collections::HashSet::new();
+        while let Some(ply) = iterator.iterate(&ruleset, &state) {
+            result.insert(ply);
+        }
         assert_eq!(result, expected);
     }
 }

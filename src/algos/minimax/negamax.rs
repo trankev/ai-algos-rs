@@ -1,6 +1,7 @@
 use super::state;
 use crate::interface;
 use crate::interface::PlyIteratorTrait;
+use crate::tools::ply_iterator;
 use std::f32;
 
 pub struct Negamax<RuleSet: interface::RuleSetTrait> {
@@ -29,7 +30,7 @@ impl<RuleSet: interface::RuleSetTrait> Negamax<RuleSet> {
             }
             interface::Status::Draw => state::State::Draw,
             interface::Status::Ongoing => {
-                let available_plies = RuleSet::PlyIterator::new(&self.ruleset, state.clone());
+                let available_plies = ply_iterator::PlyIterator::new(&self.ruleset, &state);
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
                     let resulting_state = self.ruleset.play(&state, &ply).unwrap();

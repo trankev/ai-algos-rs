@@ -5,6 +5,7 @@ use super::variants;
 use crate::interface;
 use crate::utils::grids::strips;
 use std::collections;
+use std::marker;
 use std::sync;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -14,20 +15,23 @@ enum CellState {
 }
 
 pub struct PlyIterator<Variant: variants::BaseVariant> {
-    state: state::State<Variant>,
     pub strips: sync::Arc<Vec<strips::Indices>>,
     current_index: isize,
     current_strip: strips::Indices,
     strip_state: (CellState, CellState),
     seen: collections::HashSet<usize>,
+    variant: marker::PhantomData<Variant>,
 }
 
 impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
-    fn iterate_strip(&mut self) -> Option<(interface::Player, usize)> {
+    fn iterate_strip(
+        &mut self,
+        state: &state::State<Variant>,
+    ) -> Option<(interface::Player, usize)> {
         for index in self.current_strip.by_ref() {
             let mut cell_state = CellState::Empty { index };
             for player in 0..2 {
-                if self.state.grids[player].isset(index) {
+                if state.grids[player].isset(index) {
                     cell_state = CellState::Player(player as u8);
                     break;
                 }
@@ -53,8 +57,11 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
         None
     }
 
-    fn iterate_grid(&mut self) -> Option<(interface::Player, usize)> {
-        while let Some((player, index)) = self.iterate_strip() {
+    fn iterate_grid(
+        &mut self,
+        state: &state::State<Variant>,
+    ) -> Option<(interface::Player, usize)> {
+        while let Some((player, index)) = self.iterate_strip(state) {
             return Some((player, index));
         }
         self.current_index += 1;
@@ -71,35 +78,31 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
                 index: self.current_strip.start as usize,
             },
         );
-        self.iterate_grid()
+        self.iterate_grid(state)
     }
 }
 
 impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<ruleset::Reversi<Variant>>
     for PlyIterator<Variant>
 {
-    fn new(ruleset: &ruleset::Reversi<Variant>, state: state::State<Variant>) -> Self {
+    fn new(ruleset: &ruleset::Reversi<Variant>, state: &state::State<Variant>) -> Self {
         PlyIterator::<Variant> {
-            state,
             strips: ruleset.strips.clone(),
             current_strip: strips::Indices::empty(),
             current_index: -1,
             strip_state: (CellState::Empty { index: 0 }, CellState::Empty { index: 0 }),
             seen: collections::HashSet::new(),
+            variant: marker::PhantomData,
         }
     }
 
-    fn current_state(&self) -> &state::State<Variant> {
-        &self.state
-    }
-}
-
-impl<Variant: variants::BaseVariant> Iterator for PlyIterator<Variant> {
-    type Item = plies::Ply;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while let Some((player, index)) = self.iterate_grid() {
-            if player != self.state.current_player || self.seen.contains(&index) {
+    fn iterate(
+        &mut self,
+        _ruleset: &ruleset::Reversi<Variant>,
+        state: &state::State<Variant>,
+    ) -> Option<plies::Ply> {
+        while let Some((player, index)) = self.iterate_grid(state) {
+            if player != state.current_player || self.seen.contains(&index) {
                 continue;
             }
             self.seen.insert(index);
@@ -125,8 +128,11 @@ mod tests {
         let ruleset = ruleset::Reversi::<instances::Classic>::new();
         let state = ruleset.initial_state();
         println!("{}", state.ascii_representation());
-        let iterator = PlyIterator::new(&ruleset, state);
-        let result: collections::HashSet<plies::Ply> = iterator.collect();
+        let mut iterator = PlyIterator::new(&ruleset, &state);
+        let mut result = collections::HashSet::<plies::Ply>::new();
+        while let Some(ply) = iterator.iterate(&ruleset, &state) {
+            result.insert(ply);
+        }
         let expected: collections::HashSet<plies::Ply> = [
             plies::Ply::Place(29),
             plies::Ply::Place(34),
@@ -147,8 +153,11 @@ mod tests {
                     let (p1_indices, p2_indices, current_player, expected) = $value;
                     let ruleset = ruleset::Reversi::<instances::Classic>::new();
                     let state = state::State::from_indices(&p1_indices, &p2_indices, current_player);
-                    let iterator = PlyIterator::new(&ruleset, state);
-                    let mut result: Vec<plies::Ply> = iterator.collect();
+                    let mut iterator = PlyIterator::new(&ruleset, &state);
+                    let mut result = Vec::new();
+                    while let Some(ply) = iterator.iterate(&ruleset, &state) {
+                        result.push(ply);
+                    }
                     let mut expected: Vec<plies::Ply> = expected
                         .iter()
                         .map(|index| plies::Ply::Place(*index))
