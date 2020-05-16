@@ -122,7 +122,6 @@ mod tests {
     fn test_initial_state() {
         let ruleset = ruleset::Reversi::<instances::Classic>::new();
         let state = ruleset.initial_state();
-        println!("{}", state.ascii_representation());
         let mut iterator = PlyIterator::new(&ruleset, &state);
         let mut result = collections::HashSet::<plies::Ply>::new();
         while let Some(ply) = iterator.iterate(&ruleset, &state) {

@@ -70,10 +70,10 @@ impl<Settings: settings::BitArraySettings> BitArray<Settings> {
         let index = slot / Settings::INTEGER_SIZE;
         let offset = slot % Settings::INTEGER_SIZE;
         if index < Settings::ArrayLength::to_usize() {
-            let mask = !Settings::FirstBitType::one() << offset;
+            let mask = !(Settings::FirstBitType::one() << offset);
             self.first_bits[index] = self.first_bits[index] & mask;
         } else {
-            let mask = !Settings::LastBitType::one() << offset;
+            let mask = !(Settings::LastBitType::one() << offset);
             self.last_bits = self.last_bits & mask;
         }
     }
@@ -326,15 +326,16 @@ mod tests {
             instance.unset(*index);
             assert!(!instance.isset(*index));
         }
+        for index in &[6, 120, 222] {
+            assert!(instance.isset(*index));
+        }
     }
 
     #[test]
     fn test_from_positions() {
         let indices = vec![20, 200, 77];
         let instance = BitArray225::from_indices(&indices);
-        println!("{:?}", instance);
         for index in 0..225 {
-            println!("{}", index);
             if indices.contains(&index) {
                 assert!(instance.isset(index));
             } else {
