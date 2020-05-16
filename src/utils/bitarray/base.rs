@@ -62,6 +62,22 @@ impl<Settings: settings::BitArraySettings> BitArray<Settings> {
         }
     }
 
+    pub fn unset(&mut self, slot: usize) {
+        debug_assert!(
+            slot < Settings::SIZE,
+            format!("BitArray slot out of bound: {} >= {}", slot, Settings::SIZE),
+        );
+        let index = slot / Settings::INTEGER_SIZE;
+        let offset = slot % Settings::INTEGER_SIZE;
+        if index < Settings::ArrayLength::to_usize() {
+            let mask = !Settings::FirstBitType::one() << offset;
+            self.first_bits[index] = self.first_bits[index] & mask;
+        } else {
+            let mask = !Settings::LastBitType::one() << offset;
+            self.last_bits = self.last_bits & mask;
+        }
+    }
+
     pub fn swap(&self, permutation: &[usize]) -> Self {
         let mut result = Self::zero();
         let mut iterator = permutation.iter();
@@ -300,6 +316,16 @@ mod tests {
     fn test_out_of_bound() {
         let instance = BitArray225::zero();
         instance.isset(250);
+    }
+
+    #[test]
+    fn test_unset() {
+        let mut instance = BitArray225::from_indices(&[6, 10, 100, 120, 220, 222]);
+        for index in &[10, 100, 220] {
+            assert!(instance.isset(*index));
+            instance.unset(*index);
+            assert!(!instance.isset(*index));
+        }
     }
 
     #[test]
