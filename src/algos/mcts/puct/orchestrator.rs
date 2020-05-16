@@ -10,7 +10,10 @@ use std::error;
 use std::mem;
 use std::thread;
 
-pub struct Orchestrator<RuleSet: interface::Permutable + 'static> {
+pub struct Orchestrator<RuleSet: interface::WithPermutableState + 'static>
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     ruleset: RuleSet,
     master_handle: Option<thread::JoinHandle<()>>,
     master_request_sender: channel::Sender<requests::Request<RuleSet>>,
@@ -21,7 +24,10 @@ pub struct Orchestrator<RuleSet: interface::Permutable + 'static> {
     simulation_pool: simulation::Pool<RuleSet>,
 }
 
-impl<RuleSet: interface::Permutable + 'static> Orchestrator<RuleSet> {
+impl<RuleSet: interface::WithPermutableState + 'static> Orchestrator<RuleSet>
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     pub fn new(ruleset: RuleSet) -> Orchestrator<RuleSet> {
         let expansion_pool = expansion::Pool::new();
         let simulation_pool = simulation::Pool::new();

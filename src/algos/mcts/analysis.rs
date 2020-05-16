@@ -8,7 +8,10 @@ use petgraph::graph;
 pub fn play_scores<RuleSet: interface::RuleSetTrait>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     parent: graph::NodeIndex<u32>,
-) -> Vec<algos::PlyConsideration<RuleSet::Ply>> {
+) -> Vec<algos::PlyConsideration<RuleSet::Ply>>
+where
+    RuleSet::State: interface::TurnByTurnState,
+{
     let mut scores = tree
         .neighbors(parent)
         .map(|node_index| {
@@ -38,7 +41,10 @@ pub fn play_scores<RuleSet: interface::RuleSetTrait>(
 fn best_play<RuleSet: interface::RuleSetTrait>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     mut current_node: graph::NodeIndex<u32>,
-) -> Vec<RuleSet::Ply> {
+) -> Vec<RuleSet::Ply>
+where
+    RuleSet::State: interface::TurnByTurnState,
+{
     let mut result = Vec::new();
     loop {
         let neighbours = tree.neighbors(current_node).map(|node_index| {

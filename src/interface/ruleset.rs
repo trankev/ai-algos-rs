@@ -1,3 +1,4 @@
+use super::permutation_iterator;
 use super::ply;
 use super::ply_iterator;
 use super::state;
@@ -12,4 +13,15 @@ pub trait RuleSetTrait: Clone + Send + Sized {
     fn initial_state(&self) -> Self::State;
     fn play(&self, state: &Self::State, ply: &Self::Ply) -> Result<Self::State, PlayError>;
     fn status(&self, state: &Self::State) -> status::Status;
+}
+
+pub trait WithPermutableState: RuleSetTrait
+where
+    Self::State: state::ComparableState,
+{
+    type Permutation;
+    type PermutationIterator: permutation_iterator::PermutationIteratorTrait<Self>;
+
+    fn swap_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State;
+    fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State;
 }

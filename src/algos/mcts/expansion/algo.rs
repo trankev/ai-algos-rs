@@ -14,11 +14,14 @@ pub enum ExpansionStatus<State> {
     PendingExpansion,
 }
 
-pub fn expand<RuleSet: interface::Permutable>(
+pub fn expand<RuleSet: interface::WithPermutableState>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
-) -> (interface::Status, bool) {
+) -> (interface::Status, bool)
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
         ExpansionStatus::RequiresExpansion(state) => state,
         ExpansionStatus::NotVisited => return (interface::Status::Ongoing, false),
@@ -37,7 +40,10 @@ pub fn ponder_expansion<RuleSet: interface::RuleSetTrait>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     check_for_visits: bool,
-) -> ExpansionStatus<RuleSet::State> {
+) -> ExpansionStatus<RuleSet::State>
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     let weight = tree.node_weight_mut(node_index).unwrap();
     if weight.expanding {
         return ExpansionStatus::PendingExpansion;
@@ -58,7 +64,9 @@ pub fn save_expansion<RuleSet: interface::RuleSetTrait>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     successor: items::Play<RuleSet>,
-) {
+) where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     let mut parent_weight = tree.node_weight_mut(node_index).unwrap();
     parent_weight.expanding = false;
     let node_weight = nodes::Node::new(successor.state, successor.status);

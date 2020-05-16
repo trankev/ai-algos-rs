@@ -4,14 +4,20 @@ use crate::interface::PermutationIteratorTrait;
 use crate::interface::PlyIteratorTrait;
 use std::collections;
 
-pub struct Expander<'a, RuleSet: interface::Permutable> {
+pub struct Expander<'a, RuleSet: interface::WithPermutableState>
+where
+    RuleSet::State: interface::ComparableState,
+{
     ply_iterator: RuleSet::PlyIterator,
     seen: collections::HashSet<RuleSet::State>,
     ruleset: &'a RuleSet,
     state: &'a RuleSet::State,
 }
 
-impl<'a, RuleSet: interface::Permutable> Expander<'a, RuleSet> {
+impl<'a, RuleSet: interface::WithPermutableState> Expander<'a, RuleSet>
+where
+    RuleSet::State: interface::ComparableState,
+{
     pub fn new(ruleset: &'a RuleSet, state: &'a RuleSet::State) -> Expander<'a, RuleSet> {
         let ply_iterator = RuleSet::PlyIterator::new(ruleset, state);
         Expander {

@@ -5,14 +5,20 @@ use crate::interface;
 use crossbeam::channel;
 use std::error;
 
-pub struct Worker<RuleSet: interface::Permutable + 'static> {
+pub struct Worker<RuleSet: interface::WithPermutableState + 'static>
+where
+    RuleSet::State: interface::ComparableState,
+{
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response<RuleSet>>,
     pub operation_count: usize,
 }
 
-impl<RuleSet: interface::Permutable + 'static> Worker<RuleSet> {
+impl<RuleSet: interface::WithPermutableState + 'static> Worker<RuleSet>
+where
+    RuleSet::State: interface::ComparableState,
+{
     pub fn new(
         ruleset: RuleSet,
         receiver: channel::Receiver<requests::Request<RuleSet>>,

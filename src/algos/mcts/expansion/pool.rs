@@ -7,7 +7,10 @@ use crossbeam::channel;
 use std::error;
 use std::thread;
 
-pub struct Pool<RuleSet: interface::Permutable + 'static> {
+pub struct Pool<RuleSet: interface::WithPermutableState + 'static>
+where
+    RuleSet::State: interface::ComparableState,
+{
     workers: Vec<thread::JoinHandle<usize>>,
     request_receiver: channel::Receiver<requests::Request<RuleSet>>,
     pub request_sender: channel::Sender<requests::Request<RuleSet>>,
@@ -16,7 +19,10 @@ pub struct Pool<RuleSet: interface::Permutable + 'static> {
     pub operation_count: atomic::AtomicCell<usize>,
 }
 
-impl<RuleSet: interface::Permutable + 'static> Pool<RuleSet> {
+impl<RuleSet: interface::WithPermutableState + 'static> Pool<RuleSet>
+where
+    RuleSet::State: interface::ComparableState,
+{
     pub fn new() -> Pool<RuleSet> {
         let (request_sender, request_receiver) = channel::unbounded();
         let (response_sender, response_receiver) = channel::unbounded();

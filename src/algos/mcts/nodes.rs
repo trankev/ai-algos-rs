@@ -21,7 +21,7 @@ pub struct Node<State: StateTrait> {
     pub expanding: bool,
 }
 
-impl<State: StateTrait> Node<State> {
+impl<State: interface::StateTrait + interface::TurnByTurnState> Node<State> {
     pub fn new(state: State, status: interface::Status) -> Node<State> {
         let status = if let interface::Status::Ongoing = status {
             Status::Ongoing {

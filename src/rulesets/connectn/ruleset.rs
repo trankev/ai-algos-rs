@@ -74,7 +74,7 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::Permutable for RuleSet<Variant> {
+impl<Variant: variants::BaseVariant> interface::WithPermutableState for RuleSet<Variant> {
     type Permutation = permutation::Permutation;
     type PermutationIterator = permutation_iterators::PermutationIterator;
 
@@ -99,9 +99,9 @@ pub type Gomoku = RuleSet<variants::Gomoku>;
 mod tests {
     use super::super::plies;
     use super::*;
-    use crate::interface::Permutable;
     use crate::interface::PermutationIteratorTrait;
     use crate::interface::RuleSetTrait;
+    use crate::interface::WithPermutableState;
     use std::collections;
 
     #[test]
@@ -141,7 +141,8 @@ mod tests {
     fn test_swap_state() {
         let game = TicTacToe::new();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
-        let permutations = <TicTacToe as interface::Permutable>::PermutationIterator::new(&game);
+        let permutations =
+            <TicTacToe as interface::WithPermutableState>::PermutationIterator::new(&game);
         let mut permutation_set = collections::HashSet::new();
         for permutation in permutations {
             let permuted = game.swap_state(&state, &permutation);

@@ -12,7 +12,10 @@ use petgraph::graph;
 use rand;
 use rand::rngs;
 
-pub struct MCTS<RuleSet: interface::Permutable> {
+pub struct MCTS<RuleSet: interface::WithPermutableState>
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     ruleset: RuleSet,
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     rng: rngs::ThreadRng,
@@ -21,7 +24,10 @@ pub struct MCTS<RuleSet: interface::Permutable> {
     pub simulation_count: usize,
 }
 
-impl<RuleSet: interface::Permutable> MCTS<RuleSet> {
+impl<RuleSet: interface::WithPermutableState> MCTS<RuleSet>
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {
             ruleset,

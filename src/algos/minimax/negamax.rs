@@ -1,6 +1,5 @@
 use super::state;
 use crate::interface;
-use crate::interface::PlyIteratorTrait;
 use crate::tools::ply_iterator;
 use std::f32;
 

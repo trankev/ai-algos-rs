@@ -35,10 +35,6 @@ impl<Variant: variants::BaseVariant> State<Variant> {
 }
 
 impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
-    fn current_player(&self) -> interface::Player {
-        self.current_player
-    }
-
     fn ascii_representation(&self) -> String {
         let mut result = String::new();
         for index in 0..64 {
@@ -53,6 +49,14 @@ impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
                 result.push('\n');
             }
         }
-        format!("{}\nTo play: {}", result, self.current_player())
+        format!("{}\nTo play: {}", result, self.current_player)
     }
 }
+
+impl<Variant: variants::BaseVariant> interface::TurnByTurnState for State<Variant> {
+    fn current_player(&self) -> interface::Player {
+        self.current_player
+    }
+}
+
+impl<Variant: variants::BaseVariant> interface::ComparableState for State<Variant> {}

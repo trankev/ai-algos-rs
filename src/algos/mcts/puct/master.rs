@@ -21,7 +21,10 @@ enum SelectionResult {
     Nothing,
 }
 
-pub struct Master<RuleSet: interface::Permutable + 'static> {
+pub struct Master<RuleSet: interface::WithPermutableState + 'static>
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     root: Option<graph::NodeIndex<u32>>,
     ruleset: RuleSet,
@@ -36,7 +39,10 @@ pub struct Master<RuleSet: interface::Permutable + 'static> {
     simulation_response_receiver: channel::Receiver<simulation::Response>,
 }
 
-impl<RuleSet: interface::Permutable + 'static> Master<RuleSet> {
+impl<RuleSet: interface::WithPermutableState + 'static> Master<RuleSet>
+where
+    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+{
     pub fn new(
         ruleset: RuleSet,
         master_request_receiver: channel::Receiver<requests::Request<RuleSet>>,

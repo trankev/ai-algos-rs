@@ -1,7 +1,10 @@
-use super::permutable;
+use super::ruleset;
+use super::state;
 
-pub trait PermutationIteratorTrait<Rules: permutable::Permutable>:
-    Iterator<Item = Rules::Permutation>
+pub trait PermutationIteratorTrait<Rules: ruleset::WithPermutableState>
+where
+    Self: Iterator<Item = Rules::Permutation>,
+    Rules::State: state::ComparableState,
 {
     fn new(ruleset: &Rules) -> Self;
 }

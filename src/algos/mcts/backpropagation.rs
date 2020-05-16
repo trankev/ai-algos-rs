@@ -3,7 +3,7 @@ use crate::interface;
 use petgraph;
 use petgraph::graph;
 
-pub fn backpropagate<State: interface::StateTrait, Edge>(
+pub fn backpropagate<State: interface::StateTrait + interface::TurnByTurnState, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,
@@ -18,7 +18,7 @@ pub fn backpropagate<State: interface::StateTrait, Edge>(
     update_tallies(tree, node, update_visits, status);
 }
 
-pub fn update_tallies<State: interface::StateTrait, Edge>(
+pub fn update_tallies<State: interface::StateTrait + interface::TurnByTurnState, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,

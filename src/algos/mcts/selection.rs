@@ -3,7 +3,7 @@ use super::uct_value;
 use crate::interface;
 use petgraph::graph;
 
-pub fn select<State: interface::StateTrait, Edge>(
+pub fn select<State: interface::StateTrait + interface::TurnByTurnState, Edge>(
     tree: &graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     reverse: bool,

@@ -1,7 +1,6 @@
 use super::super::edges;
 use super::super::nodes;
 use crate::interface;
-use crate::interface::PlyIteratorTrait;
 use crate::tools::ply_iterator;
 use petgraph::graph;
 use rand::rngs;

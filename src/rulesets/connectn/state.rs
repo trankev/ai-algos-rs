@@ -70,10 +70,6 @@ impl<Variant: variants::BaseVariant> State<Variant> {
 }
 
 impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
-    fn current_player(&self) -> interface::Player {
-        self.current_player
-    }
-
     fn ascii_representation(&self) -> String {
         let mut result = String::new();
         for index in 0..Variant::GRID_SIZE {
@@ -88,12 +84,17 @@ impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
                 result.push('\n');
             }
         }
-        format!("{}\nTo play: {}", result, self.current_player())
+        format!("{}\nTo play: {}", result, self.current_player)
     }
 }
 
-pub type TicTacToeState = State<variants::TicTacToe>;
-pub type GomokuState = State<variants::Gomoku>;
+impl<Variant: variants::BaseVariant> interface::TurnByTurnState for State<Variant> {
+    fn current_player(&self) -> interface::Player {
+        self.current_player
+    }
+}
+
+impl<Variant: variants::BaseVariant> interface::ComparableState for State<Variant> {}
 
 #[cfg(test)]
 mod tests {
@@ -104,7 +105,7 @@ mod tests {
 
     #[test]
     fn test_is_empty_empty() {
-        let state = TicTacToeState::new();
+        let state = State::<variants::TicTacToe>::new();
         for index in 0..variants::TicTacToe::CELL_COUNT {
             assert!(state.is_empty(index));
         }
@@ -112,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_is_empty_filled() {
-        let state = TicTacToeState::from_indices(&[4, 1], &[0, 8], 0);
+        let state = State::<variants::TicTacToe>::from_indices(&[4, 1], &[0, 8], 0);
         assert!(!state.is_empty(0));
         assert!(!state.is_empty(1));
         assert!(state.is_empty(2));
@@ -121,8 +122,8 @@ mod tests {
 
     #[test]
     fn test_from_indices() {
-        let from_indices = TicTacToeState::from_indices(&[4, 1], &[8, 7], 0);
-        let mut from_scratch = TicTacToeState::new();
+        let from_indices = State::<variants::TicTacToe>::from_indices(&[4, 1], &[8, 7], 0);
+        let mut from_scratch = State::<variants::TicTacToe>::new();
         for index in &[4, 8, 1, 7] {
             from_scratch.play(&plies::Ply { index: *index }).unwrap();
         }

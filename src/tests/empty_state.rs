@@ -12,11 +12,15 @@ impl EmptyState {
 }
 
 impl interface::StateTrait for EmptyState {
-    fn current_player(&self) -> interface::Player {
-        self.current_player
-    }
-
     fn ascii_representation(&self) -> String {
         "None".into()
     }
 }
+
+impl interface::TurnByTurnState for EmptyState {
+    fn current_player(&self) -> interface::Player {
+        self.current_player
+    }
+}
+
+impl interface::ComparableState for EmptyState {}
