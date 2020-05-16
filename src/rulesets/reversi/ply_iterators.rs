@@ -12,6 +12,7 @@ use std::sync;
 enum CellState {
     Empty { index: usize },
     Player(interface::Player),
+    Unset,
 }
 
 pub struct PlyIterator<Variant: variants::BaseVariant> {
@@ -57,35 +58,29 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
         None
     }
 
-    fn iterate_grid(
+    pub fn iterate_grid(
         &mut self,
         state: &state::State<Variant>,
     ) -> Option<(interface::Player, usize)> {
-        while let Some((player, index)) = self.iterate_strip(state) {
-            return Some((player, index));
+        loop {
+            while let Some((player, index)) = self.iterate_strip(state) {
+                return Some((player, index));
+            }
+            self.current_index += 1;
+            if self.current_index as usize >= self.strips.len() {
+                return None;
+            }
+            self.current_strip = self.strips[self.current_index as usize].clone();
+            self.current_strip.reset();
+            self.strip_state = (CellState::Unset, CellState::Unset);
         }
-        self.current_index += 1;
-        if self.current_index as usize >= self.strips.len() {
-            return None;
-        }
-        self.current_strip = self.strips[self.current_index as usize].clone();
-        self.current_strip.reset();
-        self.strip_state = (
-            CellState::Empty {
-                index: self.current_strip.start as usize,
-            },
-            CellState::Empty {
-                index: self.current_strip.start as usize,
-            },
-        );
-        self.iterate_grid(state)
     }
 }
 
 impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<ruleset::Reversi<Variant>>
     for PlyIterator<Variant>
 {
-    fn new(ruleset: &ruleset::Reversi<Variant>, state: &state::State<Variant>) -> Self {
+    fn new(ruleset: &ruleset::Reversi<Variant>, _state: &state::State<Variant>) -> Self {
         PlyIterator::<Variant> {
             strips: ruleset.strips.clone(),
             current_strip: strips::Indices::empty(),
@@ -174,5 +169,6 @@ mod tests {
         single_in_between: ([2], [1], 0, [0]),
         several_in_between: ([5], [1, 2, 3, 4], 0, [0]),
         duplicates: ([2, 16], [1, 8], 0, [0]),
+        none: ([0, 1, 2, 3], [4, 5, 6, 7], 0, []),
     }
 }

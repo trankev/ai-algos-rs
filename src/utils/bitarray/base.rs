@@ -3,6 +3,7 @@ use super::settings;
 use generic_array;
 use num;
 use num::traits::One;
+use num::traits::PrimInt;
 use num::traits::Zero;
 use std::ops;
 use typenum::Unsigned;
@@ -114,6 +115,12 @@ impl<Settings: settings::BitArraySettings> BitArray<Settings> {
         } else {
             comparison::MaskComparison::Partial
         }
+    }
+
+    pub fn count_ones(&self) -> u32 {
+        let mut result = self.first_bits.iter().map(|x| x.count_ones()).sum();
+        result += self.last_bits.count_ones();
+        result
     }
 }
 

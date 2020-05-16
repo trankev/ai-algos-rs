@@ -37,7 +37,7 @@ impl<Variant: variants::BaseVariant> State<Variant> {
 impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
     fn ascii_representation(&self) -> String {
         let mut result = String::new();
-        for index in 0..64 {
+        for index in 0..Variant::CELL_COUNT {
             if self.grids[0].isset(index) {
                 result.push('X');
             } else if self.grids[1].isset(index) {
@@ -45,7 +45,7 @@ impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
             } else {
                 result.push('.');
             }
-            if index % 8 == 7 {
+            if index % Variant::GRID_SIZE == Variant::GRID_SIZE - 1 {
                 result.push('\n');
             }
         }
