@@ -133,7 +133,7 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for Reversi<Variant
 
     fn status(&self, state: &Self::State) -> interface::Status {
         let mut ply_iterator = Self::PlyIterator::new(&self, &state);
-        match ply_iterator.iterate_grid(&state) {
+        match ply_iterator.iterate(&self, &state) {
             Some(_) => interface::Status::Ongoing,
             None => match state.grids[0]
                 .count_ones()
