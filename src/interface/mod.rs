@@ -6,6 +6,7 @@ mod state;
 mod status;
 
 pub use permutation_iterator::PermutationIteratorTrait;
+pub use ply::ComparablePly;
 pub use ply::PlyTrait;
 pub use ply_iterator::PlyIteratorTrait;
 pub use ruleset::RuleSetTrait;

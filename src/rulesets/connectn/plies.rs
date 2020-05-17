@@ -1,6 +1,6 @@
 use crate::interface;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Ply {
     pub index: u8,
 }
@@ -12,3 +12,5 @@ impl interface::PlyTrait for Ply {
         format!("[{}, {}]", row, column)
     }
 }
+
+impl interface::ComparablePly for Ply {}

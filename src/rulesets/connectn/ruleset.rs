@@ -90,6 +90,14 @@ impl<Variant: variants::BaseVariant> interface::WithPermutableState for RuleSet<
         let permutations = &self.symmetries.permutations[permutation_index];
         state.swap(permutations, permutation.switched_players)
     }
+
+    fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Permutation) -> Self::Ply {
+        let permutation =
+            &self.symmetries.permutations[permutation.grid_permutation_index as usize];
+        plies::Ply {
+            index: permutation[ply.index as usize] as u8,
+        }
+    }
 }
 
 pub type TicTacToe = RuleSet<variants::TicTacToe>;

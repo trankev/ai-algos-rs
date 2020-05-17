@@ -1,6 +1,6 @@
 use super::state;
 use crate::interface;
-use crate::tools::ply_iterator;
+use crate::tools::plies;
 use std::f32;
 
 pub struct Negamax<RuleSet: interface::RuleSetTrait> {
@@ -8,6 +8,10 @@ pub struct Negamax<RuleSet: interface::RuleSetTrait> {
 }
 
 impl<RuleSet: interface::RuleSetTrait> Negamax<RuleSet> {
+    pub fn new(ruleset: RuleSet) -> Negamax<RuleSet> {
+        Negamax { ruleset }
+    }
+
     pub fn compute(&self, state: &RuleSet::State, player: u8) -> state::State<RuleSet::Ply> {
         self.iterate(state, player, f32::NEG_INFINITY, f32::INFINITY)
     }
@@ -29,7 +33,7 @@ impl<RuleSet: interface::RuleSetTrait> Negamax<RuleSet> {
             }
             interface::Status::Draw => state::State::Draw,
             interface::Status::Ongoing => {
-                let available_plies = ply_iterator::PlyIterator::new(&self.ruleset, &state);
+                let available_plies = plies::BasicIterator::new(&self.ruleset, &state);
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
                     let resulting_state = self.ruleset.play(&state, &ply).unwrap();
