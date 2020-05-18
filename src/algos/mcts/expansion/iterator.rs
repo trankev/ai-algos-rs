@@ -3,8 +3,9 @@ use crate::interface;
 use crate::tools::plies;
 use std::hash;
 
-pub struct Expander<'a, RuleSet: interface::WithPermutableState>
+pub struct Expander<'a, RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -13,8 +14,9 @@ where
     state: &'a RuleSet::State,
 }
 
-impl<'a, RuleSet: interface::WithPermutableState> Expander<'a, RuleSet>
+impl<'a, RuleSet> Expander<'a, RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

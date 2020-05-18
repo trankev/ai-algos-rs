@@ -13,8 +13,9 @@ use rand;
 use rand::rngs;
 use std::hash;
 
-pub struct MCTS<RuleSet: interface::WithPermutableState>
+pub struct MCTS<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq + interface::TurnByTurnState,
 {
@@ -26,8 +27,9 @@ where
     pub simulation_count: usize,
 }
 
-impl<RuleSet: interface::WithPermutableState> MCTS<RuleSet>
+impl<RuleSet> MCTS<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq + interface::TurnByTurnState,
 {

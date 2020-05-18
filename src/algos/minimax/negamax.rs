@@ -3,11 +3,11 @@ use crate::interface;
 use crate::tools::plies;
 use std::f32;
 
-pub struct Negamax<RuleSet: interface::RuleSetTrait> {
+pub struct Negamax<RuleSet: interface::Deterministic> {
     ruleset: RuleSet,
 }
 
-impl<RuleSet: interface::RuleSetTrait> Negamax<RuleSet> {
+impl<RuleSet: interface::Deterministic> Negamax<RuleSet> {
     pub fn new(ruleset: RuleSet) -> Negamax<RuleSet> {
         Negamax { ruleset }
     }

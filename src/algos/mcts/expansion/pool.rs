@@ -8,8 +8,9 @@ use std::error;
 use std::hash;
 use std::thread;
 
-pub struct Pool<RuleSet: interface::WithPermutableState + 'static>
+pub struct Pool<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -21,8 +22,9 @@ where
     pub operation_count: atomic::AtomicCell<usize>,
 }
 
-impl<RuleSet: interface::WithPermutableState + 'static> Pool<RuleSet>
+impl<RuleSet> Pool<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

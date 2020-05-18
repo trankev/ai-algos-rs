@@ -15,7 +15,7 @@ pub enum ExpansionStatus<State> {
     PendingExpansion,
 }
 
-pub fn expand<RuleSet: interface::WithPermutableState>(
+pub fn expand<RuleSet: interface::WithPermutableState + interface::Deterministic>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,

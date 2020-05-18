@@ -6,8 +6,9 @@ use crossbeam::channel;
 use std::error;
 use std::hash;
 
-pub struct Worker<RuleSet: interface::WithPermutableState + 'static>
+pub struct Worker<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -17,8 +18,9 @@ where
     pub operation_count: usize,
 }
 
-impl<RuleSet: interface::WithPermutableState + 'static> Worker<RuleSet>
+impl<RuleSet> Worker<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

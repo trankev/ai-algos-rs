@@ -11,8 +11,9 @@ use std::hash;
 use std::mem;
 use std::thread;
 
-pub struct Orchestrator<RuleSet: interface::WithPermutableState + 'static>
+pub struct Orchestrator<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq + interface::TurnByTurnState,
 {
@@ -26,8 +27,9 @@ where
     simulation_pool: simulation::Pool<RuleSet>,
 }
 
-impl<RuleSet: interface::WithPermutableState + 'static> Orchestrator<RuleSet>
+impl<RuleSet> Orchestrator<RuleSet>
 where
+    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq + interface::TurnByTurnState,
 {

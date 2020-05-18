@@ -39,18 +39,6 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant
         state::State::new()
     }
 
-    fn play(
-        &self,
-        state: &Self::State,
-        ply: &Self::Ply,
-    ) -> Result<Self::State, interface::PlayError> {
-        let mut result = (*state).clone();
-        if let Err(error) = result.play(ply) {
-            return Err(error);
-        }
-        Ok(result)
-    }
-
     fn status(&self, state: &Self::State) -> interface::Status {
         let mut ongoing = false;
         for strip in &self.strips {
@@ -71,6 +59,20 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant
         } else {
             interface::Status::Draw
         }
+    }
+}
+
+impl<Variant: variants::BaseVariant> interface::Deterministic for RuleSet<Variant> {
+    fn play(
+        &self,
+        state: &Self::State,
+        ply: &Self::Ply,
+    ) -> Result<Self::State, interface::PlayError> {
+        let mut result = (*state).clone();
+        if let Err(error) = result.play(ply) {
+            return Err(error);
+        }
+        Ok(result)
     }
 }
 
@@ -107,6 +109,7 @@ pub type Gomoku = RuleSet<variants::Gomoku>;
 mod tests {
     use super::super::plies;
     use super::*;
+    use crate::interface::Deterministic;
     use crate::interface::PermutationIteratorTrait;
     use crate::interface::RuleSetTrait;
     use crate::interface::WithPermutableState;

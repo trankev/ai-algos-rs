@@ -6,7 +6,7 @@ use petgraph::graph;
 use rand::rngs;
 use rand::seq::IteratorRandom;
 
-pub fn simulate<RuleSet: interface::RuleSetTrait>(
+pub fn simulate<RuleSet: interface::Deterministic>(
     ruleset: &RuleSet,
     state: &RuleSet::State,
     rng: &mut rngs::ThreadRng,
@@ -26,7 +26,7 @@ pub fn simulate<RuleSet: interface::RuleSetTrait>(
     }
 }
 
-pub fn fetch_random_child<RuleSet: interface::RuleSetTrait>(
+pub fn fetch_random_child<RuleSet: interface::Deterministic>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     rng: &mut rngs::ThreadRng,

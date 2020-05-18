@@ -7,7 +7,7 @@ use rand;
 use rand::rngs;
 use std::error;
 
-pub struct Worker<RuleSet: interface::RuleSetTrait> {
+pub struct Worker<RuleSet: interface::Deterministic> {
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response>,
@@ -15,7 +15,7 @@ pub struct Worker<RuleSet: interface::RuleSetTrait> {
     pub operation_count: usize,
 }
 
-impl<RuleSet: interface::RuleSetTrait> Worker<RuleSet> {
+impl<RuleSet: interface::Deterministic> Worker<RuleSet> {
     pub fn new(
         ruleset: RuleSet,
         receiver: channel::Receiver<requests::Request<RuleSet>>,

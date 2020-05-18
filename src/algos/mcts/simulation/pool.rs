@@ -6,7 +6,7 @@ use crossbeam::channel;
 use std::error;
 use std::thread;
 
-pub struct Pool<RuleSet: interface::RuleSetTrait + 'static> {
+pub struct Pool<RuleSet: interface::Deterministic + 'static> {
     workers: Vec<thread::JoinHandle<usize>>,
     request_receiver: channel::Receiver<requests::Request<RuleSet>>,
     pub request_sender: channel::Sender<requests::Request<RuleSet>>,
@@ -14,7 +14,7 @@ pub struct Pool<RuleSet: interface::RuleSetTrait + 'static> {
     response_sender: channel::Sender<responses::Response>,
 }
 
-impl<RuleSet: interface::RuleSetTrait + 'static> Pool<RuleSet> {
+impl<RuleSet: interface::Deterministic + 'static> Pool<RuleSet> {
     pub fn new() -> Pool<RuleSet> {
         let (request_sender, request_receiver) = channel::unbounded();
         let (response_sender, response_receiver) = channel::unbounded();

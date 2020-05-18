@@ -79,6 +79,23 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for Reversi<Variant
         state::State::new()
     }
 
+    fn status(&self, state: &Self::State) -> interface::Status {
+        let mut ply_iterator = Self::PlyIterator::new(&self, &state);
+        match ply_iterator.iterate(&self, &state) {
+            Some(_) => interface::Status::Ongoing,
+            None => match state.grids[0]
+                .count_ones()
+                .cmp(&state.grids[1].count_ones())
+            {
+                cmp::Ordering::Less => interface::Status::Win { player: 1 },
+                cmp::Ordering::Equal => interface::Status::Draw,
+                cmp::Ordering::Greater => interface::Status::Win { player: 0 },
+            },
+        }
+    }
+}
+
+impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Variant> {
     fn play(
         &self,
         state: &Self::State,
@@ -129,21 +146,6 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for Reversi<Variant
             plies::Ply::Pass => Ok(state.clone()),
         }
     }
-
-    fn status(&self, state: &Self::State) -> interface::Status {
-        let mut ply_iterator = Self::PlyIterator::new(&self, &state);
-        match ply_iterator.iterate(&self, &state) {
-            Some(_) => interface::Status::Ongoing,
-            None => match state.grids[0]
-                .count_ones()
-                .cmp(&state.grids[1].count_ones())
-            {
-                cmp::Ordering::Less => interface::Status::Win { player: 1 },
-                cmp::Ordering::Equal => interface::Status::Draw,
-                cmp::Ordering::Greater => interface::Status::Win { player: 0 },
-            },
-        }
-    }
 }
 
 #[cfg(test)]
@@ -152,6 +154,7 @@ mod tests {
     use super::super::plies;
     use super::*;
     use crate::interface;
+    use crate::interface::Deterministic;
     use crate::interface::RuleSetTrait;
 
     #[test]
