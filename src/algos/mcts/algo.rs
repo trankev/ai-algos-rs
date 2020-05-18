@@ -15,6 +15,7 @@ use rand::rngs;
 pub struct MCTS<RuleSet: interface::WithPermutableState>
 where
     RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+    RuleSet::Ply: interface::ComparablePly,
 {
     ruleset: RuleSet,
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
@@ -27,6 +28,7 @@ where
 impl<RuleSet: interface::WithPermutableState> MCTS<RuleSet>
 where
     RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+    RuleSet::Ply: interface::ComparablePly,
 {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {

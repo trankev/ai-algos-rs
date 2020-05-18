@@ -8,6 +8,7 @@ use std::error;
 pub struct Worker<RuleSet: interface::WithPermutableState + 'static>
 where
     RuleSet::State: interface::ComparableState,
+    RuleSet::Ply: interface::ComparablePly,
 {
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
@@ -18,6 +19,7 @@ where
 impl<RuleSet: interface::WithPermutableState + 'static> Worker<RuleSet>
 where
     RuleSet::State: interface::ComparableState,
+    RuleSet::Ply: interface::ComparablePly,
 {
     pub fn new(
         ruleset: RuleSet,

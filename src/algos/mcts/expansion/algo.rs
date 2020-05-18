@@ -21,6 +21,7 @@ pub fn expand<RuleSet: interface::WithPermutableState>(
 ) -> (interface::Status, bool)
 where
     RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+    RuleSet::Ply: interface::ComparablePly,
 {
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
         ExpansionStatus::RequiresExpansion(state) => state,
