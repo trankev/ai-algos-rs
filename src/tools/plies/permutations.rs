@@ -2,11 +2,12 @@ use crate::interface;
 use crate::interface::PermutationIteratorTrait;
 use crate::interface::PlyIteratorTrait;
 use std::collections;
+use std::hash;
 
 pub struct PermutationsIterator<'a, RuleSet: interface::WithPermutableState>
 where
-    RuleSet::Ply: interface::ComparablePly,
-    RuleSet::State: interface::ComparableState,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     ruleset: &'a RuleSet,
     state: &'a RuleSet::State,
@@ -17,8 +18,8 @@ where
 
 impl<'a, RuleSet: interface::WithPermutableState> PermutationsIterator<'a, RuleSet>
 where
-    RuleSet::Ply: interface::ComparablePly,
-    RuleSet::State: interface::ComparableState,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     pub fn new(
         ruleset: &'a RuleSet,
@@ -40,8 +41,8 @@ where
 
 impl<'a, RuleSet: interface::WithPermutableState> Iterator for PermutationsIterator<'a, RuleSet>
 where
-    RuleSet::Ply: interface::ComparablePly,
-    RuleSet::State: interface::ComparableState,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     type Item = RuleSet::Ply;
 
@@ -67,14 +68,12 @@ where
 mod tests {
     use super::*;
     use crate::interface::RuleSetTrait;
-    use crate::interface::StateTrait;
     use crate::rulesets::connectn;
 
     #[test]
     fn test_mini_reversi() {
         let ruleset = connectn::TicTacToe::new();
         let state = ruleset.initial_state();
-        println!("{}", state.ascii_representation());
         let iterator = PermutationsIterator::new(&ruleset, &state);
         let mut result = iterator.collect::<Vec<_>>();
         result.sort();

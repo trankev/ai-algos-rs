@@ -11,11 +11,12 @@ use crate::interface::StateTrait;
 use petgraph::graph;
 use rand;
 use rand::rngs;
+use std::hash;
 
 pub struct MCTS<RuleSet: interface::WithPermutableState>
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq + interface::TurnByTurnState,
 {
     ruleset: RuleSet,
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
@@ -27,8 +28,8 @@ where
 
 impl<RuleSet: interface::WithPermutableState> MCTS<RuleSet>
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq + interface::TurnByTurnState,
 {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {

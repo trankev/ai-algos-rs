@@ -23,7 +23,7 @@ enum SelectionResult {
 
 pub struct Master<RuleSet: interface::WithPermutableState + 'static>
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+    RuleSet::State: interface::TurnByTurnState,
 {
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     root: Option<graph::NodeIndex<u32>>,
@@ -41,7 +41,7 @@ where
 
 impl<RuleSet: interface::WithPermutableState + 'static> Master<RuleSet>
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+    RuleSet::State: interface::TurnByTurnState,
 {
     pub fn new(
         ruleset: RuleSet,

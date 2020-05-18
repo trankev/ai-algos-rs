@@ -12,5 +12,3 @@ impl interface::PlyTrait for Ply {
         format!("[{}, {}]", row, column)
     }
 }
-
-impl interface::ComparablePly for Ply {}

@@ -115,7 +115,6 @@ mod tests {
     use super::*;
     use crate::interface::PlyIteratorTrait;
     use crate::interface::RuleSetTrait;
-    use crate::interface::StateTrait;
     use std::collections;
 
     #[test]

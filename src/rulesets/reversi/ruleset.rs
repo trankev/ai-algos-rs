@@ -4,7 +4,6 @@ use super::state;
 use super::variants;
 use crate::interface;
 use crate::interface::PlyIteratorTrait;
-use crate::interface::StateTrait;
 use crate::utils::grids::strips;
 use std::cmp;
 use std::marker;
@@ -154,7 +153,6 @@ mod tests {
     use super::*;
     use crate::interface;
     use crate::interface::RuleSetTrait;
-    use crate::interface::StateTrait;
 
     #[test]
     fn test_play_on_occupied_cell() {

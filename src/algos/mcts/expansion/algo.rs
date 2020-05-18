@@ -1,6 +1,7 @@
 use super::items;
 use super::iterator;
 use crate::interface;
+use std::hash;
 
 use super::super::edges;
 use super::super::nodes;
@@ -20,8 +21,8 @@ pub fn expand<RuleSet: interface::WithPermutableState>(
     node: graph::NodeIndex<u32>,
 ) -> (interface::Status, bool)
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::State: Eq + interface::TurnByTurnState,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
 {
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
         ExpansionStatus::RequiresExpansion(state) => state,
@@ -43,7 +44,7 @@ pub fn ponder_expansion<RuleSet: interface::RuleSetTrait>(
     check_for_visits: bool,
 ) -> ExpansionStatus<RuleSet::State>
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+    RuleSet::State: interface::TurnByTurnState,
 {
     let weight = tree.node_weight_mut(node_index).unwrap();
     if weight.expanding {
@@ -66,7 +67,7 @@ pub fn save_expansion<RuleSet: interface::RuleSetTrait>(
     node_index: graph::NodeIndex<u32>,
     successor: items::Play<RuleSet>,
 ) where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
+    RuleSet::State: interface::TurnByTurnState,
 {
     let mut parent_weight = tree.node_weight_mut(node_index).unwrap();
     parent_weight.expanding = false;

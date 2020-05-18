@@ -94,8 +94,6 @@ impl<Variant: variants::BaseVariant> interface::TurnByTurnState for State<Varian
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::ComparableState for State<Variant> {}
-
 #[cfg(test)]
 mod tests {
     use super::super::plies;

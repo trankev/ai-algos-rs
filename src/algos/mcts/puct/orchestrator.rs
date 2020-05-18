@@ -7,13 +7,14 @@ use crate::algos;
 use crate::interface;
 use crossbeam::channel;
 use std::error;
+use std::hash;
 use std::mem;
 use std::thread;
 
 pub struct Orchestrator<RuleSet: interface::WithPermutableState + 'static>
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq + interface::TurnByTurnState,
 {
     ruleset: RuleSet,
     master_handle: Option<thread::JoinHandle<()>>,
@@ -27,8 +28,8 @@ where
 
 impl<RuleSet: interface::WithPermutableState + 'static> Orchestrator<RuleSet>
 where
-    RuleSet::State: interface::ComparableState + interface::TurnByTurnState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq + interface::TurnByTurnState,
 {
     pub fn new(ruleset: RuleSet) -> Orchestrator<RuleSet> {
         let expansion_pool = expansion::Pool::new();

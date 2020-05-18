@@ -22,5 +22,3 @@ impl interface::TurnByTurnState for EmptyState {
         self.current_player
     }
 }
-
-impl interface::ComparableState for EmptyState {}

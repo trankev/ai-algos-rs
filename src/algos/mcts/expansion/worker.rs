@@ -4,11 +4,12 @@ use super::responses;
 use crate::interface;
 use crossbeam::channel;
 use std::error;
+use std::hash;
 
 pub struct Worker<RuleSet: interface::WithPermutableState + 'static>
 where
-    RuleSet::State: interface::ComparableState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
@@ -18,8 +19,8 @@ where
 
 impl<RuleSet: interface::WithPermutableState + 'static> Worker<RuleSet>
 where
-    RuleSet::State: interface::ComparableState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     pub fn new(
         ruleset: RuleSet,

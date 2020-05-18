@@ -5,12 +5,13 @@ use crate::interface;
 use crossbeam::atomic;
 use crossbeam::channel;
 use std::error;
+use std::hash;
 use std::thread;
 
 pub struct Pool<RuleSet: interface::WithPermutableState + 'static>
 where
-    RuleSet::State: interface::ComparableState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     workers: Vec<thread::JoinHandle<usize>>,
     request_receiver: channel::Receiver<requests::Request<RuleSet>>,
@@ -22,8 +23,8 @@ where
 
 impl<RuleSet: interface::WithPermutableState + 'static> Pool<RuleSet>
 where
-    RuleSet::State: interface::ComparableState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     pub fn new() -> Pool<RuleSet> {
         let (request_sender, request_receiver) = channel::unbounded();

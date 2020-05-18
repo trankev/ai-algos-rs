@@ -58,5 +58,3 @@ impl<Variant: variants::BaseVariant> interface::TurnByTurnState for State<Varian
         self.current_player
     }
 }
-
-impl<Variant: variants::BaseVariant> interface::ComparableState for State<Variant> {}

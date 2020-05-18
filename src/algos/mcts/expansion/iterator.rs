@@ -1,11 +1,12 @@
 use super::items;
 use crate::interface;
 use crate::tools::plies;
+use std::hash;
 
 pub struct Expander<'a, RuleSet: interface::WithPermutableState>
 where
-    RuleSet::State: interface::ComparableState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     ply_iterator: plies::PermutationsIterator<'a, RuleSet>,
     ruleset: &'a RuleSet,
@@ -14,8 +15,8 @@ where
 
 impl<'a, RuleSet: interface::WithPermutableState> Expander<'a, RuleSet>
 where
-    RuleSet::State: interface::ComparableState,
-    RuleSet::Ply: interface::ComparablePly,
+    RuleSet::Ply: Eq + Ord + hash::Hash,
+    RuleSet::State: Eq,
 {
     pub fn new(ruleset: &'a RuleSet, state: &'a RuleSet::State) -> Expander<'a, RuleSet> {
         let ply_iterator = plies::PermutationsIterator::new(ruleset, state);
