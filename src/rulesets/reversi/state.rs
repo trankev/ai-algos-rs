@@ -32,6 +32,22 @@ impl<Variant: variants::BaseVariant> State<Variant> {
             current_player,
         }
     }
+
+    pub fn swap(&self, grid_permutation: &[usize], switch_players: bool) -> Self {
+        let permuted_grid1 = self.grids[0].swap(grid_permutation);
+        let permuted_grid2 = self.grids[1].swap(grid_permutation);
+        if switch_players {
+            State {
+                grids: [permuted_grid2, permuted_grid1],
+                current_player: 1 - self.current_player,
+            }
+        } else {
+            State {
+                grids: [permuted_grid1, permuted_grid2],
+                current_player: self.current_player,
+            }
+        }
+    }
 }
 
 impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {

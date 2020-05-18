@@ -1,3 +1,5 @@
+use super::permutation;
+use super::permutation_iterators;
 use super::plies;
 use super::ply_iterators;
 use super::state;
@@ -5,24 +7,33 @@ use super::variants;
 use crate::interface;
 use crate::interface::PlyIteratorTrait;
 use crate::utils::grids::strips;
+use crate::utils::grids::symmetries;
 use std::cmp;
 use std::marker;
 use std::sync;
 
 #[derive(Clone)]
 pub struct Reversi<Variant: variants::BaseVariant> {
+    symmetries: symmetries::SymmetryTable,
     variant: marker::PhantomData<Variant>,
     pub strips: sync::Arc<Vec<strips::Indices>>,
 }
 
 impl<Variant: variants::BaseVariant> Reversi<Variant> {
     pub fn new() -> Reversi<Variant> {
+        let dimensions = vec![Variant::GRID_SIZE, Variant::GRID_SIZE];
+        let symmetries = symmetries::SymmetryTable::new(&dimensions);
         Reversi {
+            symmetries,
             variant: marker::PhantomData,
             strips: sync::Arc::new(
                 strips::StripIterator::new(Variant::DIMENSIONS.to_vec()).collect(),
             ),
         }
+    }
+
+    pub fn grid_symmetry_count(&self) -> usize {
+        self.symmetries.permutations.len()
     }
 
     fn reverse_pegs(
@@ -148,6 +159,35 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Varian
     }
 }
 
+impl<Variant: variants::BaseVariant> interface::WithPermutableState for Reversi<Variant> {
+    type Permutation = permutation::Permutation;
+    type PermutationIterator = permutation_iterators::PermutationIterator;
+
+    fn swap_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
+        let permutations =
+            &self.symmetries.permutations[permutation.grid_permutation_index as usize];
+        state.swap(permutations, permutation.switched_players)
+    }
+
+    fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
+        let permutation_index =
+            self.symmetries.reverses[permutation.grid_permutation_index as usize];
+        let permutations = &self.symmetries.permutations[permutation_index];
+        state.swap(permutations, permutation.switched_players)
+    }
+
+    fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Permutation) -> Self::Ply {
+        match ply {
+            plies::Ply::Pass => plies::Ply::Pass,
+            plies::Ply::Place(index) => {
+                let permutation =
+                    &self.symmetries.permutations[permutation.grid_permutation_index as usize];
+                plies::Ply::Place(permutation[*index])
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::instances;
@@ -155,7 +195,10 @@ mod tests {
     use super::*;
     use crate::interface;
     use crate::interface::Deterministic;
+    use crate::interface::PermutationIteratorTrait;
     use crate::interface::RuleSetTrait;
+    use crate::interface::WithPermutableState;
+    use std::collections;
 
     #[test]
     fn test_play_on_occupied_cell() {
@@ -193,15 +236,15 @@ mod tests {
     }
 
     play_tests! {
-        // leftward_take: ([5, 10], [6, 9], 0, 7, [5, 6, 7, 10], [9], 1),
-        // rightward_take: ([5, 10], [6, 9], 0, 8, [5, 8, 9, 10], [6], 1),
-        // upward_take: ([5, 10], [6, 9], 0, 2, [2, 5, 6, 10], [9], 1),
+        leftward_take: ([5, 10], [6, 9], 0, 7, [5, 6, 7, 10], [9], 1),
+        rightward_take: ([5, 10], [6, 9], 0, 8, [5, 8, 9, 10], [6], 1),
+        upward_take: ([5, 10], [6, 9], 0, 2, [2, 5, 6, 10], [9], 1),
         downward_take: ([5, 10], [6, 9], 0, 13, [5, 9, 10, 13], [6], 1),
-        // upleftward_take: ([12], [9], 0, 6, [6, 9, 12], [], 1),
-        // uprightward_take: ([15], [10], 0, 5, [5, 10, 15], [], 1),
-        // downrightward_take: ([6], [9], 0, 12, [6, 9, 12], [], 1),
-        // downleftward_take: ([5], [10], 0, 15, [5, 10, 15], [], 1),
-        // several_take: ([2, 8, 10], [1, 4, 5], 0, 0, [0, 1, 2, 4, 5, 8, 10], [], 1),
+        upleftward_take: ([12], [9], 0, 6, [6, 9, 12], [], 1),
+        uprightward_take: ([15], [10], 0, 5, [5, 10, 15], [], 1),
+        downrightward_take: ([6], [9], 0, 12, [6, 9, 12], [], 1),
+        downleftward_take: ([5], [10], 0, 15, [5, 10, 15], [], 1),
+        several_take: ([2, 8, 10], [1, 4, 5], 0, 0, [0, 1, 2, 4, 5, 8, 10], [], 1),
     }
 
     macro_rules! status_tests {
@@ -224,5 +267,23 @@ mod tests {
         p1_win: ([0, 1, 2, 4, 4, 5, 7, 8], [13, 14, 15], 0, interface::Status::Win{player: 0}),
         p2_win: ([0, 1, 4], [3, 6, 7, 9, 11, 12, 13, 14], 0, interface::Status::Win{player: 1}),
         draw: ([1, 2, 3, 4, 6], [9, 11, 12, 13, 14], 0, interface::Status::Draw),
+    }
+
+    #[test]
+    fn test_swap_state() {
+        let game = Reversi::<instances::Mini>::new();
+        let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
+        let permutations =
+            <Reversi<instances::Mini> as interface::WithPermutableState>::PermutationIterator::new(
+                &game,
+            );
+        let mut permutation_set = collections::HashSet::new();
+        for permutation in permutations {
+            let permuted = game.swap_state(&state, &permutation);
+            let reverse = game.reverse_state(&permuted, &permutation);
+            permutation_set.insert(permuted);
+            assert_eq!(state, reverse);
+        }
+        assert_eq!(permutation_set.len(), 16);
     }
 }
