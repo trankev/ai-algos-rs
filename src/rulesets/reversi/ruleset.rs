@@ -39,33 +39,33 @@ impl<Variant: variants::BaseVariant> Reversi<Variant> {
     fn reverse_pegs(
         &self,
         state: &mut state::State<Variant>,
-        mut start: isize,
+        start: isize,
         direction: isize,
         length: isize,
     ) -> bool {
-        start += direction;
+        let mut current = start + direction;
+        let mut remaining = length;
         let current_player = state.current_player as usize;
         let opponent = 1 - current_player;
-        if !state.grids[opponent].isset(start as usize) {
+        if !state.grids[opponent].isset(current as usize) {
             return false;
         }
-        let mut current = start;
-        let mut remaining = length;
         loop {
-            current += direction;
             if state.grids[current_player].isset(current as usize) {
                 break;
             } else if !state.grids[opponent].isset(current as usize) {
                 return false;
             }
+            current += direction;
             remaining -= 1;
             if remaining == 0 {
                 return false;
             }
         }
         current = start;
-        remaining = length;
+        remaining = length - 1;
         loop {
+            current += direction;
             if !state.grids[opponent].isset(current as usize) {
                 break;
             }
@@ -75,7 +75,6 @@ impl<Variant: variants::BaseVariant> Reversi<Variant> {
             if remaining == 0 {
                 break;
             }
-            current += direction;
         }
         true
     }
@@ -135,12 +134,12 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Varian
                         found_update |=
                             self.reverse_pegs(&mut result, index, -strip.step, distance);
                     }
-                    if strip.length - distance > 1 {
+                    if strip.length - distance > 2 {
                         found_update |= self.reverse_pegs(
                             &mut result,
                             index,
                             strip.step,
-                            strip.length - distance,
+                            strip.length - distance - 1,
                         );
                     }
                 }
