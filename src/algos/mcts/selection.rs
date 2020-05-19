@@ -6,7 +6,6 @@ use petgraph::graph;
 pub fn select<State: interface::StateTrait + interface::TurnByTurnState, Edge>(
     tree: &graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
-    reverse: bool,
 ) -> graph::NodeIndex<u32> {
     let weight = tree.node_weight(node).unwrap();
     if !weight.is_visited() {
@@ -25,8 +24,11 @@ pub fn select<State: interface::StateTrait + interface::TurnByTurnState, Edge>(
         })
         .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap());
     match best_neighbour {
-        Some((child_index, _)) => select(tree, child_index, !reverse),
-        None => node,
+        Some((child_index, _)) => select(tree, child_index),
+        None => match tree.neighbors(node).nth(0) {
+            Some(child_index) => child_index,
+            None => node,
+        },
     }
 }
 
@@ -44,7 +46,7 @@ mod tests {
             tests::EmptyState::new(),
             interface::Status::Ongoing,
         ));
-        let result = select(&tree, root, false);
+        let result = select(&tree, root);
         assert_eq!(result, root);
     }
 
@@ -65,7 +67,7 @@ mod tests {
         ));
         tree.add_edge(root_index, second_index, ());
 
-        let result = select(&tree, root_index, false);
+        let result = select(&tree, root_index);
         assert_eq!(result, second_index);
     }
 
@@ -84,7 +86,7 @@ mod tests {
         let second_index = tree.add_node(second_weight);
         tree.add_edge(root_index, second_index, ());
 
-        let result = select(&tree, root_index, false);
+        let result = select(&tree, root_index);
         assert_eq!(result, first_index);
     }
 
@@ -103,7 +105,7 @@ mod tests {
         let second_index = tree.add_node(second_weight);
         tree.add_edge(root_index, second_index, ());
 
-        let result = select(&tree, root_index, false);
+        let result = select(&tree, root_index);
         assert_eq!(result, first_index);
     }
 }

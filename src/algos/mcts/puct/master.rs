@@ -15,10 +15,12 @@ use rand;
 use rand::rngs;
 use std::error;
 
+#[derive(Debug)]
 enum SelectionResult {
     Expansion,
     Simulation,
     Nothing,
+    PendingExpansion,
 }
 
 pub struct Master<RuleSet>
@@ -74,57 +76,6 @@ where
         self.root = Some(index);
     }
 
-    fn first_iteration(&mut self) -> Result<(), Box<dyn error::Error>> {
-        let node = match self.root {
-            Some(node) => node,
-            None => {
-                return Ok(());
-            }
-        };
-
-        let selected = selection::select(&self.tree, node, true);
-
-        let mut wait_for_expansion = false;
-        match expansion::ponder_expansion::<RuleSet>(&mut self.tree, selected, false) {
-            expansion::ExpansionStatus::RequiresExpansion(state) => {
-                let request = expansion::Request::ExpansionRequest {
-                    node_index: selected,
-                    state,
-                };
-                self.expansion_request_sender.send(request)?;
-                wait_for_expansion = true;
-            }
-            expansion::ExpansionStatus::NotVisited => unreachable!(),
-            expansion::ExpansionStatus::Terminal(_) => (),
-            expansion::ExpansionStatus::PendingExpansion => unreachable!(),
-        };
-
-        let (to_simulate, state) =
-            simulation::fetch_random_child::<RuleSet>(&self.tree, selected, &mut self.rng);
-        let request = simulation::Request::SimulationRequest {
-            node_index: to_simulate,
-            state,
-        };
-        self.simulation_request_sender.send(request)?;
-
-        if wait_for_expansion {
-            let response = self.expansion_response_receiver.recv()?;
-            for successor in response.successors {
-                expansion::save_expansion(&mut self.tree, selected, successor);
-            }
-        }
-
-        let response = self.simulation_response_receiver.recv()?;
-        backpropagation::backpropagate(
-            &mut self.tree,
-            response.node_index,
-            true,
-            Some(&response.status),
-        );
-
-        Ok(())
-    }
-
     fn iterate_concurrent(
         &mut self,
         iteration_count: usize,
@@ -143,27 +94,30 @@ where
         let mut simulation_jobs: isize = 0;
         for _ in 0..iteration_count {
             if simulation_jobs < simulation_threshold * 10 {
-                match self.make_selection(node)? {
-                    SelectionResult::Expansion => {
-                        expansion_jobs += 1;
-                    }
-                    SelectionResult::Simulation => {
-                        simulation_jobs += 1;
-                    }
+                let mut waiting_for_expansion = false;
+                let result = self.make_selection(node)?;
+                match result {
+                    SelectionResult::Expansion => expansion_jobs += 1,
+                    SelectionResult::Simulation => simulation_jobs += 1,
                     SelectionResult::Nothing => (),
+                    SelectionResult::PendingExpansion => waiting_for_expansion = true,
                 }
-                if expansion_jobs < expansion_threshold {
+                if !waiting_for_expansion && expansion_jobs < expansion_threshold {
                     continue;
                 }
             }
 
-            let jobs = self.wait_for_expansion()?;
-            expansion_jobs -= jobs;
-            simulation_jobs += jobs;
-            if simulation_jobs < simulation_threshold {
-                continue;
+            if expansion_jobs > 0 {
+                let jobs = self.wait_for_expansion()?;
+                expansion_jobs -= jobs;
+                simulation_jobs += jobs;
+                if simulation_jobs < simulation_threshold {
+                    continue;
+                }
             }
-            simulation_jobs -= self.wait_for_simulation()?;
+            if simulation_jobs > 0 {
+                simulation_jobs -= self.wait_for_simulation()?;
+            }
         }
         println!(
             "Cleaning {} expansion_jobs and {} simulation_jobs",
@@ -184,7 +138,7 @@ where
         &mut self,
         node: graph::NodeIndex<u32>,
     ) -> Result<SelectionResult, Box<dyn error::Error>> {
-        let selected = selection::select(&self.tree, node, false);
+        let selected = selection::select(&self.tree, node);
         match expansion::ponder_expansion::<RuleSet>(&mut self.tree, selected, true) {
             expansion::ExpansionStatus::RequiresExpansion(state) => {
                 let request = expansion::Request::ExpansionRequest {
@@ -210,7 +164,7 @@ where
                 backpropagation::backpropagate(&mut self.tree, selected, true, Some(&status));
                 Ok(SelectionResult::Nothing)
             }
-            expansion::ExpansionStatus::PendingExpansion => Ok(SelectionResult::Nothing),
+            expansion::ExpansionStatus::PendingExpansion => Ok(SelectionResult::PendingExpansion),
         }
     }
 
@@ -234,9 +188,9 @@ where
     }
 
     fn wait_for_expansion(&mut self) -> Result<isize, Box<dyn error::Error>> {
-        // let response = self.expansion_response_receiver.recv()?;
-        // self.handle_expansion(response.node_index, response.successors)?;
-        let mut handled = 0;
+        let response = self.expansion_response_receiver.recv()?;
+        self.handle_expansion(response.node_index, response.successors)?;
+        let mut handled = 1;
         loop {
             match self.expansion_response_receiver.try_recv() {
                 Ok(response) => {
@@ -290,6 +244,7 @@ where
             }
             SelectionResult::Simulation => (),
             SelectionResult::Nothing => return Ok(()),
+            SelectionResult::PendingExpansion => unreachable!(),
         }
         self.wait_for_simulation()?;
         Ok(())
@@ -310,7 +265,6 @@ where
             match self.master_request_receiver.recv()? {
                 requests::Request::SetState(state) => {
                     self.set_state(state);
-                    self.first_iteration()?;
                 }
                 requests::Request::IterateSequentially { count } => {
                     for _ in 0..count {

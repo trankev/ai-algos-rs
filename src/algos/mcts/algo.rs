@@ -57,7 +57,7 @@ where
                 return;
             }
         };
-        let mut selected = selection::select(&self.tree, node, false);
+        let mut selected = selection::select(&self.tree, node);
         let (mut status, expanded) =
             expansion::expand::<RuleSet>(&mut self.tree, &self.ruleset, selected);
         if expanded {
