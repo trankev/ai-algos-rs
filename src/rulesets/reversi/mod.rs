@@ -12,3 +12,4 @@ pub use instances::Mini;
 pub use permutation::Permutation;
 pub use plies::Ply;
 pub use ruleset::Reversi;
+pub use state::State;
