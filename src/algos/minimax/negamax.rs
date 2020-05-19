@@ -69,8 +69,8 @@ mod tests {
                     let algo = Negamax{ruleset};
                     let result = algo.compute(&state, current_player);
                     assert_eq!(result.score(), expected_score);
-                    let expected_plies: Vec<connectn::Ply> = expected_indices.iter().map(
-                        |index| connectn::Ply{index: *index}
+                    let expected_plies: Vec<connectn::TicTacToePly> = expected_indices.iter().map(
+                        |index| connectn::Ply::new(*index)
                     ).collect();
                     let plies = result.plies();
                     assert_eq!(plies, expected_plies);

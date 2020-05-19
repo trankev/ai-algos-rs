@@ -16,3 +16,5 @@ pub use state::State;
 
 pub type TicTacToeState = State<variants::TicTacToe>;
 pub type GomokuState = State<variants::Gomoku>;
+pub type TicTacToePly = Ply<variants::TicTacToe>;
+pub type GomokuPly = Ply<variants::Gomoku>;

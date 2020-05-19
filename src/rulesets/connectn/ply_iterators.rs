@@ -25,7 +25,7 @@ impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<connectn::RuleS
         &mut self,
         _ruleset: &connectn::RuleSet<Variant>,
         state: &connectn::State<Variant>,
-    ) -> Option<connectn::Ply> {
+    ) -> Option<connectn::Ply<Variant>> {
         loop {
             if self.current_index >= Variant::CELL_COUNT {
                 return None;
@@ -37,14 +37,13 @@ impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<connectn::RuleS
         }
         let to_return = self.current_index;
         self.current_index += 1;
-        Some(connectn::Ply {
-            index: to_return as u8,
-        })
+        Some(connectn::Ply::<Variant>::new(to_return as u8))
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::super::variants;
     use super::*;
     use crate::interface::PlyIteratorTrait;
     use crate::rulesets::connectn;
@@ -56,12 +55,12 @@ mod tests {
         let state = connectn::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0);
         let mut iterator =
             <connectn::TicTacToe as interface::RuleSetTrait>::PlyIterator::new(&ruleset, &state);
-        let expected: collections::HashSet<connectn::Ply> = [
-            connectn::Ply { index: 0 },
-            connectn::Ply { index: 2 },
-            connectn::Ply { index: 3 },
-            connectn::Ply { index: 5 },
-            connectn::Ply { index: 8 },
+        let expected: collections::HashSet<connectn::Ply<variants::TicTacToe>> = [
+            connectn::Ply::new(0),
+            connectn::Ply::new(2),
+            connectn::Ply::new(3),
+            connectn::Ply::new(5),
+            connectn::Ply::new(8),
         ]
         .iter()
         .cloned()

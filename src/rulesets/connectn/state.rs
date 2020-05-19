@@ -38,7 +38,7 @@ impl<Variant: variants::BaseVariant> State<Variant> {
         self.grids.iter().all(|grid| !grid.isset(index))
     }
 
-    pub fn play(&mut self, ply: &plies::Ply) -> Result<(), interface::PlayError> {
+    pub fn play(&mut self, ply: &plies::Ply<Variant>) -> Result<(), interface::PlayError> {
         for grid in &self.grids {
             if grid.isset(ply.index as usize) {
                 return Err(interface::PlayError {
@@ -72,7 +72,7 @@ impl<Variant: variants::BaseVariant> State<Variant> {
 impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
     fn ascii_representation(&self) -> String {
         let mut result = String::new();
-        for index in 0..Variant::GRID_SIZE {
+        for index in 0..Variant::CELL_COUNT {
             if self.grids[0].isset(index) {
                 result.push('X');
             } else if self.grids[1].isset(index) {
@@ -80,7 +80,7 @@ impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
             } else {
                 result.push('.');
             }
-            if index % Variant::GRID_SIZE == Variant::GRID_SIZE {
+            if index % Variant::GRID_SIZE == Variant::GRID_SIZE - 1 {
                 result.push('\n');
             }
         }
@@ -123,7 +123,7 @@ mod tests {
         let from_indices = State::<variants::TicTacToe>::from_indices(&[4, 1], &[8, 7], 0);
         let mut from_scratch = State::<variants::TicTacToe>::new();
         for index in &[4, 8, 1, 7] {
-            from_scratch.play(&plies::Ply { index: *index }).unwrap();
+            from_scratch.play(&plies::Ply::new(*index)).unwrap();
         }
         assert_eq!(from_indices, from_scratch);
     }

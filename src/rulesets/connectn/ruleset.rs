@@ -32,7 +32,7 @@ impl<Variant: variants::BaseVariant> RuleSet<Variant> {
 
 impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant> {
     type State = state::State<Variant>;
-    type Ply = plies::Ply;
+    type Ply = plies::Ply<Variant>;
     type PlyIterator = ply_iterators::PlyIterator<Variant>;
 
     fn initial_state(&self) -> Self::State {
@@ -96,9 +96,7 @@ impl<Variant: variants::BaseVariant> interface::WithPermutableState for RuleSet<
     fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Permutation) -> Self::Ply {
         let permutation =
             &self.symmetries.permutations[permutation.grid_permutation_index as usize];
-        plies::Ply {
-            index: permutation[ply.index as usize] as u8,
-        }
+        plies::Ply::new(permutation[ply.index as usize] as u8)
     }
 }
 
@@ -119,7 +117,7 @@ mod tests {
     fn test_invalid_move() {
         let game = TicTacToe::new();
         let state = game.initial_state();
-        let ply = plies::Ply { index: 3 };
+        let ply = plies::Ply::new(3);
         let resulting_state = game.play(&state, &ply).unwrap();
         let result = game.play(&resulting_state, &ply);
         assert!(result.is_err());

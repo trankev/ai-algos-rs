@@ -2,7 +2,7 @@ use crate::utils::bitarray;
 use std::fmt;
 use std::hash;
 
-pub trait BaseVariant: Clone + Send + Ord + fmt::Debug + hash::Hash {
+pub trait BaseVariant: Clone + Copy + Send + Ord + fmt::Debug + hash::Hash {
     type ArraySettings: bitarray::BitArraySettings;
 
     const GRID_SIZE: usize;
@@ -10,7 +10,7 @@ pub trait BaseVariant: Clone + Send + Ord + fmt::Debug + hash::Hash {
     const RUN_COUNT: usize;
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Gomoku {}
 
 impl BaseVariant for Gomoku {
@@ -20,7 +20,7 @@ impl BaseVariant for Gomoku {
     const RUN_COUNT: usize = 5;
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TicTacToe {}
 
 impl BaseVariant for TicTacToe {

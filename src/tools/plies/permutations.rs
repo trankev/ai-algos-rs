@@ -78,9 +78,9 @@ mod tests {
         let mut result = iterator.collect::<Vec<_>>();
         result.sort();
         let expected = vec![
-            connectn::Ply { index: 0 },
-            connectn::Ply { index: 1 },
-            connectn::Ply { index: 4 },
+            connectn::Ply::new(0),
+            connectn::Ply::new(1),
+            connectn::Ply::new(4),
         ];
         assert_eq!(result, expected);
     }
