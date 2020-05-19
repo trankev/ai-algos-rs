@@ -1,16 +1,24 @@
+use super::variants;
 use crate::interface;
+use std::marker;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Ply {
+pub enum Ply<Variant: variants::BaseVariant> {
     Place(usize),
     Pass,
+    Unused(marker::PhantomData<Variant>),
 }
 
-impl interface::PlyTrait for Ply {
+impl<Variant: variants::BaseVariant> interface::PlyTrait for Ply<Variant> {
     fn ascii_representation(&self) -> String {
         match self {
-            Ply::Place(index) => format!("Place({})", index),
+            Ply::Place(index) => {
+                let row = index / Variant::GRID_SIZE;
+                let column = index % Variant::GRID_SIZE;
+                format!("Place[{}, {}]", row, column)
+            }
             Ply::Pass => String::from("Pass"),
+            Ply::Unused(_) => unreachable!(),
         }
     }
 }

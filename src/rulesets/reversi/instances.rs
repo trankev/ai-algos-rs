@@ -1,7 +1,7 @@
 use super::variants;
 use crate::utils::bitarray;
 
-#[derive(Clone, Hash, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Hash, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Classic {}
 impl variants::BaseVariant for Classic {
     type ArraySettings = bitarray::BitArray64Settings;
@@ -9,7 +9,7 @@ impl variants::BaseVariant for Classic {
     const PLAYER_POSITIONS: [&'static [usize]; 2] = [&[27, 36], &[28, 35]];
 }
 
-#[derive(Clone, Hash, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Hash, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Mini {}
 impl variants::BaseVariant for Mini {
     type ArraySettings = bitarray::BitArray16Settings;

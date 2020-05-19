@@ -82,7 +82,7 @@ impl<Variant: variants::BaseVariant> Reversi<Variant> {
 }
 
 impl<Variant: variants::BaseVariant> interface::RuleSetTrait for Reversi<Variant> {
-    type Ply = plies::Ply;
+    type Ply = plies::Ply<Variant>;
     type State = state::State<Variant>;
     type PlyIterator = ply_iterators::PlyIterator<Variant>;
 
@@ -155,6 +155,7 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Varian
                 Ok(result)
             }
             plies::Ply::Pass => Ok(state.clone()),
+            plies::Ply::Unused(_) => unreachable!(),
         }
     }
 }
@@ -179,6 +180,7 @@ impl<Variant: variants::BaseVariant> interface::WithPermutableState for Reversi<
     fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Permutation) -> Self::Ply {
         match ply {
             plies::Ply::Pass => plies::Ply::Pass,
+            plies::Ply::Unused(_) => unreachable!(),
             plies::Ply::Place(index) => {
                 let permutation =
                     &self.symmetries.permutations[permutation.grid_permutation_index as usize];
@@ -200,11 +202,13 @@ mod tests {
     use crate::interface::WithPermutableState;
     use std::collections;
 
+    type MiniPly = plies::Ply<instances::Mini>;
+
     #[test]
     fn test_play_on_occupied_cell() {
         let game = Reversi::<instances::Mini>::new();
         let state = state::State::from_indices(&[5, 10], &[6, 9], 0);
-        let ply = plies::Ply::Place(5);
+        let ply = MiniPly::Place(5);
         let result = game.play(&state, &ply);
         assert!(result.is_err());
     }
@@ -213,7 +217,7 @@ mod tests {
     fn test_play_on_non_reversing_cell() {
         let game = Reversi::<instances::Mini>::new();
         let state = state::State::from_indices(&[5, 10], &[6, 9], 0);
-        let ply = plies::Ply::Place(4);
+        let ply = MiniPly::Place(4);
         let result = game.play(&state, &ply);
         assert!(result.is_err());
     }
@@ -226,7 +230,7 @@ mod tests {
                     let (in_p1_idx, in_p2_idx, in_player, ply_idx, out_p1_idx, out_p2_idx, out_player) = $value;
                     let game = Reversi::<instances::Mini>::new();
                     let state = state::State::from_indices(&in_p1_idx, &in_p2_idx, in_player);
-                    let ply = plies::Ply::Place(ply_idx);
+                    let ply = MiniPly::Place(ply_idx);
                     let resulting_state = game.play(&state, &ply).unwrap();
                     let expected = state::State::from_indices(&out_p1_idx, &out_p2_idx, out_player);
                     assert_eq!(resulting_state, expected);

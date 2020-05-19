@@ -95,13 +95,13 @@ impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<ruleset::Revers
         &mut self,
         _ruleset: &ruleset::Reversi<Variant>,
         state: &state::State<Variant>,
-    ) -> Option<plies::Ply> {
+    ) -> Option<plies::Ply<Variant>> {
         while let Some((player, index)) = self.iterate_grid(state) {
             if player != state.current_player || self.seen.contains(&index) {
                 continue;
             }
             self.seen.insert(index);
-            return Some(plies::Ply::Place(index));
+            return Some(plies::Ply::<Variant>::Place(index));
         }
         None
     }
@@ -117,20 +117,23 @@ mod tests {
     use crate::interface::RuleSetTrait;
     use std::collections;
 
+    type ClassicReversi = ruleset::Reversi<instances::Classic>;
+    type ClassicPly = plies::Ply<instances::Classic>;
+
     #[test]
     fn test_initial_state() {
-        let ruleset = ruleset::Reversi::<instances::Classic>::new();
+        let ruleset = ClassicReversi::new();
         let state = ruleset.initial_state();
         let mut iterator = PlyIterator::new(&ruleset, &state);
-        let mut result = collections::HashSet::<plies::Ply>::new();
+        let mut result = collections::HashSet::<ClassicPly>::new();
         while let Some(ply) = iterator.iterate(&ruleset, &state) {
             result.insert(ply);
         }
-        let expected: collections::HashSet<plies::Ply> = [
-            plies::Ply::Place(29),
-            plies::Ply::Place(34),
-            plies::Ply::Place(20),
-            plies::Ply::Place(43),
+        let expected: collections::HashSet<ClassicPly> = [
+            plies::Ply::<instances::Classic>::Place(29),
+            plies::Ply::<instances::Classic>::Place(34),
+            plies::Ply::<instances::Classic>::Place(20),
+            plies::Ply::<instances::Classic>::Place(43),
         ]
         .iter()
         .cloned()
@@ -151,9 +154,9 @@ mod tests {
                     while let Some(ply) = iterator.iterate(&ruleset, &state) {
                         result.push(ply);
                     }
-                    let mut expected: Vec<plies::Ply> = expected
+                    let mut expected: Vec<ClassicPly> = expected
                         .iter()
-                        .map(|index| plies::Ply::Place(*index))
+                        .map(|index| ClassicPly::Place(*index))
                         .collect();
                     result.sort();
                     expected.sort();

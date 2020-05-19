@@ -3,7 +3,7 @@ use std::fmt;
 use std::hash;
 
 pub trait BaseVariant:
-    Clone + hash::Hash + fmt::Debug + Eq + Ord + PartialEq + PartialOrd + Send
+    Clone + Copy + hash::Hash + fmt::Debug + Eq + Ord + PartialEq + PartialOrd + Send
 {
     type ArraySettings: bitarray::BitArraySettings;
 
