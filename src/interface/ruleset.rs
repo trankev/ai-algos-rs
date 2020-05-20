@@ -14,6 +14,8 @@ pub trait RuleSetTrait: Clone + Send + Sized {
     fn status(&self, state: &Self::State) -> status::Status;
 }
 
+/// Ruleset with deterministic outcome.
+/// For a given state, playing the same move will always result in the same state.
 pub trait Deterministic: RuleSetTrait {
     fn play(&self, state: &Self::State, ply: &Self::Ply) -> Result<Self::State, PlayError>;
 }
