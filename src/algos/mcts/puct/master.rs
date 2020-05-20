@@ -25,7 +25,7 @@ enum SelectionResult {
 
 pub struct Master<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::State: interface::TurnByTurnState,
 {
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
@@ -44,7 +44,7 @@ where
 
 impl<RuleSet> Master<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::State: interface::TurnByTurnState,
 {
     pub fn new(

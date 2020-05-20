@@ -1,8 +1,8 @@
-use super::permutation_iterator;
 use super::ply;
 use super::ply_iterator;
 use super::state;
 use super::status;
+use super::symmetry_iterator;
 use super::PlayError;
 
 pub trait RuleSetTrait: Clone + Send + Sized {
@@ -20,11 +20,11 @@ pub trait Deterministic: RuleSetTrait {
     fn play(&self, state: &Self::State, ply: &Self::Ply) -> Result<Self::State, PlayError>;
 }
 
-pub trait WithPermutableState: RuleSetTrait {
-    type Permutation;
-    type PermutationIterator: permutation_iterator::PermutationIteratorTrait<Self>;
+pub trait HasStatesWithSymmetries: RuleSetTrait {
+    type Symmetry;
+    type SymmetryIterator: symmetry_iterator::SymmetryIteratorTrait<Self>;
 
-    fn swap_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State;
-    fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Permutation) -> Self::Ply;
-    fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State;
+    fn swap_state(&self, state: &Self::State, permutation: &Self::Symmetry) -> Self::State;
+    fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Symmetry) -> Self::Ply;
+    fn reverse_state(&self, state: &Self::State, permutation: &Self::Symmetry) -> Self::State;
 }

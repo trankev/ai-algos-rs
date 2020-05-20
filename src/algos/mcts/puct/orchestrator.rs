@@ -13,7 +13,7 @@ use std::thread;
 
 pub struct Orchestrator<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq + interface::TurnByTurnState,
 {
@@ -29,7 +29,7 @@ where
 
 impl<RuleSet> Orchestrator<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq + interface::TurnByTurnState,
 {

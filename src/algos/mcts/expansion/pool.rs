@@ -10,7 +10,7 @@ use std::thread;
 
 pub struct Pool<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -24,7 +24,7 @@ where
 
 impl<RuleSet> Pool<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

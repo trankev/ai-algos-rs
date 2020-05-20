@@ -1,5 +1,5 @@
 mod basic;
-mod permutations;
+mod symmetries;
 
 pub use basic::BasicIterator;
-pub use permutations::PermutationsIterator;
+pub use symmetries::SymmetriesIterator;

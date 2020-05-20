@@ -1,8 +1,8 @@
-use super::permutation;
-use super::permutation_iterators;
 use super::plies;
 use super::ply_iterators;
 use super::state;
+use super::symmetry;
+use super::symmetry_iterators;
 use super::variants;
 use crate::interface;
 use crate::utils::bitarray;
@@ -76,24 +76,24 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for RuleSet<Varian
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::WithPermutableState for RuleSet<Variant> {
-    type Permutation = permutation::Permutation;
-    type PermutationIterator = permutation_iterators::PermutationIterator;
+impl<Variant: variants::BaseVariant> interface::HasStatesWithSymmetries for RuleSet<Variant> {
+    type Symmetry = symmetry::Symmetry;
+    type SymmetryIterator = symmetry_iterators::SymmetryIterator;
 
-    fn swap_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
+    fn swap_state(&self, state: &Self::State, permutation: &Self::Symmetry) -> Self::State {
         let permutations =
             &self.symmetries.permutations[permutation.grid_permutation_index as usize];
         state.swap(permutations, permutation.switched_players)
     }
 
-    fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
+    fn reverse_state(&self, state: &Self::State, permutation: &Self::Symmetry) -> Self::State {
         let permutation_index =
             self.symmetries.reverses[permutation.grid_permutation_index as usize];
         let permutations = &self.symmetries.permutations[permutation_index];
         state.swap(permutations, permutation.switched_players)
     }
 
-    fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Permutation) -> Self::Ply {
+    fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Symmetry) -> Self::Ply {
         let permutation =
             &self.symmetries.permutations[permutation.grid_permutation_index as usize];
         plies::Ply::new(permutation[ply.index as usize] as u8)
@@ -108,9 +108,9 @@ mod tests {
     use super::super::plies;
     use super::*;
     use crate::interface::Deterministic;
-    use crate::interface::PermutationIteratorTrait;
+    use crate::interface::HasStatesWithSymmetries;
     use crate::interface::RuleSetTrait;
-    use crate::interface::WithPermutableState;
+    use crate::interface::SymmetryIteratorTrait;
     use std::collections;
 
     #[test]
@@ -151,7 +151,7 @@ mod tests {
         let game = TicTacToe::new();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
         let permutations =
-            <TicTacToe as interface::WithPermutableState>::PermutationIterator::new(&game);
+            <TicTacToe as interface::HasStatesWithSymmetries>::SymmetryIterator::new(&game);
         let mut permutation_set = collections::HashSet::new();
         for permutation in permutations {
             let permuted = game.swap_state(&state, &permutation);

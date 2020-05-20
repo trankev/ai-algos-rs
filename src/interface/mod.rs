@@ -1,20 +1,20 @@
-mod permutation_iterator;
 mod ply;
 mod ply_iterator;
 mod ruleset;
 mod state;
 mod status;
+mod symmetry_iterator;
 
-pub use permutation_iterator::PermutationIteratorTrait;
 pub use ply::PlyTrait;
 pub use ply_iterator::PlyIteratorTrait;
 pub use ruleset::Deterministic;
+pub use ruleset::HasStatesWithSymmetries;
 pub use ruleset::RuleSetTrait;
-pub use ruleset::WithPermutableState;
 pub use state::StateTrait;
 pub use state::TurnByTurnState;
 pub use status::PlayerStatus;
 pub use status::Status;
+pub use symmetry_iterator::SymmetryIteratorTrait;
 
 #[derive(Debug)]
 pub struct PlayError {

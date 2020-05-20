@@ -8,7 +8,7 @@ use std::hash;
 
 pub struct Worker<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -20,7 +20,7 @@ where
 
 impl<RuleSet> Worker<RuleSet>
 where
-    RuleSet: interface::WithPermutableState + interface::Deterministic + 'static,
+    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

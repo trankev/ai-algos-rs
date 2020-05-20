@@ -1,10 +1,10 @@
 use crate::interface;
-use crate::interface::PermutationIteratorTrait;
 use crate::interface::PlyIteratorTrait;
+use crate::interface::SymmetryIteratorTrait;
 use std::collections;
 use std::hash;
 
-pub struct PermutationsIterator<'a, RuleSet: interface::WithPermutableState>
+pub struct SymmetriesIterator<'a, RuleSet: interface::HasStatesWithSymmetries>
 where
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
@@ -12,24 +12,21 @@ where
     ruleset: &'a RuleSet,
     state: &'a RuleSet::State,
     iterator: RuleSet::PlyIterator,
-    permutations: Vec<RuleSet::Permutation>,
+    permutations: Vec<RuleSet::Symmetry>,
     seen: collections::HashSet<RuleSet::Ply>,
 }
 
-impl<'a, RuleSet: interface::WithPermutableState> PermutationsIterator<'a, RuleSet>
+impl<'a, RuleSet: interface::HasStatesWithSymmetries> SymmetriesIterator<'a, RuleSet>
 where
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
-    pub fn new(
-        ruleset: &'a RuleSet,
-        state: &'a RuleSet::State,
-    ) -> PermutationsIterator<'a, RuleSet> {
-        let iterator = RuleSet::PermutationIterator::new(ruleset);
+    pub fn new(ruleset: &'a RuleSet, state: &'a RuleSet::State) -> SymmetriesIterator<'a, RuleSet> {
+        let iterator = RuleSet::SymmetryIterator::new(ruleset);
         let permutations = iterator
             .filter(|permutation| ruleset.swap_state(state, permutation) == *state)
             .collect();
-        PermutationsIterator {
+        SymmetriesIterator {
             ruleset,
             state,
             iterator: RuleSet::PlyIterator::new(ruleset, state),
@@ -39,7 +36,7 @@ where
     }
 }
 
-impl<'a, RuleSet: interface::WithPermutableState> Iterator for PermutationsIterator<'a, RuleSet>
+impl<'a, RuleSet: interface::HasStatesWithSymmetries> Iterator for SymmetriesIterator<'a, RuleSet>
 where
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
@@ -74,7 +71,7 @@ mod tests {
     fn test_mini_reversi() {
         let ruleset = connectn::TicTacToe::new();
         let state = ruleset.initial_state();
-        let iterator = PermutationsIterator::new(&ruleset, &state);
+        let iterator = SymmetriesIterator::new(&ruleset, &state);
         let mut result = iterator.collect::<Vec<_>>();
         result.sort();
         let expected = vec![

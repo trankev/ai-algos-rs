@@ -2,29 +2,29 @@ use super::variants;
 use crate::interface;
 use crate::rulesets::connectn;
 
-pub struct PermutationIterator {
+pub struct SymmetryIterator {
     permutation_count: usize,
     switched_player: bool,
 }
 
-impl<Variant: variants::BaseVariant> interface::PermutationIteratorTrait<connectn::RuleSet<Variant>>
-    for PermutationIterator
+impl<Variant: variants::BaseVariant> interface::SymmetryIteratorTrait<connectn::RuleSet<Variant>>
+    for SymmetryIterator
 {
     fn new(ruleset: &connectn::RuleSet<Variant>) -> Self {
-        PermutationIterator {
+        SymmetryIterator {
             permutation_count: ruleset.grid_symmetry_count(),
             switched_player: true,
         }
     }
 }
 
-impl Iterator for PermutationIterator {
-    type Item = connectn::Permutation;
+impl Iterator for SymmetryIterator {
+    type Item = connectn::Symmetry;
 
     fn next(&mut self) -> Option<Self::Item> {
         if !self.switched_player {
             self.switched_player = true;
-            return Some(connectn::Permutation {
+            return Some(connectn::Symmetry {
                 grid_permutation_index: self.permutation_count as u8,
                 switched_players: true,
             });
@@ -32,7 +32,7 @@ impl Iterator for PermutationIterator {
         if self.permutation_count > 0 {
             self.permutation_count -= 1;
             self.switched_player = false;
-            return Some(connectn::Permutation {
+            return Some(connectn::Symmetry {
                 grid_permutation_index: self.permutation_count as u8,
                 switched_players: false,
             });
@@ -44,7 +44,7 @@ impl Iterator for PermutationIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::interface::PermutationIteratorTrait;
+    use crate::interface::SymmetryIteratorTrait;
     use crate::rulesets::connectn;
     use std::collections;
     use std::iter;
@@ -52,15 +52,15 @@ mod tests {
     #[test]
     fn test_permutations() {
         let ruleset = connectn::TicTacToe::new();
-        let iterator = PermutationIterator::new(&ruleset);
+        let iterator = SymmetryIterator::new(&ruleset);
         let result = iterator.collect::<collections::HashSet<_>>();
         let expected = (0u8..8)
             .flat_map(|index| {
-                iter::once(connectn::Permutation {
+                iter::once(connectn::Symmetry {
                     grid_permutation_index: index,
                     switched_players: false,
                 })
-                .chain(iter::once(connectn::Permutation {
+                .chain(iter::once(connectn::Symmetry {
                     grid_permutation_index: index,
                     switched_players: true,
                 }))

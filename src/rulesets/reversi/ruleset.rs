@@ -1,8 +1,8 @@
-use super::permutation;
-use super::permutation_iterators;
 use super::plies;
 use super::ply_iterators;
 use super::state;
+use super::symmetry;
+use super::symmetry_iterators;
 use super::variants;
 use crate::interface;
 use crate::interface::PlyIteratorTrait;
@@ -159,31 +159,28 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Varian
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::WithPermutableState for Reversi<Variant> {
-    type Permutation = permutation::Permutation;
-    type PermutationIterator = permutation_iterators::PermutationIterator;
+impl<Variant: variants::BaseVariant> interface::HasStatesWithSymmetries for Reversi<Variant> {
+    type Symmetry = symmetry::Symmetry;
+    type SymmetryIterator = symmetry_iterators::SymmetryIterator;
 
-    fn swap_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
-        let permutations =
-            &self.symmetries.permutations[permutation.grid_permutation_index as usize];
-        state.swap(permutations, permutation.switched_players)
+    fn swap_state(&self, state: &Self::State, symmetry: &Self::Symmetry) -> Self::State {
+        let symmetrys = &self.symmetries.permutations[symmetry.grid_symmetry_index as usize];
+        state.swap(symmetrys, symmetry.switched_players)
     }
 
-    fn reverse_state(&self, state: &Self::State, permutation: &Self::Permutation) -> Self::State {
-        let permutation_index =
-            self.symmetries.reverses[permutation.grid_permutation_index as usize];
-        let permutations = &self.symmetries.permutations[permutation_index];
-        state.swap(permutations, permutation.switched_players)
+    fn reverse_state(&self, state: &Self::State, symmetry: &Self::Symmetry) -> Self::State {
+        let symmetry_index = self.symmetries.reverses[symmetry.grid_symmetry_index as usize];
+        let symmetrys = &self.symmetries.permutations[symmetry_index];
+        state.swap(symmetrys, symmetry.switched_players)
     }
 
-    fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Permutation) -> Self::Ply {
+    fn swap_ply(&self, ply: &Self::Ply, symmetry: &Self::Symmetry) -> Self::Ply {
         match ply {
             plies::Ply::Pass => plies::Ply::Pass,
             plies::Ply::Unused(_) => unreachable!(),
             plies::Ply::Place(index) => {
-                let permutation =
-                    &self.symmetries.permutations[permutation.grid_permutation_index as usize];
-                plies::Ply::Place(permutation[*index])
+                let symmetry = &self.symmetries.permutations[symmetry.grid_symmetry_index as usize];
+                plies::Ply::Place(symmetry[*index])
             }
         }
     }
@@ -196,9 +193,9 @@ mod tests {
     use super::*;
     use crate::interface;
     use crate::interface::Deterministic;
-    use crate::interface::PermutationIteratorTrait;
+    use crate::interface::HasStatesWithSymmetries;
     use crate::interface::RuleSetTrait;
-    use crate::interface::WithPermutableState;
+    use crate::interface::SymmetryIteratorTrait;
     use std::collections;
 
     type MiniPly = plies::Ply<instances::Mini>;
@@ -276,17 +273,17 @@ mod tests {
     fn test_swap_state() {
         let game = Reversi::<instances::Mini>::new();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
-        let permutations =
-            <Reversi<instances::Mini> as interface::WithPermutableState>::PermutationIterator::new(
+        let symmetries =
+            <Reversi<instances::Mini> as interface::HasStatesWithSymmetries>::SymmetryIterator::new(
                 &game,
             );
-        let mut permutation_set = collections::HashSet::new();
-        for permutation in permutations {
-            let permuted = game.swap_state(&state, &permutation);
-            let reverse = game.reverse_state(&permuted, &permutation);
-            permutation_set.insert(permuted);
+        let mut symmetry_set = collections::HashSet::new();
+        for symmetry in symmetries {
+            let permuted = game.swap_state(&state, &symmetry);
+            let reverse = game.reverse_state(&permuted, &symmetry);
+            symmetry_set.insert(permuted);
             assert_eq!(state, reverse);
         }
-        assert_eq!(permutation_set.len(), 16);
+        assert_eq!(symmetry_set.len(), 16);
     }
 }
