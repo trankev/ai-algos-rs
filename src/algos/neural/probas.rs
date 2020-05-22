@@ -4,21 +4,19 @@ use std::io::Read;
 use std::path;
 use tensorflow as tf;
 
-pub struct ProbabilityLearning {
+pub struct Probas {
     graph: tf::Graph,
     session: tf::Session,
 }
 
-impl ProbabilityLearning {
-    pub fn from_file<P: AsRef<path::Path>>(
-        filename: P,
-    ) -> Result<ProbabilityLearning, Box<dyn error::Error>> {
+impl Probas {
+    pub fn from_file<P: AsRef<path::Path>>(filename: P) -> Result<Probas, Box<dyn error::Error>> {
         let mut graph = tf::Graph::new();
         let mut proto = Vec::new();
         fs::File::open(filename)?.read_to_end(&mut proto)?;
         graph.import_graph_def(&proto, &tf::ImportGraphDefOptions::new())?;
         let session = tf::Session::new(&tf::SessionOptions::new(), &graph)?;
-        Ok(ProbabilityLearning { graph, session })
+        Ok(Probas { graph, session })
     }
 
     pub fn initialize(&self) -> Result<(), Box<dyn error::Error>> {

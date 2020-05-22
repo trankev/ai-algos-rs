@@ -3,7 +3,7 @@ use tensorflow::ops as tf_ops;
 use tensorflow::train as tf_train;
 use tensorflow::train::Optimizer;
 
-pub struct NeuralNetwork {
+pub struct Network {
     session: tf::Session,
     input: tf::Operation,
     probabilities: tf::Operation,
@@ -16,8 +16,8 @@ pub struct NeuralNetwork {
 
 type InputType = tf::Tensor<f64>;
 
-impl NeuralNetwork {
-    pub fn new(dimensions: &[u64]) -> Result<NeuralNetwork, tf::Status> {
+impl Network {
+    pub fn new(dimensions: &[u64]) -> Result<Network, tf::Status> {
         let mut scope = tf::Scope::new_root_scope();
         let (variables, input, output_layer, chosen_action) = build_model(&scope, dimensions)?;
         let (minimizer_vars, action_holder, reward_holder, loss, minimize) =
@@ -26,7 +26,7 @@ impl NeuralNetwork {
         let graph = scope.graph_mut();
         let session = tf::Session::new(&options, &graph)?;
         initialize(&session, &variables, &minimizer_vars)?;
-        Ok(NeuralNetwork {
+        Ok(Network {
             session,
             input,
             probabilities: output_layer,
@@ -240,7 +240,7 @@ mod tests {
 
     #[test]
     fn test_build_graph() -> Result<(), Box<dyn error::Error>> {
-        let nn = NeuralNetwork::new(&[19, 9])?;
+        let nn = Network::new(&[19, 9])?;
         let input = nn.build_input(&[0]);
         let action = nn.play(&input)?;
         nn.learn(&input, action, 1.0)?;
