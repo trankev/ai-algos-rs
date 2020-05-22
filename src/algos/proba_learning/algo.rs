@@ -66,4 +66,17 @@ impl ProbabilityLearning {
         }
         Ok(result)
     }
+
+    pub fn save(&self, path: String) -> Result<(), Box<dyn error::Error>> {
+        let op_filepath = self.graph.operation_by_name_required("save/Const")?;
+        let op_save = self
+            .graph
+            .operation_by_name_required("save/control_dependency")?;
+        let filepath_tensor = tf::Tensor::from(path);
+        let mut run_args = tf::SessionRunArgs::new();
+        run_args.add_target(&op_save);
+        run_args.add_feed(&op_filepath, 0, &filepath_tensor);
+        self.session.run(&mut run_args)?;
+        Ok(())
+    }
 }
