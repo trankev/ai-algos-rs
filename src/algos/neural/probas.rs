@@ -27,14 +27,14 @@ impl Probas {
         Ok(())
     }
 
-    pub fn play(&self) -> Result<i64, Box<dyn error::Error>> {
+    pub fn play(&self) -> Result<i32, Box<dyn error::Error>> {
         let mut run_args = tf::SessionRunArgs::new();
         let chosen_action = self
             .graph
             .operation_by_name_required("chosen_action/Multinomial")?;
         let action_fetch = run_args.request_fetch(&chosen_action, 0);
         self.session.run(&mut run_args)?;
-        let action = run_args.fetch::<i64>(action_fetch)?[0];
+        let action = run_args.fetch::<i64>(action_fetch)?[0] as i32;
         Ok(action)
     }
 
@@ -73,6 +73,17 @@ impl Probas {
         let filepath_tensor = tf::Tensor::from(path);
         let mut run_args = tf::SessionRunArgs::new();
         run_args.add_target(&op_save);
+        run_args.add_feed(&op_filepath, 0, &filepath_tensor);
+        self.session.run(&mut run_args)?;
+        Ok(())
+    }
+
+    pub fn load(&self, path: String) -> Result<(), Box<dyn error::Error>> {
+        let op_filepath = self.graph.operation_by_name_required("save/Const")?;
+        let op_load = self.graph.operation_by_name_required("save/restore_all")?;
+        let filepath_tensor = tf::Tensor::from(path);
+        let mut run_args = tf::SessionRunArgs::new();
+        run_args.add_target(&op_load);
         run_args.add_feed(&op_filepath, 0, &filepath_tensor);
         self.session.run(&mut run_args)?;
         Ok(())
