@@ -8,6 +8,7 @@ mod symmetry_iterator;
 pub use ply::PlyTrait;
 pub use ply_iterator::PlyIteratorTrait;
 pub use ruleset::Deterministic;
+pub use ruleset::EncodableState;
 pub use ruleset::HasStatesWithSymmetries;
 pub use ruleset::RuleSetTrait;
 pub use state::StateTrait;

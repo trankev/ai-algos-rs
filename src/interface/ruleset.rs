@@ -28,3 +28,11 @@ pub trait HasStatesWithSymmetries: RuleSetTrait {
     fn swap_ply(&self, ply: &Self::Ply, permutation: &Self::Symmetry) -> Self::Ply;
     fn reverse_state(&self, state: &Self::State, permutation: &Self::Symmetry) -> Self::State;
 }
+
+pub trait EncodableState: RuleSetTrait {
+    const STATE_SIZE: usize;
+    const PLY_COUNT: usize;
+
+    fn encode_state(&self, state: &Self::State) -> Vec<f32>;
+    fn decode_ply(&self, ply_index: i32) -> Self::Ply;
+}

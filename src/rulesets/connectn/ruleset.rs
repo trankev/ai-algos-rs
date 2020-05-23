@@ -100,8 +100,28 @@ impl<Variant: variants::BaseVariant> interface::HasStatesWithSymmetries for Rule
     }
 }
 
-pub type TicTacToe = RuleSet<variants::TicTacToe>;
-pub type Gomoku = RuleSet<variants::Gomoku>;
+impl<Variant: variants::BaseVariant> interface::EncodableState for RuleSet<Variant> {
+    const STATE_SIZE: usize = Variant::CELL_COUNT * 3;
+    const PLY_COUNT: usize = Variant::CELL_COUNT;
+
+    fn encode_state(&self, state: &Self::State) -> Vec<f32> {
+        let mut result = vec![0.0; Variant::CELL_COUNT * 3];
+        for index in 0..Variant::CELL_COUNT {
+            if state.grids[0].isset(index) {
+                result[index] = 1.0;
+            } else if state.grids[1].isset(index) {
+                result[index + Variant::CELL_COUNT] = 1.0;
+            } else {
+                result[index + Variant::CELL_COUNT * 2] = 1.0;
+            }
+        }
+        result
+    }
+
+    fn decode_ply(&self, ply_index: i32) -> Self::Ply {
+        Self::Ply::new(ply_index as u8)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -112,6 +132,8 @@ mod tests {
     use crate::interface::RuleSetTrait;
     use crate::interface::SymmetryIteratorTrait;
     use std::collections;
+
+    pub type TicTacToe = RuleSet<variants::TicTacToe>;
 
     #[test]
     fn test_invalid_move() {
