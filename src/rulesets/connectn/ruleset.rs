@@ -121,6 +121,10 @@ impl<Variant: variants::BaseVariant> interface::EncodableState for RuleSet<Varia
     fn decode_ply(&self, ply_index: i32) -> Self::Ply {
         Self::Ply::new(ply_index as u8)
     }
+
+    fn encode_ply(&self, ply: &Self::Ply) -> i32 {
+        ply.index as i32
+    }
 }
 
 #[cfg(test)]

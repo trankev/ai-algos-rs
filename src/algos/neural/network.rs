@@ -8,14 +8,14 @@ pub struct Network {
     graph: tf::Graph,
     session: tf::Session,
     state_size: u64,
-    action_count: usize,
+    action_count: u64,
 }
 
 impl Network {
     pub fn from_file<P: AsRef<path::Path>>(
         filename: P,
         state_size: u64,
-        action_count: usize,
+        action_count: u64,
     ) -> Result<Network, Box<dyn error::Error>> {
         let mut graph = tf::Graph::new();
         let mut proto = Vec::new();
@@ -38,35 +38,49 @@ impl Network {
         Ok(())
     }
 
-    pub fn play(&self, state: &Vec<f32>) -> Result<i32, Box<dyn error::Error>> {
+    pub fn play(
+        &self,
+        state: &Vec<f32>,
+        allowed_plies: &Vec<f32>,
+    ) -> Result<i32, Box<dyn error::Error>> {
         let state_value = tf::Tensor::new(&[1, self.state_size][..]).with_values(&state)?;
         let state_in = self.graph.operation_by_name_required("state_in")?;
+        let allowed_plies_value =
+            tf::Tensor::new(&[1, self.action_count][..]).with_values(&allowed_plies)?;
+        let allowed_plies_in = self.graph.operation_by_name_required("allowed_plies")?;
         let chosen_action = self.graph.operation_by_name_required("chosen_action")?;
 
         let mut run_args = tf::SessionRunArgs::new();
         run_args.add_feed(&state_in, 0, &state_value);
+        run_args.add_feed(&allowed_plies_in, 0, &allowed_plies_value);
         let action_fetch = run_args.request_fetch(&chosen_action, 0);
         self.session.run(&mut run_args)?;
         let action = run_args.fetch::<i64>(action_fetch)?[0] as i32;
         Ok(action)
     }
 
-    pub fn get_probabilities(&self, state: &Vec<f32>) -> Result<Vec<f32>, Box<dyn error::Error>> {
+    pub fn get_probabilities(
+        &self,
+        state: &Vec<f32>,
+        allowed_plies: &Vec<f32>,
+    ) -> Result<Vec<f32>, Box<dyn error::Error>> {
         let state_value = tf::Tensor::new(&[1, self.state_size][..]).with_values(&state)?;
         let state_in = self.graph.operation_by_name_required("state_in")?;
-        let probabilities = self
-            .graph
-            .operation_by_name_required("output_layer/Softmax")?;
+        let allowed_plies_value =
+            tf::Tensor::new(&[1, self.action_count][..]).with_values(&allowed_plies)?;
+        let allowed_plies_in = self.graph.operation_by_name_required("allowed_plies")?;
+        let probabilities = self.graph.operation_by_name_required("probabilities")?;
 
         let mut run_args = tf::SessionRunArgs::new();
         run_args.add_feed(&state_in, 0, &state_value);
+        run_args.add_feed(&allowed_plies_in, 0, &allowed_plies_value);
         let probabilities_fetch = run_args.request_fetch(&probabilities, 0);
         self.session.run(&mut run_args)?;
 
         let mut result = Vec::new();
         let probabilities_value = run_args.fetch::<f32>(probabilities_fetch)?;
-        for i in 0..self.action_count {
-            result.push(probabilities_value[i]);
+        for i in 0..probabilities_value.dims()[1] {
+            result.push(probabilities_value[i as usize]);
         }
         Ok(result)
     }
