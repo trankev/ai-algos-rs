@@ -1,6 +1,6 @@
 use super::edges;
 use super::nodes;
-use crate::algos;
+use crate::interface::ai;
 use crate::interface::rulesets;
 
 use petgraph::graph;
@@ -8,7 +8,7 @@ use petgraph::graph;
 pub fn play_scores<RuleSet: rulesets::RuleSetTrait>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     parent: graph::NodeIndex<u32>,
-) -> Vec<algos::PlyConsideration<RuleSet::Ply>>
+) -> Vec<ai::PlyConsideration<RuleSet::Ply>>
 where
     RuleSet::State: rulesets::TurnByTurnState,
 {
@@ -19,7 +19,7 @@ where
             let edge = tree.find_edge(parent, node_index).unwrap();
             let edge_weight = tree.edge_weight(edge).unwrap();
             let follow_up = best_play::<RuleSet>(tree, node_index);
-            algos::PlyConsideration {
+            ai::PlyConsideration {
                 ply: edge_weight.ply,
                 score: node_weight.score(),
                 win_rate: node_weight.win_rate(),

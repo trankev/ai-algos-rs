@@ -7,7 +7,7 @@ use super::super::selection;
 use super::super::simulation;
 use super::requests;
 use super::responses;
-use crate::algos;
+use crate::interface::ai;
 use crate::interface::rulesets;
 use crossbeam::channel;
 use petgraph::graph;
@@ -250,7 +250,7 @@ where
         Ok(())
     }
 
-    fn play_scores(&self) -> Option<Vec<algos::PlyConsideration<RuleSet::Ply>>> {
+    fn play_scores(&self) -> Option<Vec<ai::PlyConsideration<RuleSet::Ply>>> {
         let parent = match self.root {
             Some(node) => node,
             None => {

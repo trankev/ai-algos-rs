@@ -5,7 +5,7 @@ use super::expansion;
 use super::nodes;
 use super::selection;
 use super::simulation;
-use crate::algos;
+use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::interface::rulesets::StateTrait;
 use petgraph::graph;
@@ -73,7 +73,7 @@ where
         backpropagation::backpropagate(&mut self.tree, selected, true, Some(&status));
     }
 
-    pub fn play_scores(&self) -> Option<Vec<algos::PlyConsideration<RuleSet::Ply>>> {
+    pub fn play_scores(&self) -> Option<Vec<ai::PlyConsideration<RuleSet::Ply>>> {
         let parent = match self.root {
             Some(node) => node,
             None => {

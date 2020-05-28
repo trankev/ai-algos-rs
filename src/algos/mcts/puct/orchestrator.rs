@@ -3,7 +3,7 @@ use super::super::simulation;
 use super::master;
 use super::requests;
 use super::responses;
-use crate::algos;
+use crate::interface::ai;
 use crate::interface::rulesets;
 use crossbeam::channel;
 use std::error;
@@ -79,7 +79,7 @@ where
 
     pub fn ply_considerations(
         &self,
-    ) -> Result<Option<Vec<algos::PlyConsideration<RuleSet::Ply>>>, Box<dyn error::Error>> {
+    ) -> Result<Option<Vec<ai::PlyConsideration<RuleSet::Ply>>>, Box<dyn error::Error>> {
         let request = requests::Request::ListConsiderations;
         self.master_request_sender.send(request)?;
         let response = self.master_response_receiver.recv()?;
