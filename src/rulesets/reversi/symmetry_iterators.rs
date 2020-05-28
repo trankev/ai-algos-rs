@@ -1,5 +1,5 @@
 use super::variants;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::rulesets::reversi;
 
 pub struct SymmetryIterator {
@@ -7,7 +7,7 @@ pub struct SymmetryIterator {
     switched_player: bool,
 }
 
-impl<Variant: variants::BaseVariant> interface::SymmetryIteratorTrait<reversi::Reversi<Variant>>
+impl<Variant: variants::BaseVariant> rulesets::SymmetryIteratorTrait<reversi::Reversi<Variant>>
     for SymmetryIterator
 {
     fn new(ruleset: &reversi::Reversi<Variant>) -> Self {
@@ -44,7 +44,7 @@ impl Iterator for SymmetryIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::interface::SymmetryIteratorTrait;
+    use crate::interface::rulesets::SymmetryIteratorTrait;
     use crate::rulesets::reversi;
     use std::collections;
     use std::iter;

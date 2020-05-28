@@ -1,21 +1,21 @@
 use super::super::edges;
 use super::super::nodes;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::tools::plies;
 use petgraph::graph;
 use rand::rngs;
 use rand::seq::IteratorRandom;
 
-pub fn simulate<RuleSet: interface::Deterministic>(
+pub fn simulate<RuleSet: rulesets::Deterministic>(
     ruleset: &RuleSet,
     state: &RuleSet::State,
     rng: &mut rngs::ThreadRng,
-) -> interface::Status {
+) -> rulesets::Status {
     let mut current_state = state;
     let mut state;
     loop {
         let status = ruleset.status(current_state);
-        if let interface::Status::Ongoing = status {
+        if let rulesets::Status::Ongoing = status {
             let available_plies = plies::BasicIterator::new(ruleset, current_state);
             let ply = available_plies.choose(rng).unwrap();
             state = ruleset.play(&current_state, &ply).unwrap();
@@ -26,7 +26,7 @@ pub fn simulate<RuleSet: interface::Deterministic>(
     }
 }
 
-pub fn fetch_random_child<RuleSet: interface::Deterministic>(
+pub fn fetch_random_child<RuleSet: rulesets::Deterministic>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     rng: &mut rngs::ThreadRng,

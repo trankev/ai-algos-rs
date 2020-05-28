@@ -1,7 +1,7 @@
-use crate::interface;
+use crate::interface::rulesets;
 use petgraph::graph;
 
-pub enum Request<RuleSet: interface::RuleSetTrait> {
+pub enum Request<RuleSet: rulesets::RuleSetTrait> {
     SimulationRequest {
         node_index: graph::NodeIndex<u32>,
         state: RuleSet::State,

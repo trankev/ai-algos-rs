@@ -1,13 +1,13 @@
-use crate::interface;
-use crate::interface::PlyIteratorTrait;
+use crate::interface::rulesets;
+use crate::interface::rulesets::PlyIteratorTrait;
 
-pub struct BasicIterator<'a, RuleSet: interface::RuleSetTrait> {
+pub struct BasicIterator<'a, RuleSet: rulesets::RuleSetTrait> {
     ruleset: &'a RuleSet,
     state: &'a RuleSet::State,
     iterator: RuleSet::PlyIterator,
 }
 
-impl<'a, RuleSet: interface::RuleSetTrait> BasicIterator<'a, RuleSet> {
+impl<'a, RuleSet: rulesets::RuleSetTrait> BasicIterator<'a, RuleSet> {
     pub fn new(ruleset: &'a RuleSet, state: &'a RuleSet::State) -> BasicIterator<'a, RuleSet> {
         BasicIterator {
             ruleset,
@@ -17,7 +17,7 @@ impl<'a, RuleSet: interface::RuleSetTrait> BasicIterator<'a, RuleSet> {
     }
 }
 
-impl<'a, RuleSet: interface::RuleSetTrait> Iterator for BasicIterator<'a, RuleSet> {
+impl<'a, RuleSet: rulesets::RuleSetTrait> Iterator for BasicIterator<'a, RuleSet> {
     type Item = RuleSet::Ply;
 
     fn next(&mut self) -> Option<Self::Item> {

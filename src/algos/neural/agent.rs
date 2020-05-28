@@ -1,7 +1,7 @@
 use super::memory;
 use super::network;
-use crate::interface;
-use crate::interface::TurnByTurnState;
+use crate::interface::rulesets;
+use crate::interface::rulesets::TurnByTurnState;
 use crate::tools::plies;
 use std::error;
 use std::hash;
@@ -9,7 +9,7 @@ use std::path;
 
 pub struct Agent<'a, RuleSet>
 where
-    RuleSet: interface::EncodableState + interface::HasStatesWithSymmetries,
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
     RuleSet::State: Eq,
     RuleSet::Ply: Ord + hash::Hash,
 {
@@ -20,8 +20,8 @@ where
 
 impl<'a, RuleSet> Agent<'a, RuleSet>
 where
-    RuleSet: interface::EncodableState + interface::HasStatesWithSymmetries,
-    RuleSet::State: Eq + interface::TurnByTurnState,
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
+    RuleSet::State: Eq + rulesets::TurnByTurnState,
     RuleSet::Ply: Ord + hash::Hash,
 {
     pub fn new<P: AsRef<path::Path>>(
@@ -93,7 +93,7 @@ where
 
     pub fn learn(
         &mut self,
-        status: interface::Status,
+        status: rulesets::Status,
         discount_factor: f32,
     ) -> Result<(), Box<dyn error::Error>> {
         let rewards = self.memory.compute_rewards(status, discount_factor);

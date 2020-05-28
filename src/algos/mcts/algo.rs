@@ -6,8 +6,8 @@ use super::nodes;
 use super::selection;
 use super::simulation;
 use crate::algos;
-use crate::interface;
-use crate::interface::StateTrait;
+use crate::interface::rulesets;
+use crate::interface::rulesets::StateTrait;
 use petgraph::graph;
 use rand;
 use rand::rngs;
@@ -15,9 +15,9 @@ use std::hash;
 
 pub struct MCTS<RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
-    RuleSet::State: Eq + interface::TurnByTurnState,
+    RuleSet::State: Eq + rulesets::TurnByTurnState,
 {
     ruleset: RuleSet,
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
@@ -29,9 +29,9 @@ where
 
 impl<RuleSet> MCTS<RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
-    RuleSet::State: Eq + interface::TurnByTurnState,
+    RuleSet::State: Eq + rulesets::TurnByTurnState,
 {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {
@@ -63,7 +63,7 @@ where
         if expanded {
             self.expansion_count += 1;
         }
-        if let interface::Status::Ongoing = status {
+        if let rulesets::Status::Ongoing = status {
             self.simulation_count += 1;
             let (to_simulate, state) =
                 simulation::fetch_random_child::<RuleSet>(&self.tree, selected, &mut self.rng);
@@ -108,7 +108,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::interface::RuleSetTrait;
+    use crate::interface::rulesets::RuleSetTrait;
     use crate::rulesets::connectn;
 
     #[test]

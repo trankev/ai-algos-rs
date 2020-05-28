@@ -1,12 +1,12 @@
 use super::requests;
 use super::responses;
 use super::worker;
-use crate::interface;
+use crate::interface::rulesets;
 use crossbeam::channel;
 use std::error;
 use std::thread;
 
-pub struct Pool<RuleSet: interface::Deterministic + 'static> {
+pub struct Pool<RuleSet: rulesets::Deterministic + 'static> {
     workers: Vec<thread::JoinHandle<usize>>,
     request_receiver: channel::Receiver<requests::Request<RuleSet>>,
     pub request_sender: channel::Sender<requests::Request<RuleSet>>,
@@ -14,7 +14,7 @@ pub struct Pool<RuleSet: interface::Deterministic + 'static> {
     response_sender: channel::Sender<responses::Response>,
 }
 
-impl<RuleSet: interface::Deterministic + 'static> Pool<RuleSet> {
+impl<RuleSet: rulesets::Deterministic + 'static> Pool<RuleSet> {
     pub fn new() -> Pool<RuleSet> {
         let (request_sender, request_receiver) = channel::unbounded();
         let (response_sender, response_receiver) = channel::unbounded();

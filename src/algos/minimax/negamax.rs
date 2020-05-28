@@ -1,13 +1,13 @@
 use super::state;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::tools::plies;
 use std::f32;
 
-pub struct Negamax<RuleSet: interface::Deterministic> {
+pub struct Negamax<RuleSet: rulesets::Deterministic> {
     ruleset: RuleSet,
 }
 
-impl<RuleSet: interface::Deterministic> Negamax<RuleSet> {
+impl<RuleSet: rulesets::Deterministic> Negamax<RuleSet> {
     pub fn new(ruleset: RuleSet) -> Negamax<RuleSet> {
         Negamax { ruleset }
     }
@@ -24,15 +24,15 @@ impl<RuleSet: interface::Deterministic> Negamax<RuleSet> {
         beta: f32,
     ) -> state::State<RuleSet::Ply> {
         match self.ruleset.status(&state) {
-            interface::Status::Win { player: winner } => {
+            rulesets::Status::Win { player: winner } => {
                 if winner == player {
                     state::State::Win
                 } else {
                     state::State::Loss
                 }
             }
-            interface::Status::Draw => state::State::Draw,
-            interface::Status::Ongoing => {
+            rulesets::Status::Draw => state::State::Draw,
+            rulesets::Status::Ongoing => {
                 let available_plies = plies::BasicIterator::new(&self.ruleset, &state);
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {

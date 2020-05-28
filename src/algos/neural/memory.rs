@@ -1,10 +1,10 @@
-use crate::interface;
+use crate::interface::rulesets;
 
 pub struct Memory {
     pub states: Vec<f32>,
     pub allowed_plies: Vec<f32>,
     pub actions: Vec<i32>,
-    players: Vec<interface::Player>,
+    players: Vec<rulesets::Player>,
 }
 
 impl Memory {
@@ -19,7 +19,7 @@ impl Memory {
 
     pub fn play(
         &mut self,
-        player: interface::Player,
+        player: rulesets::Player,
         state: &Vec<f32>,
         allowed_plies: &Vec<f32>,
         action: i32,
@@ -30,17 +30,17 @@ impl Memory {
         self.actions.push(action);
     }
 
-    pub fn compute_rewards(&self, status: interface::Status, discount_factor: f32) -> Vec<f32> {
+    pub fn compute_rewards(&self, status: rulesets::Status, discount_factor: f32) -> Vec<f32> {
         let reward: f32 = match status {
-            interface::Status::Win { player } => {
+            rulesets::Status::Win { player } => {
                 if player == 0 {
                     1.0
                 } else {
                     0.0
                 }
             }
-            interface::Status::Draw => 0.5,
-            interface::Status::Ongoing => unreachable!(),
+            rulesets::Status::Draw => 0.5,
+            rulesets::Status::Ongoing => unreachable!(),
         };
         let mut rewards = vec![reward; self.actions.len()];
         let mut discounted_reward = reward;

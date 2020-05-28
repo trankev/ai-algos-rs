@@ -1,5 +1,5 @@
 use super::variants;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::rulesets::connectn;
 
 pub struct SymmetryIterator {
@@ -7,7 +7,7 @@ pub struct SymmetryIterator {
     switched_player: bool,
 }
 
-impl<Variant: variants::BaseVariant> interface::SymmetryIteratorTrait<connectn::RuleSet<Variant>>
+impl<Variant: variants::BaseVariant> rulesets::SymmetryIteratorTrait<connectn::RuleSet<Variant>>
     for SymmetryIterator
 {
     fn new(ruleset: &connectn::RuleSet<Variant>) -> Self {
@@ -44,7 +44,7 @@ impl Iterator for SymmetryIterator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::interface::SymmetryIteratorTrait;
+    use crate::interface::rulesets::SymmetryIteratorTrait;
     use crate::rulesets::connectn;
     use std::collections;
     use std::iter;

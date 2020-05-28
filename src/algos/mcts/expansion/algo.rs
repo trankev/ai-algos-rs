@@ -1,6 +1,6 @@
 use super::items;
 use super::iterator;
-use crate::interface;
+use crate::interface::rulesets;
 use std::hash;
 
 use super::super::edges;
@@ -11,22 +11,22 @@ use petgraph::graph;
 pub enum ExpansionStatus<State> {
     RequiresExpansion(State),
     NotVisited,
-    Terminal(interface::Status),
+    Terminal(rulesets::Status),
     PendingExpansion,
 }
 
-pub fn expand<RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic>(
+pub fn expand<RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
-) -> (interface::Status, bool)
+) -> (rulesets::Status, bool)
 where
-    RuleSet::State: Eq + interface::TurnByTurnState,
+    RuleSet::State: Eq + rulesets::TurnByTurnState,
     RuleSet::Ply: Eq + Ord + hash::Hash,
 {
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
         ExpansionStatus::RequiresExpansion(state) => state,
-        ExpansionStatus::NotVisited => return (interface::Status::Ongoing, false),
+        ExpansionStatus::NotVisited => return (rulesets::Status::Ongoing, false),
         ExpansionStatus::Terminal(status) => return (status, false),
         ExpansionStatus::PendingExpansion => unreachable!(),
     };
@@ -35,16 +35,16 @@ where
     while let Some(successor) = iterator.iterate() {
         save_expansion(tree, node, successor);
     }
-    (interface::Status::Ongoing, true)
+    (rulesets::Status::Ongoing, true)
 }
 
-pub fn ponder_expansion<RuleSet: interface::RuleSetTrait>(
+pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     check_for_visits: bool,
 ) -> ExpansionStatus<RuleSet::State>
 where
-    RuleSet::State: interface::TurnByTurnState,
+    RuleSet::State: rulesets::TurnByTurnState,
 {
     let weight = tree.node_weight_mut(node_index).unwrap();
     if weight.expanding {
@@ -52,7 +52,7 @@ where
     }
     let status = weight.game_status();
     match status {
-        interface::Status::Ongoing => (),
+        rulesets::Status::Ongoing => (),
         _ => return ExpansionStatus::Terminal(status),
     }
     if check_for_visits && !weight.is_visited() {
@@ -62,12 +62,12 @@ where
     ExpansionStatus::RequiresExpansion(weight.state.clone())
 }
 
-pub fn save_expansion<RuleSet: interface::RuleSetTrait>(
+pub fn save_expansion<RuleSet: rulesets::RuleSetTrait>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     successor: items::Play<RuleSet>,
 ) where
-    RuleSet::State: interface::TurnByTurnState,
+    RuleSet::State: rulesets::TurnByTurnState,
 {
     let mut parent_weight = tree.node_weight_mut(node_index).unwrap();
     parent_weight.expanding = false;

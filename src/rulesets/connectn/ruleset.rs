@@ -4,7 +4,7 @@ use super::state;
 use super::symmetry;
 use super::symmetry_iterators;
 use super::variants;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::utils::bitarray;
 use crate::utils::grids::strips;
 use crate::utils::grids::symmetries;
@@ -30,7 +30,7 @@ impl<Variant: variants::BaseVariant> RuleSet<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for RuleSet<Variant> {
     type State = state::State<Variant>;
     type Ply = plies::Ply<Variant>;
     type PlyIterator = ply_iterators::PlyIterator<Variant>;
@@ -39,13 +39,13 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant
         state::State::new()
     }
 
-    fn status(&self, state: &Self::State) -> interface::Status {
+    fn status(&self, state: &Self::State) -> rulesets::Status {
         let mut ongoing = false;
         for strip in &self.strips {
             for player in 0..2 {
                 match state.grids[player].compare_with_mask(strip) {
                     bitarray::MaskComparison::Equal => {
-                        return interface::Status::Win {
+                        return rulesets::Status::Win {
                             player: player as u8,
                         }
                     }
@@ -55,19 +55,19 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for RuleSet<Variant
             }
         }
         if ongoing {
-            interface::Status::Ongoing
+            rulesets::Status::Ongoing
         } else {
-            interface::Status::Draw
+            rulesets::Status::Draw
         }
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::Deterministic for RuleSet<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::Deterministic for RuleSet<Variant> {
     fn play(
         &self,
         state: &Self::State,
         ply: &Self::Ply,
-    ) -> Result<Self::State, interface::PlayError> {
+    ) -> Result<Self::State, rulesets::PlayError> {
         let mut result = (*state).clone();
         if let Err(error) = result.play(ply) {
             return Err(error);
@@ -76,7 +76,7 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for RuleSet<Varian
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::HasStatesWithSymmetries for RuleSet<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::HasStatesWithSymmetries for RuleSet<Variant> {
     type Symmetry = symmetry::Symmetry;
     type SymmetryIterator = symmetry_iterators::SymmetryIterator;
 
@@ -100,7 +100,7 @@ impl<Variant: variants::BaseVariant> interface::HasStatesWithSymmetries for Rule
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::EncodableState for RuleSet<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::EncodableState for RuleSet<Variant> {
     const STATE_SIZE: usize = Variant::CELL_COUNT * 3 + 1;
     const PLY_COUNT: usize = Variant::CELL_COUNT;
 
@@ -132,10 +132,10 @@ impl<Variant: variants::BaseVariant> interface::EncodableState for RuleSet<Varia
 mod tests {
     use super::super::plies;
     use super::*;
-    use crate::interface::Deterministic;
-    use crate::interface::HasStatesWithSymmetries;
-    use crate::interface::RuleSetTrait;
-    use crate::interface::SymmetryIteratorTrait;
+    use crate::interface::rulesets::Deterministic;
+    use crate::interface::rulesets::HasStatesWithSymmetries;
+    use crate::interface::rulesets::RuleSetTrait;
+    use crate::interface::rulesets::SymmetryIteratorTrait;
     use std::collections;
 
     pub type TicTacToe = RuleSet<variants::TicTacToe>;
@@ -166,11 +166,11 @@ mod tests {
     }
 
     status_tests! {
-        new_game: ([], [], 0, interface::Status::Ongoing),
-        ongoing: ([4, 1, 6, 5], [8, 7, 2], 1, interface::Status::Ongoing),
-        p1_win: ([4, 1, 0, 2], [5, 7, 8], 1, interface::Status::Win{player: 0}),
-        p2_win: ([1, 2, 5], [4, 0, 8], 0, interface::Status::Win{player: 1}),
-        draw: ([4, 1, 6, 5], [8, 7, 2, 3], 0, interface::Status::Draw),
+        new_game: ([], [], 0, rulesets::Status::Ongoing),
+        ongoing: ([4, 1, 6, 5], [8, 7, 2], 1, rulesets::Status::Ongoing),
+        p1_win: ([4, 1, 0, 2], [5, 7, 8], 1, rulesets::Status::Win{player: 0}),
+        p2_win: ([1, 2, 5], [4, 0, 8], 0, rulesets::Status::Win{player: 1}),
+        draw: ([4, 1, 6, 5], [8, 7, 2, 3], 0, rulesets::Status::Draw),
     }
 
     #[test]
@@ -178,7 +178,7 @@ mod tests {
         let game = TicTacToe::new();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
         let permutations =
-            <TicTacToe as interface::HasStatesWithSymmetries>::SymmetryIterator::new(&game);
+            <TicTacToe as rulesets::HasStatesWithSymmetries>::SymmetryIterator::new(&game);
         let mut permutation_set = collections::HashSet::new();
         for permutation in permutations {
             let permuted = game.swap_state(&state, &permutation);

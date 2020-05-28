@@ -4,8 +4,8 @@ use super::state;
 use super::symmetry;
 use super::symmetry_iterators;
 use super::variants;
-use crate::interface;
-use crate::interface::PlyIteratorTrait;
+use crate::interface::rulesets;
+use crate::interface::rulesets::PlyIteratorTrait;
 use crate::utils::grids::strips;
 use crate::utils::grids::symmetries;
 use std::cmp;
@@ -80,7 +80,7 @@ impl<Variant: variants::BaseVariant> Reversi<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::RuleSetTrait for Reversi<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for Reversi<Variant> {
     type Ply = plies::Ply<Variant>;
     type State = state::State<Variant>;
     type PlyIterator = ply_iterators::PlyIterator<Variant>;
@@ -89,32 +89,32 @@ impl<Variant: variants::BaseVariant> interface::RuleSetTrait for Reversi<Variant
         state::State::new()
     }
 
-    fn status(&self, state: &Self::State) -> interface::Status {
+    fn status(&self, state: &Self::State) -> rulesets::Status {
         let mut ply_iterator = Self::PlyIterator::new(&self, &state);
         match ply_iterator.iterate(&self, &state) {
-            Some(_) => interface::Status::Ongoing,
+            Some(_) => rulesets::Status::Ongoing,
             None => match state.grids[0]
                 .count_ones()
                 .cmp(&state.grids[1].count_ones())
             {
-                cmp::Ordering::Less => interface::Status::Win { player: 1 },
-                cmp::Ordering::Equal => interface::Status::Draw,
-                cmp::Ordering::Greater => interface::Status::Win { player: 0 },
+                cmp::Ordering::Less => rulesets::Status::Win { player: 1 },
+                cmp::Ordering::Equal => rulesets::Status::Draw,
+                cmp::Ordering::Greater => rulesets::Status::Win { player: 0 },
             },
         }
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::Deterministic for Reversi<Variant> {
     fn play(
         &self,
         state: &Self::State,
         ply: &Self::Ply,
-    ) -> Result<Self::State, interface::PlayError> {
+    ) -> Result<Self::State, rulesets::PlayError> {
         match ply {
             plies::Ply::Place(index) => {
                 if state.grids.iter().any(|grid| grid.isset(*index)) {
-                    return Err(interface::PlayError {
+                    return Err(rulesets::PlayError {
                         message: "Cell is occupied",
                         field: "index",
                     });
@@ -144,7 +144,7 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Varian
                     }
                 }
                 if !found_update {
-                    return Err(interface::PlayError {
+                    return Err(rulesets::PlayError {
                         message: "No reversal resulting from the peg placement",
                         field: "index",
                     });
@@ -159,7 +159,7 @@ impl<Variant: variants::BaseVariant> interface::Deterministic for Reversi<Varian
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::HasStatesWithSymmetries for Reversi<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::HasStatesWithSymmetries for Reversi<Variant> {
     type Symmetry = symmetry::Symmetry;
     type SymmetryIterator = symmetry_iterators::SymmetryIterator;
 
@@ -191,11 +191,11 @@ mod tests {
     use super::super::instances;
     use super::super::plies;
     use super::*;
-    use crate::interface;
-    use crate::interface::Deterministic;
-    use crate::interface::HasStatesWithSymmetries;
-    use crate::interface::RuleSetTrait;
-    use crate::interface::SymmetryIteratorTrait;
+    use crate::interface::rulesets;
+    use crate::interface::rulesets::Deterministic;
+    use crate::interface::rulesets::HasStatesWithSymmetries;
+    use crate::interface::rulesets::RuleSetTrait;
+    use crate::interface::rulesets::SymmetryIteratorTrait;
     use std::collections;
 
     type MiniPly = plies::Ply<instances::Mini>;
@@ -263,10 +263,10 @@ mod tests {
     }
 
     status_tests! {
-        initial_state: ([5, 10], [6, 9], 0, interface::Status::Ongoing),
-        p1_win: ([0, 1, 2, 4, 4, 5, 7, 8], [13, 14, 15], 0, interface::Status::Win{player: 0}),
-        p2_win: ([0, 1, 4], [3, 6, 7, 9, 11, 12, 13, 14], 0, interface::Status::Win{player: 1}),
-        draw: ([1, 2, 3, 4, 6], [9, 11, 12, 13, 14], 0, interface::Status::Draw),
+        initial_state: ([5, 10], [6, 9], 0, rulesets::Status::Ongoing),
+        p1_win: ([0, 1, 2, 4, 4, 5, 7, 8], [13, 14, 15], 0, rulesets::Status::Win{player: 0}),
+        p2_win: ([0, 1, 4], [3, 6, 7, 9, 11, 12, 13, 14], 0, rulesets::Status::Win{player: 1}),
+        draw: ([1, 2, 3, 4, 6], [9, 11, 12, 13, 14], 0, rulesets::Status::Draw),
     }
 
     #[test]
@@ -274,7 +274,7 @@ mod tests {
         let game = Reversi::<instances::Mini>::new();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
         let symmetries =
-            <Reversi<instances::Mini> as interface::HasStatesWithSymmetries>::SymmetryIterator::new(
+            <Reversi<instances::Mini> as rulesets::HasStatesWithSymmetries>::SymmetryIterator::new(
                 &game,
             );
         let mut symmetry_set = collections::HashSet::new();

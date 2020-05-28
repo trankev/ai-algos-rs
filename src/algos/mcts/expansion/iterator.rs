@@ -1,11 +1,11 @@
 use super::items;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::tools::plies;
 use std::hash;
 
 pub struct Expander<'a, RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -16,7 +16,7 @@ where
 
 impl<'a, RuleSet> Expander<'a, RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

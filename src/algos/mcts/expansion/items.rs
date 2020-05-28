@@ -1,7 +1,7 @@
-use crate::interface;
+use crate::interface::rulesets;
 
-pub struct Play<RuleSet: interface::RuleSetTrait> {
+pub struct Play<RuleSet: rulesets::RuleSetTrait> {
     pub ply: RuleSet::Ply,
     pub state: RuleSet::State,
-    pub status: interface::Status,
+    pub status: rulesets::Status,
 }

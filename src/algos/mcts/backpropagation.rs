@@ -1,13 +1,13 @@
 use super::nodes;
-use crate::interface;
+use crate::interface::rulesets;
 use petgraph;
 use petgraph::graph;
 
-pub fn backpropagate<State: interface::StateTrait + interface::TurnByTurnState, Edge>(
+pub fn backpropagate<State: rulesets::StateTrait + rulesets::TurnByTurnState, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,
-    status: Option<&interface::Status>,
+    status: Option<&rulesets::Status>,
 ) {
     let mut neighbours = tree
         .neighbors_directed(node, petgraph::Direction::Incoming)
@@ -18,11 +18,11 @@ pub fn backpropagate<State: interface::StateTrait + interface::TurnByTurnState, 
     update_tallies(tree, node, update_visits, status);
 }
 
-pub fn update_tallies<State: interface::StateTrait + interface::TurnByTurnState, Edge>(
+pub fn update_tallies<State: rulesets::StateTrait + rulesets::TurnByTurnState, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,
-    status: Option<&interface::Status>,
+    status: Option<&rulesets::Status>,
 ) {
     let weight = tree.node_weight_mut(node).unwrap();
     if update_visits {

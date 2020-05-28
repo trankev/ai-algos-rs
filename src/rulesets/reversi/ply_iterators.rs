@@ -2,7 +2,7 @@ use super::plies;
 use super::ruleset;
 use super::state;
 use super::variants;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::utils::grids::strips;
 use std::collections;
 use std::marker;
@@ -11,7 +11,7 @@ use std::sync;
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum CellState {
     Empty { index: usize },
-    Player(interface::Player),
+    Player(rulesets::Player),
     Unset,
 }
 
@@ -28,7 +28,7 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
     fn iterate_strip(
         &mut self,
         state: &state::State<Variant>,
-    ) -> Option<(interface::Player, usize)> {
+    ) -> Option<(rulesets::Player, usize)> {
         for index in self.current_strip.by_ref() {
             let mut cell_state = CellState::Empty { index };
             for player in 0..2 {
@@ -61,7 +61,7 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
     pub fn iterate_grid(
         &mut self,
         state: &state::State<Variant>,
-    ) -> Option<(interface::Player, usize)> {
+    ) -> Option<(rulesets::Player, usize)> {
         loop {
             while let Some((player, index)) = self.iterate_strip(state) {
                 return Some((player, index));
@@ -77,7 +77,7 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<ruleset::Reversi<Variant>>
+impl<Variant: variants::BaseVariant> rulesets::PlyIteratorTrait<ruleset::Reversi<Variant>>
     for PlyIterator<Variant>
 {
     fn new(ruleset: &ruleset::Reversi<Variant>, _state: &state::State<Variant>) -> Self {
@@ -113,8 +113,8 @@ mod tests {
     use super::super::plies;
     use super::super::ruleset;
     use super::*;
-    use crate::interface::PlyIteratorTrait;
-    use crate::interface::RuleSetTrait;
+    use crate::interface::rulesets::PlyIteratorTrait;
+    use crate::interface::rulesets::RuleSetTrait;
     use std::collections;
 
     type ClassicReversi = ruleset::Reversi<instances::Classic>;

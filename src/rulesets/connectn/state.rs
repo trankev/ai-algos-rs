@@ -1,6 +1,6 @@
 use super::plies;
 use super::variants;
-use crate::interface;
+use crate::interface::rulesets;
 use crate::utils::bitarray;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -38,10 +38,10 @@ impl<Variant: variants::BaseVariant> State<Variant> {
         self.grids.iter().all(|grid| !grid.isset(index))
     }
 
-    pub fn play(&mut self, ply: &plies::Ply<Variant>) -> Result<(), interface::PlayError> {
+    pub fn play(&mut self, ply: &plies::Ply<Variant>) -> Result<(), rulesets::PlayError> {
         for grid in &self.grids {
             if grid.isset(ply.index as usize) {
-                return Err(interface::PlayError {
+                return Err(rulesets::PlayError {
                     message: "Cell is occupied",
                     field: "index",
                 });
@@ -69,7 +69,7 @@ impl<Variant: variants::BaseVariant> State<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::StateTrait for State<Variant> {
     fn ascii_representation(&self) -> String {
         let mut result = String::new();
         for index in 0..Variant::CELL_COUNT {
@@ -88,8 +88,8 @@ impl<Variant: variants::BaseVariant> interface::StateTrait for State<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::TurnByTurnState for State<Variant> {
-    fn current_player(&self) -> interface::Player {
+impl<Variant: variants::BaseVariant> rulesets::TurnByTurnState for State<Variant> {
+    fn current_player(&self) -> rulesets::Player {
         self.current_player
     }
 }

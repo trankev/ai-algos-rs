@@ -1,4 +1,4 @@
-use crate::interface;
+use crate::interface::rulesets;
 use crate::rulesets::connectn;
 use crate::rulesets::connectn::variants;
 use std::marker;
@@ -8,7 +8,7 @@ pub struct PlyIterator<Variant: variants::BaseVariant> {
     variant: marker::PhantomData<Variant>,
 }
 
-impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<connectn::RuleSet<Variant>>
+impl<Variant: variants::BaseVariant> rulesets::PlyIteratorTrait<connectn::RuleSet<Variant>>
     for PlyIterator<Variant>
 {
     fn new(
@@ -45,7 +45,7 @@ impl<Variant: variants::BaseVariant> interface::PlyIteratorTrait<connectn::RuleS
 mod tests {
     use super::super::variants;
     use super::*;
-    use crate::interface::PlyIteratorTrait;
+    use crate::interface::rulesets::PlyIteratorTrait;
     use crate::rulesets::connectn;
     use std::collections;
 
@@ -54,7 +54,7 @@ mod tests {
         let ruleset = connectn::TicTacToe::new();
         let state = connectn::TicTacToeState::from_indices(&[4, 1], &[6, 7], 0);
         let mut iterator =
-            <connectn::TicTacToe as interface::RuleSetTrait>::PlyIterator::new(&ruleset, &state);
+            <connectn::TicTacToe as rulesets::RuleSetTrait>::PlyIterator::new(&ruleset, &state);
         let expected: collections::HashSet<connectn::Ply<variants::TicTacToe>> = [
             connectn::Ply::new(0),
             connectn::Ply::new(2),

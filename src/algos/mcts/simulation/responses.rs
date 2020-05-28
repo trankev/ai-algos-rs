@@ -1,7 +1,7 @@
-use crate::interface;
+use crate::interface::rulesets;
 use petgraph::graph;
 
 pub struct Response {
     pub node_index: graph::NodeIndex<u32>,
-    pub status: interface::Status,
+    pub status: rulesets::Status,
 }

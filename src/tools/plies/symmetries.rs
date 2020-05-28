@@ -1,10 +1,10 @@
-use crate::interface;
-use crate::interface::PlyIteratorTrait;
-use crate::interface::SymmetryIteratorTrait;
+use crate::interface::rulesets;
+use crate::interface::rulesets::PlyIteratorTrait;
+use crate::interface::rulesets::SymmetryIteratorTrait;
 use std::collections;
 use std::hash;
 
-pub struct SymmetriesIterator<'a, RuleSet: interface::HasStatesWithSymmetries>
+pub struct SymmetriesIterator<'a, RuleSet: rulesets::HasStatesWithSymmetries>
 where
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
@@ -16,7 +16,7 @@ where
     seen: collections::HashSet<RuleSet::Ply>,
 }
 
-impl<'a, RuleSet: interface::HasStatesWithSymmetries> SymmetriesIterator<'a, RuleSet>
+impl<'a, RuleSet: rulesets::HasStatesWithSymmetries> SymmetriesIterator<'a, RuleSet>
 where
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
@@ -36,7 +36,7 @@ where
     }
 }
 
-impl<'a, RuleSet: interface::HasStatesWithSymmetries> Iterator for SymmetriesIterator<'a, RuleSet>
+impl<'a, RuleSet: rulesets::HasStatesWithSymmetries> Iterator for SymmetriesIterator<'a, RuleSet>
 where
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
@@ -64,7 +64,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::interface::RuleSetTrait;
+    use crate::interface::rulesets::RuleSetTrait;
     use crate::rulesets::connectn;
 
     #[test]

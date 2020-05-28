@@ -1,6 +1,6 @@
-use crate::interface;
+use crate::interface::rulesets;
 
-pub enum Request<RuleSet: interface::RuleSetTrait> {
+pub enum Request<RuleSet: rulesets::RuleSetTrait> {
     SetState(RuleSet::State),
     IterateSequentially {
         count: usize,

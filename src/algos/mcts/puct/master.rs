@@ -8,7 +8,7 @@ use super::super::simulation;
 use super::requests;
 use super::responses;
 use crate::algos;
-use crate::interface;
+use crate::interface::rulesets;
 use crossbeam::channel;
 use petgraph::graph;
 use rand;
@@ -25,8 +25,8 @@ enum SelectionResult {
 
 pub struct Master<RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
-    RuleSet::State: interface::TurnByTurnState,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet::State: rulesets::TurnByTurnState,
 {
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     root: Option<graph::NodeIndex<u32>>,
@@ -44,8 +44,8 @@ where
 
 impl<RuleSet> Master<RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
-    RuleSet::State: interface::TurnByTurnState,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet::State: rulesets::TurnByTurnState,
 {
     pub fn new(
         ruleset: RuleSet,

@@ -1,13 +1,13 @@
 use super::algo;
 use super::requests;
 use super::responses;
-use crate::interface;
+use crate::interface::rulesets;
 use crossbeam::channel;
 use rand;
 use rand::rngs;
 use std::error;
 
-pub struct Worker<RuleSet: interface::Deterministic> {
+pub struct Worker<RuleSet: rulesets::Deterministic> {
     ruleset: RuleSet,
     receiver: channel::Receiver<requests::Request<RuleSet>>,
     sender: channel::Sender<responses::Response>,
@@ -15,7 +15,7 @@ pub struct Worker<RuleSet: interface::Deterministic> {
     pub operation_count: usize,
 }
 
-impl<RuleSet: interface::Deterministic> Worker<RuleSet> {
+impl<RuleSet: rulesets::Deterministic> Worker<RuleSet> {
     pub fn new(
         ruleset: RuleSet,
         receiver: channel::Receiver<requests::Request<RuleSet>>,

@@ -1,7 +1,7 @@
 use super::requests;
 use super::responses;
 use super::worker;
-use crate::interface;
+use crate::interface::rulesets;
 use crossbeam::atomic;
 use crossbeam::channel;
 use std::error;
@@ -10,7 +10,7 @@ use std::thread;
 
 pub struct Pool<RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -24,7 +24,7 @@ where
 
 impl<RuleSet> Pool<RuleSet>
 where
-    RuleSet: interface::HasStatesWithSymmetries + interface::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

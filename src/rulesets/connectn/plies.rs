@@ -1,5 +1,5 @@
 use super::variants;
-use crate::interface;
+use crate::interface::rulesets;
 use std::marker;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -17,7 +17,7 @@ impl<Variant: variants::BaseVariant> Ply<Variant> {
     }
 }
 
-impl<Variant: variants::BaseVariant> interface::PlyTrait for Ply<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::PlyTrait for Ply<Variant> {
     fn ascii_representation(&self) -> String {
         let row = self.index / Variant::GRID_SIZE as u8;
         let column = self.index % Variant::GRID_SIZE as u8;

@@ -1,8 +1,8 @@
-use crate::interface;
+use crate::interface::rulesets;
 
 #[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
 pub struct EmptyState {
-    current_player: interface::Player,
+    current_player: rulesets::Player,
 }
 
 impl EmptyState {
@@ -11,14 +11,14 @@ impl EmptyState {
     }
 }
 
-impl interface::StateTrait for EmptyState {
+impl rulesets::StateTrait for EmptyState {
     fn ascii_representation(&self) -> String {
         "None".into()
     }
 }
 
-impl interface::TurnByTurnState for EmptyState {
-    fn current_player(&self) -> interface::Player {
+impl rulesets::TurnByTurnState for EmptyState {
+    fn current_player(&self) -> rulesets::Player {
         self.current_player
     }
 }

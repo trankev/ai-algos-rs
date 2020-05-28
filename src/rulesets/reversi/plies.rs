@@ -1,5 +1,5 @@
 use super::variants;
-use crate::interface;
+use crate::interface::rulesets;
 use std::marker;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -9,7 +9,7 @@ pub enum Ply<Variant: variants::BaseVariant> {
     Unused(marker::PhantomData<Variant>),
 }
 
-impl<Variant: variants::BaseVariant> interface::PlyTrait for Ply<Variant> {
+impl<Variant: variants::BaseVariant> rulesets::PlyTrait for Ply<Variant> {
     fn ascii_representation(&self) -> String {
         match self {
             Ply::Place(index) => {

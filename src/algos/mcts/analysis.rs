@@ -1,16 +1,16 @@
 use super::edges;
 use super::nodes;
 use crate::algos;
-use crate::interface;
+use crate::interface::rulesets;
 
 use petgraph::graph;
 
-pub fn play_scores<RuleSet: interface::RuleSetTrait>(
+pub fn play_scores<RuleSet: rulesets::RuleSetTrait>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     parent: graph::NodeIndex<u32>,
 ) -> Vec<algos::PlyConsideration<RuleSet::Ply>>
 where
-    RuleSet::State: interface::TurnByTurnState,
+    RuleSet::State: rulesets::TurnByTurnState,
 {
     let mut scores = tree
         .neighbors(parent)
@@ -38,12 +38,12 @@ where
     scores
 }
 
-fn best_play<RuleSet: interface::RuleSetTrait>(
+fn best_play<RuleSet: rulesets::RuleSetTrait>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     mut current_node: graph::NodeIndex<u32>,
 ) -> Vec<RuleSet::Ply>
 where
-    RuleSet::State: interface::TurnByTurnState,
+    RuleSet::State: rulesets::TurnByTurnState,
 {
     let mut result = Vec::new();
     loop {
