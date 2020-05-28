@@ -34,6 +34,6 @@ pub trait EncodableState: RuleSetTrait {
     const PLY_COUNT: usize;
 
     fn encode_state(&self, state: &Self::State) -> Vec<f32>;
-    fn decode_ply(&self, ply_index: i32) -> Self::Ply;
-    fn encode_ply(&self, ply: &Self::Ply) -> i32;
+    fn decode_ply(&self, ply_index: usize) -> Self::Ply;
+    fn encode_ply(&self, ply: &Self::Ply) -> usize;
 }

@@ -85,16 +85,30 @@ impl Network {
         Ok(result)
     }
 
-    pub fn learn(&self, action: i32, reward: f32) -> Result<(), Box<dyn error::Error>> {
-        let action_value = tf::Tensor::new(&[1][..]).with_values(&[action])?;
-        let reward_value = tf::Tensor::new(&[1][..]).with_values(&[reward])?;
+    pub fn learn(
+        &self,
+        states: &Vec<f32>,
+        allowed_plies: &Vec<f32>,
+        actions: &Vec<i32>,
+        rewards: &Vec<f32>,
+    ) -> Result<(), Box<dyn error::Error>> {
+        let action_value = tf::Tensor::new(&[actions.len() as u64][..]).with_values(actions)?;
+        let reward_value = tf::Tensor::new(&[rewards.len() as u64][..]).with_values(rewards)?;
+        let state_value =
+            tf::Tensor::new(&[actions.len() as u64, self.state_size][..]).with_values(states)?;
+        let allowed_plies_value = tf::Tensor::new(&[actions.len() as u64, self.action_count][..])
+            .with_values(allowed_plies)?;
         let mut run_args = tf::SessionRunArgs::new();
         let minimize = self.graph.operation_by_name_required("minimize")?;
         run_args.add_target(&minimize);
         let action_holder = self.graph.operation_by_name_required("action_holder")?;
         let reward_holder = self.graph.operation_by_name_required("reward_holder")?;
+        let allowed_plies_holder = self.graph.operation_by_name_required("allowed_plies")?;
+        let state_in = self.graph.operation_by_name_required("state_in")?;
         run_args.add_feed(&action_holder, 0, &action_value);
         run_args.add_feed(&reward_holder, 0, &reward_value);
+        run_args.add_feed(&state_in, 0, &state_value);
+        run_args.add_feed(&allowed_plies_holder, 0, &allowed_plies_value);
         self.session.run(&mut run_args)?;
         Ok(())
     }
