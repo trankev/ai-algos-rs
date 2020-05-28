@@ -1,4 +1,4 @@
-pub mod algos;
+pub mod agents;
 pub mod interface;
 pub mod rulesets;
 mod tests;
