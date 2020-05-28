@@ -1,5 +1,6 @@
 use super::memory;
 use super::network;
+use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::interface::rulesets::TurnByTurnState;
 use crate::tools::plies;
@@ -43,24 +44,6 @@ where
             network,
             memory: memory::Memory::new(),
         })
-    }
-
-    pub fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
-        let encoded_state = self.ruleset.encode_state(state);
-        let mut allowed_plies = vec![0.0; RuleSet::PLY_COUNT];
-        for ply in plies::SymmetriesIterator::new(self.ruleset, state) {
-            let index = self.ruleset.encode_ply(&ply) as usize;
-            allowed_plies[index] = 1.0;
-        }
-        let encoded_ply = self.network.play(&encoded_state, &allowed_plies)?;
-        let ply = self.ruleset.decode_ply(encoded_ply as usize);
-        self.memory.play(
-            state.current_player(),
-            &encoded_state,
-            &allowed_plies,
-            encoded_ply,
-        );
-        Ok(ply)
     }
 
     pub fn get_probabilities(
@@ -109,5 +92,30 @@ where
 
     pub fn save(&self, path: String) -> Result<(), Box<dyn error::Error>> {
         self.network.save(path)
+    }
+}
+
+impl<'a, RuleSet> ai::Policy<RuleSet> for Agent<'a, RuleSet>
+where
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
+    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet::Ply: Ord + hash::Hash,
+{
+    fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
+        let encoded_state = self.ruleset.encode_state(state);
+        let mut allowed_plies = vec![0.0; RuleSet::PLY_COUNT];
+        for ply in plies::SymmetriesIterator::new(self.ruleset, state) {
+            let index = self.ruleset.encode_ply(&ply) as usize;
+            allowed_plies[index] = 1.0;
+        }
+        let encoded_ply = self.network.play(&encoded_state, &allowed_plies)?;
+        let ply = self.ruleset.decode_ply(encoded_ply as usize);
+        self.memory.play(
+            state.current_player(),
+            &encoded_state,
+            &allowed_plies,
+            encoded_ply,
+        );
+        Ok(ply)
     }
 }
