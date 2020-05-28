@@ -101,11 +101,11 @@ impl<Variant: variants::BaseVariant> interface::HasStatesWithSymmetries for Rule
 }
 
 impl<Variant: variants::BaseVariant> interface::EncodableState for RuleSet<Variant> {
-    const STATE_SIZE: usize = Variant::CELL_COUNT * 3;
+    const STATE_SIZE: usize = Variant::CELL_COUNT * 3 + 1;
     const PLY_COUNT: usize = Variant::CELL_COUNT;
 
     fn encode_state(&self, state: &Self::State) -> Vec<f32> {
-        let mut result = vec![0.0; Variant::CELL_COUNT * 3];
+        let mut result = vec![0.0; Variant::CELL_COUNT * 3 + 1];
         for index in 0..Variant::CELL_COUNT {
             if state.grids[0].isset(index) {
                 result[index] = 1.0;
@@ -115,15 +115,16 @@ impl<Variant: variants::BaseVariant> interface::EncodableState for RuleSet<Varia
                 result[index + Variant::CELL_COUNT * 2] = 1.0;
             }
         }
+        result[Variant::CELL_COUNT * 3] = if state.current_player == 0 { 1.0 } else { 0.0 };
         result
     }
 
-    fn decode_ply(&self, ply_index: i32) -> Self::Ply {
+    fn decode_ply(&self, ply_index: usize) -> Self::Ply {
         Self::Ply::new(ply_index as u8)
     }
 
-    fn encode_ply(&self, ply: &Self::Ply) -> i32 {
-        ply.index as i32
+    fn encode_ply(&self, ply: &Self::Ply) -> usize {
+        ply.index as usize
     }
 }
 
