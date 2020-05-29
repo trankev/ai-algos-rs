@@ -80,15 +80,6 @@ where
         Ok(ply_values)
     }
 
-    pub fn learn(
-        &mut self,
-        game_logs: &Vec<ai::GameLog<RuleSet>>,
-    ) -> Result<(), Box<dyn error::Error>> {
-        let replay_buffer = self.build_buffer(game_logs);
-        self.network.learn(&replay_buffer)?;
-        Ok(())
-    }
-
     fn build_buffer(&self, logs: &Vec<ai::GameLog<RuleSet>>) -> replay_buffer::ReplayBuffer {
         let mut result = replay_buffer::ReplayBuffer::new();
         for log in logs {
@@ -137,5 +128,21 @@ where
         let encoded_ply = self.network.play(&encoded_state, &allowed_plies)?;
         let ply = self.ruleset.decode_ply(encoded_ply as usize);
         Ok(ply)
+    }
+}
+
+impl<'a, RuleSet> ai::Teachable<RuleSet> for Agent<'a, RuleSet>
+where
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
+    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet::Ply: Ord + hash::Hash,
+{
+    fn learn(
+        &mut self,
+        game_logs: &Vec<ai::GameLog<RuleSet>>,
+    ) -> Result<(), Box<dyn error::Error>> {
+        let replay_buffer = self.build_buffer(game_logs);
+        self.network.learn(&replay_buffer)?;
+        Ok(())
     }
 }
