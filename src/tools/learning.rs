@@ -6,42 +6,46 @@ use std::collections;
 use std::error;
 use std::hash;
 
-pub fn train<RuleSet, Policy>(
+pub fn train<RuleSet, Player, Opponent>(
     ruleset: &RuleSet,
-    agent: &mut Policy,
+    player: &mut Player,
+    opponent: &mut Opponent,
     exploration_rate: f32,
     samples: usize,
 ) -> Result<(), Box<dyn error::Error>>
 where
-    Policy: ai::Policy<RuleSet> + ai::Teachable<RuleSet>,
+    Player: ai::Policy<RuleSet> + ai::Teachable<RuleSet>,
+    Opponent: ai::Policy<RuleSet>,
     RuleSet: rulesets::Deterministic + rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
     RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
     RuleSet::Ply: hash::Hash + Ord,
 {
-    let mut eagent = egreedy::EGreedy::new(ruleset, exploration_rate, agent);
+    let mut eagent = egreedy::EGreedy::new(ruleset, exploration_rate, player);
     let mut logs = Vec::new();
     for _ in 0..samples {
-        let game_log = playing::play(ruleset, &mut eagent)?;
+        let game_log = playing::play(ruleset, &mut eagent, opponent)?;
         logs.push(game_log);
     }
-    agent.learn(&logs)?;
+    player.learn(&logs)?;
     Ok(())
 }
 
-pub fn test<RuleSet, Policy>(
+pub fn test<RuleSet, Player, Opponent>(
     ruleset: &RuleSet,
-    agent: &mut Policy,
+    player: &mut Player,
+    opponent: &mut Opponent,
     samples: usize,
 ) -> Result<collections::HashMap<rulesets::Status, usize>, Box<dyn error::Error>>
 where
-    Policy: ai::Policy<RuleSet>,
+    Player: ai::Policy<RuleSet>,
+    Opponent: ai::Policy<RuleSet>,
     RuleSet: rulesets::Deterministic + rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
     RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
     RuleSet::Ply: hash::Hash + Ord,
 {
     let mut scores = collections::HashMap::<rulesets::Status, usize>::new();
     for _ in 0..samples {
-        let game_log = playing::play(ruleset, agent)?;
+        let game_log = playing::play(ruleset, player, opponent)?;
         *scores.entry(game_log.status).or_insert(0) += 1;
     }
     Ok(scores)
