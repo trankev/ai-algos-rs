@@ -1,6 +1,6 @@
 use super::Player;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Status {
     Ongoing,
     Draw,

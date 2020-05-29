@@ -1,5 +1,5 @@
-use super::memory;
 use super::network;
+use super::replay_buffer;
 use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::interface::rulesets::TurnByTurnState;
@@ -16,7 +16,7 @@ where
 {
     network: network::Network,
     ruleset: &'a RuleSet,
-    memory: memory::Memory,
+    discount_factor: f32,
 }
 
 impl<'a, RuleSet> Agent<'a, RuleSet>
@@ -29,6 +29,7 @@ where
         ruleset: &'a RuleSet,
         model_file: P,
         data_folder: Option<String>,
+        discount_factor: f32,
     ) -> Result<Agent<RuleSet>, Box<dyn error::Error>> {
         let network = network::Network::from_file(
             model_file,
@@ -42,8 +43,17 @@ where
         Ok(Agent {
             ruleset,
             network,
-            memory: memory::Memory::new(),
+            discount_factor,
         })
+    }
+
+    fn compute_allowed_plies(&self, state: &RuleSet::State) -> Vec<f32> {
+        let mut allowed_plies = vec![0.0; RuleSet::PLY_COUNT];
+        for ply in plies::SymmetriesIterator::new(self.ruleset, state) {
+            let index = self.ruleset.encode_ply(&ply) as usize;
+            allowed_plies[index] = 1.0;
+        }
+        allowed_plies
     }
 
     pub fn get_probabilities(
@@ -51,11 +61,7 @@ where
         state: &RuleSet::State,
     ) -> Result<Vec<(RuleSet::Ply, f32)>, Box<dyn error::Error>> {
         let encoded_state = self.ruleset.encode_state(state);
-        let mut allowed_plies = vec![0.0; RuleSet::PLY_COUNT];
-        for ply in plies::SymmetriesIterator::new(self.ruleset, state) {
-            let index = self.ruleset.encode_ply(&ply) as usize;
-            allowed_plies[index] = 1.0;
-        }
+        let allowed_plies = self.compute_allowed_plies(state);
         let probabilities = self
             .network
             .get_probabilities(&encoded_state, &allowed_plies)?;
@@ -76,18 +82,42 @@ where
 
     pub fn learn(
         &mut self,
-        status: rulesets::Status,
-        discount_factor: f32,
+        game_logs: &Vec<ai::GameLog<RuleSet>>,
     ) -> Result<(), Box<dyn error::Error>> {
-        let rewards = self.memory.compute_rewards(status, discount_factor);
-        self.network.learn(
-            &self.memory.states,
-            &self.memory.allowed_plies,
-            &self.memory.actions,
-            &rewards,
-        )?;
-        self.memory.clear();
+        let replay_buffer = self.build_buffer(game_logs);
+        self.network.learn(&replay_buffer)?;
         Ok(())
+    }
+
+    fn build_buffer(&self, logs: &Vec<ai::GameLog<RuleSet>>) -> replay_buffer::ReplayBuffer {
+        let mut result = replay_buffer::ReplayBuffer::new();
+        for log in logs {
+            let winner = match log.status {
+                rulesets::Status::Win { player } => Some(player),
+                rulesets::Status::Draw => None,
+                rulesets::Status::Ongoing => unreachable!(),
+            };
+            let mut discounted_reward = match winner {
+                Some(_) => 1.0,
+                None => 0.5,
+            };
+            for (state, ply) in log.history.iter().rev() {
+                if let Some(player) = winner {
+                    if player != state.current_player() {
+                        discounted_reward *= self.discount_factor;
+                        continue;
+                    }
+                }
+                result.rewards.push(discounted_reward);
+                result.states.extend(self.ruleset.encode_state(&state));
+                result
+                    .allowed_plies
+                    .extend(self.compute_allowed_plies(&state));
+                result.plies.push(self.ruleset.encode_ply(ply) as i32);
+                discounted_reward *= self.discount_factor;
+            }
+        }
+        result
     }
 
     pub fn save(&self, path: String) -> Result<(), Box<dyn error::Error>> {
@@ -103,19 +133,9 @@ where
 {
     fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
         let encoded_state = self.ruleset.encode_state(state);
-        let mut allowed_plies = vec![0.0; RuleSet::PLY_COUNT];
-        for ply in plies::SymmetriesIterator::new(self.ruleset, state) {
-            let index = self.ruleset.encode_ply(&ply) as usize;
-            allowed_plies[index] = 1.0;
-        }
+        let allowed_plies = self.compute_allowed_plies(state);
         let encoded_ply = self.network.play(&encoded_state, &allowed_plies)?;
         let ply = self.ruleset.decode_ply(encoded_ply as usize);
-        self.memory.play(
-            state.current_player(),
-            &encoded_state,
-            &allowed_plies,
-            encoded_ply,
-        );
         Ok(ply)
     }
 }

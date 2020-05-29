@@ -1,3 +1,4 @@
+use super::replay_buffer;
 use std::error;
 use std::fs;
 use std::io::Read;
@@ -85,22 +86,19 @@ impl Network {
         Ok(result)
     }
 
-    pub fn learn(
-        &self,
-        states: &Vec<f32>,
-        allowed_plies: &Vec<f32>,
-        actions: &Vec<i32>,
-        rewards: &Vec<f32>,
-    ) -> Result<(), Box<dyn error::Error>> {
-        let action_value = tf::Tensor::new(&[actions.len() as u64][..]).with_values(actions)?;
-        let reward_value = tf::Tensor::new(&[rewards.len() as u64][..]).with_values(rewards)?;
-        let state_value =
-            tf::Tensor::new(&[actions.len() as u64, self.state_size][..]).with_values(states)?;
-        let allowed_plies_value = tf::Tensor::new(&[actions.len() as u64, self.action_count][..])
-            .with_values(allowed_plies)?;
+    pub fn learn(&self, buffer: &replay_buffer::ReplayBuffer) -> Result<(), Box<dyn error::Error>> {
+        let action_value =
+            tf::Tensor::new(&[buffer.plies.len() as u64][..]).with_values(&buffer.plies)?;
+        let reward_value =
+            tf::Tensor::new(&[buffer.rewards.len() as u64][..]).with_values(&buffer.rewards)?;
+        let state_value = tf::Tensor::new(&[buffer.plies.len() as u64, self.state_size][..])
+            .with_values(&buffer.states)?;
+        let allowed_plies_value =
+            tf::Tensor::new(&[buffer.plies.len() as u64, self.action_count][..])
+                .with_values(&buffer.allowed_plies)?;
         let mut run_args = tf::SessionRunArgs::new();
-        let minimize = self.graph.operation_by_name_required("minimize")?;
-        run_args.add_target(&minimize);
+        let update_batch = self.graph.operation_by_name_required("update_batch")?;
+        run_args.add_target(&update_batch);
         let action_holder = self.graph.operation_by_name_required("action_holder")?;
         let reward_holder = self.graph.operation_by_name_required("reward_holder")?;
         let allowed_plies_holder = self.graph.operation_by_name_required("allowed_plies")?;
