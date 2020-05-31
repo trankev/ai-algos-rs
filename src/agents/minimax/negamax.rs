@@ -1,31 +1,39 @@
 use super::state;
 use crate::interface::rulesets;
+use crate::interface::rulesets::TurnByTurnState;
 use crate::tools::plies;
 use std::f32;
 
-pub struct Negamax<RuleSet: rulesets::Deterministic> {
+pub struct Negamax<RuleSet>
+where
+    RuleSet: rulesets::Deterministic,
+    RuleSet::State: rulesets::TurnByTurnState,
+{
     ruleset: RuleSet,
 }
 
-impl<RuleSet: rulesets::Deterministic> Negamax<RuleSet> {
+impl<RuleSet> Negamax<RuleSet>
+where
+    RuleSet: rulesets::Deterministic,
+    RuleSet::State: rulesets::TurnByTurnState,
+{
     pub fn new(ruleset: RuleSet) -> Negamax<RuleSet> {
         Negamax { ruleset }
     }
 
-    pub fn compute(&self, state: &RuleSet::State, player: u8) -> state::State<RuleSet::Ply> {
-        self.iterate(state, player, f32::NEG_INFINITY, f32::INFINITY)
+    pub fn compute(&self, state: &RuleSet::State) -> state::State<RuleSet::Ply> {
+        self.iterate(state, f32::NEG_INFINITY, f32::INFINITY)
     }
 
     fn iterate(
         &self,
         state: &RuleSet::State,
-        player: u8,
         mut alpha: f32,
         beta: f32,
     ) -> state::State<RuleSet::Ply> {
         match self.ruleset.status(&state) {
             rulesets::Status::Win { player: winner } => {
-                if winner == player {
+                if winner == state.current_player() {
                     state::State::Win
                 } else {
                     state::State::Loss
@@ -37,7 +45,7 @@ impl<RuleSet: rulesets::Deterministic> Negamax<RuleSet> {
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
                     let resulting_state = self.ruleset.play(&state, &ply).unwrap();
-                    let iteration_state = self.iterate(&resulting_state, 1 - player, -beta, -alpha);
+                    let iteration_state = self.iterate(&resulting_state, -beta, -alpha);
                     if iteration_state.should_replace(&current_state) {
                         current_state = state::State::tree_search(ply, iteration_state);
                         alpha = alpha.max(current_state.score());
@@ -67,7 +75,7 @@ mod tests {
                     let ruleset = connectn::TicTacToe::new();
                     let state = connectn::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player);
                     let algo = Negamax{ruleset};
-                    let result = algo.compute(&state, current_player);
+                    let result = algo.compute(&state);
                     assert_eq!(result.score(), expected_score);
                     let expected_plies: Vec<connectn::TicTacToePly> = expected_indices.iter().map(
                         |index| connectn::Ply::new(*index)

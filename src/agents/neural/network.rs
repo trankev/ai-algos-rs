@@ -103,11 +103,15 @@ impl Network {
         let reward_holder = self.graph.operation_by_name_required("reward_holder")?;
         let allowed_plies_holder = self.graph.operation_by_name_required("allowed_plies")?;
         let state_in = self.graph.operation_by_name_required("state_in")?;
+        let loss = self.graph.operation_by_name_required("loss")?;
         run_args.add_feed(&action_holder, 0, &action_value);
         run_args.add_feed(&reward_holder, 0, &reward_value);
         run_args.add_feed(&state_in, 0, &state_value);
         run_args.add_feed(&allowed_plies_holder, 0, &allowed_plies_value);
+        let loss_fetch = run_args.request_fetch(&loss, 0);
         self.session.run(&mut run_args)?;
+        let loss_value = run_args.fetch::<f32>(loss_fetch)?[0];
+        println!("Loss: {}", loss_value);
         Ok(())
     }
 
