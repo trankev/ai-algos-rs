@@ -1,23 +1,25 @@
 use super::state;
+use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::interface::rulesets::TurnByTurnState;
 use crate::tools::plies;
+use std::error;
 use std::f32;
 
-pub struct Negamax<RuleSet>
+pub struct Negamax<'a, RuleSet>
 where
     RuleSet: rulesets::Deterministic,
     RuleSet::State: rulesets::TurnByTurnState,
 {
-    ruleset: RuleSet,
+    ruleset: &'a RuleSet,
 }
 
-impl<RuleSet> Negamax<RuleSet>
+impl<'a, RuleSet> Negamax<'a, RuleSet>
 where
     RuleSet: rulesets::Deterministic,
     RuleSet::State: rulesets::TurnByTurnState,
 {
-    pub fn new(ruleset: RuleSet) -> Negamax<RuleSet> {
+    pub fn new(ruleset: &'a RuleSet) -> Negamax<RuleSet> {
         Negamax { ruleset }
     }
 
@@ -41,7 +43,7 @@ where
             }
             rulesets::Status::Draw => state::State::Draw,
             rulesets::Status::Ongoing => {
-                let available_plies = plies::BasicIterator::new(&self.ruleset, &state);
+                let available_plies = plies::BasicIterator::new(self.ruleset, &state);
                 let mut current_state = state::State::Unset;
                 for ply in available_plies {
                     let resulting_state = self.ruleset.play(&state, &ply).unwrap();
@@ -60,6 +62,19 @@ where
     }
 }
 
+impl<'a, RuleSet> ai::Policy<RuleSet> for Negamax<'a, RuleSet>
+where
+    RuleSet: rulesets::Deterministic,
+    RuleSet::State: rulesets::TurnByTurnState,
+{
+    fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
+        match self.compute(state) {
+            state::State::TreeSearch { ply, .. } => Ok(ply),
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Negamax;
@@ -74,7 +89,7 @@ mod tests {
                     let (p1_indices, p2_indices, current_player, expected_indices, expected_score) = $value;
                     let ruleset = connectn::TicTacToe::new();
                     let state = connectn::TicTacToeState::from_indices(&p1_indices, &p2_indices, current_player);
-                    let algo = Negamax{ruleset};
+                    let algo = Negamax{ruleset: &ruleset};
                     let result = algo.compute(&state);
                     assert_eq!(result.score(), expected_score);
                     let expected_plies: Vec<connectn::TicTacToePly> = expected_indices.iter().map(
