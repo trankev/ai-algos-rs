@@ -39,7 +39,7 @@ pub fn test<RuleSet, Player, Opponent>(
 where
     Player: ai::Policy<RuleSet>,
     Opponent: ai::Policy<RuleSet>,
-    RuleSet: rulesets::Deterministic + rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
+    RuleSet: rulesets::Deterministic,
     RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
     RuleSet::Ply: hash::Hash + Ord,
 {
