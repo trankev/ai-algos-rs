@@ -101,21 +101,22 @@ impl<Variant: variants::BaseVariant> rulesets::HasStatesWithSymmetries for RuleS
 }
 
 impl<Variant: variants::BaseVariant> rulesets::EncodableState for RuleSet<Variant> {
-    const STATE_SIZE: usize = Variant::CELL_COUNT * 3 + 1;
+    const STATE_SIZE: usize = Variant::CELL_COUNT * 3;
     const PLY_COUNT: usize = Variant::CELL_COUNT;
 
     fn encode_state(&self, state: &Self::State) -> Vec<f32> {
-        let mut result = vec![0.0; Variant::CELL_COUNT * 3 + 1];
+        let mut result = vec![0.0; Variant::CELL_COUNT * 3];
+        let player = state.current_player as usize;
+        let opponent = 1 - player;
         for index in 0..Variant::CELL_COUNT {
-            if state.grids[0].isset(index) {
+            if state.grids[player].isset(index) {
                 result[index] = 1.0;
-            } else if state.grids[1].isset(index) {
+            } else if state.grids[opponent].isset(index) {
                 result[index + Variant::CELL_COUNT] = 1.0;
             } else {
                 result[index + Variant::CELL_COUNT * 2] = 1.0;
             }
         }
-        result[Variant::CELL_COUNT * 3] = if state.current_player == 0 { 1.0 } else { 0.0 };
         result
     }
 
