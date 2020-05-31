@@ -23,12 +23,7 @@ impl<Ply: Copy> State<Ply> {
         State::TreeSearch {
             value: -next.score(),
             depth: match next {
-                State::TreeSearch {
-                    value: _,
-                    depth,
-                    ply: _,
-                    next: _,
-                } => depth + 1,
+                State::TreeSearch { depth, .. } => depth + 1,
                 _ => 1,
             },
             next: rc::Rc::new(next),
@@ -42,12 +37,7 @@ impl<Ply: Copy> State<Ply> {
             State::Loss => f32::NEG_INFINITY,
             State::Draw => 0.0,
             State::Heuristic { value } => *value,
-            State::TreeSearch {
-                value,
-                depth: _,
-                ply: _,
-                next: _,
-            } => *value,
+            State::TreeSearch { value, .. } => *value,
             State::Unset => f32::NAN,
         }
     }
@@ -66,13 +56,7 @@ impl<Ply: Copy> State<Ply> {
     }
 
     fn list_plies(&self, list: &mut Vec<Ply>) {
-        if let State::TreeSearch {
-            value: _,
-            depth: _,
-            ply,
-            next,
-        } = self
-        {
+        if let State::TreeSearch { ply, next, .. } = self {
             list.push(*ply);
             next.list_plies(list);
         }

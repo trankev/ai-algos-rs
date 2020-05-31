@@ -45,17 +45,14 @@ impl<State: rulesets::StateTrait + rulesets::TurnByTurnState> Node<State> {
 
     pub fn is_visited(&self) -> bool {
         match self.status {
-            Status::Terminal {
-                global: _,
-                player: _,
-            } => true,
+            Status::Terminal { .. } => true,
             _ => self.visits > 0.0,
         }
     }
 
     pub fn game_status(&self) -> rulesets::Status {
         match self.status {
-            Status::Terminal { global, player: _ } => global,
+            Status::Terminal { global, .. } => global,
             _ => rulesets::Status::Ongoing,
         }
     }
@@ -103,31 +100,25 @@ impl<State: rulesets::StateTrait + rulesets::TurnByTurnState> Node<State> {
                 }
                 Status::Ongoing { score, draw_rate }
             }
-            Status::Terminal {
-                global: _,
-                player: _,
-            } => return,
+            Status::Terminal { .. } => return,
         };
     }
 
     pub fn score(&self) -> f32 {
         match &self.status {
-            Status::Terminal { global: _, player } => match player {
+            Status::Terminal { player, .. } => match player {
                 rulesets::PlayerStatus::Win => 0.0,
                 rulesets::PlayerStatus::Draw => 0.5,
                 rulesets::PlayerStatus::Loss => 1.0,
                 rulesets::PlayerStatus::Ongoing => unreachable!(),
             },
-            Status::Ongoing {
-                score,
-                draw_rate: _,
-            } => *score,
+            Status::Ongoing { score, .. } => *score,
         }
     }
 
     pub fn win_rate(&self) -> f32 {
         match &self.status {
-            Status::Terminal { global: _, player } => match player {
+            Status::Terminal { player, .. } => match player {
                 rulesets::PlayerStatus::Loss => 1.0,
                 _ => 0.0,
             },
@@ -137,14 +128,11 @@ impl<State: rulesets::StateTrait + rulesets::TurnByTurnState> Node<State> {
 
     pub fn draw_rate(&self) -> f32 {
         match &self.status {
-            Status::Terminal { global: _, player } => match player {
+            Status::Terminal { player, .. } => match player {
                 rulesets::PlayerStatus::Draw => 1.0,
                 _ => 0.0,
             },
-            Status::Ongoing {
-                score: _,
-                draw_rate,
-            } => *draw_rate,
+            Status::Ongoing { draw_rate, .. } => *draw_rate,
         }
     }
 }
