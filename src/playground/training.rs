@@ -1,4 +1,3 @@
-use crate::agents::egreedy;
 use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::playground;
@@ -9,7 +8,6 @@ pub fn train<RuleSet, Player, Opponent>(
     ruleset: &RuleSet,
     player: &mut Player,
     opponent: &mut Opponent,
-    exploration_rate: f32,
     samples: usize,
 ) -> Result<(), Box<dyn error::Error>>
 where
@@ -19,10 +17,9 @@ where
     RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
     RuleSet::Ply: hash::Hash + Ord,
 {
-    let mut eagent = egreedy::EGreedy::new(ruleset, exploration_rate, player);
     let mut logs = Vec::new();
     for _ in 0..samples {
-        let game_log = playground::play(ruleset, &mut eagent, opponent)?;
+        let game_log = playground::play(ruleset, player, opponent)?;
         logs.push(game_log);
     }
     player.learn(&logs)?;
@@ -32,7 +29,6 @@ where
 pub fn self_train<RuleSet, Player>(
     ruleset: &RuleSet,
     player: &mut Player,
-    exploration_rate: f32,
     samples: usize,
 ) -> Result<(), Box<dyn error::Error>>
 where
@@ -41,10 +37,9 @@ where
     RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
     RuleSet::Ply: hash::Hash + Ord,
 {
-    let mut eagent = egreedy::EGreedy::new(ruleset, exploration_rate, player);
     let mut logs = Vec::new();
     for _ in 0..samples {
-        let game_log = playground::self_play(ruleset, &mut eagent)?;
+        let game_log = playground::self_play(ruleset, player)?;
         logs.push(game_log);
     }
     player.learn(&logs)?;
