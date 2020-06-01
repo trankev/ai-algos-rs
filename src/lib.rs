@@ -1,6 +1,7 @@
 pub mod agents;
 pub mod interface;
+pub mod playground;
 pub mod rulesets;
 mod tests;
-pub mod tools;
+mod tools;
 mod utils;

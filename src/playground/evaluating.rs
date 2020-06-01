@@ -1,11 +1,11 @@
 use crate::interface::ai;
 use crate::interface::rulesets;
-use crate::tools::playing;
+use crate::playground;
 use std::collections;
 use std::error;
 use std::hash;
 
-pub fn test<RuleSet, Player, Opponent>(
+pub fn evaluate<RuleSet, Player, Opponent>(
     ruleset: &RuleSet,
     player: &mut Player,
     opponent: &mut Opponent,
@@ -20,13 +20,13 @@ where
 {
     let mut scores = collections::HashMap::<rulesets::Status, usize>::new();
     for _ in 0..samples {
-        let game_log = playing::play(ruleset, player, opponent)?;
+        let game_log = playground::play(ruleset, player, opponent)?;
         *scores.entry(game_log.status).or_insert(0) += 1;
     }
     Ok(scores)
 }
 
-pub fn self_test<RuleSet, Player>(
+pub fn self_evaluate<RuleSet, Player>(
     ruleset: &RuleSet,
     player: &mut Player,
     samples: usize,
@@ -39,7 +39,7 @@ where
 {
     let mut scores = collections::HashMap::<rulesets::Status, usize>::new();
     for _ in 0..samples {
-        let game_log = playing::self_play(ruleset, player)?;
+        let game_log = playground::self_play(ruleset, player)?;
         *scores.entry(game_log.status).or_insert(0) += 1;
     }
     Ok(scores)

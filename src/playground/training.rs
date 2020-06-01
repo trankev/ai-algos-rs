@@ -1,7 +1,7 @@
 use crate::agents::egreedy;
 use crate::interface::ai;
 use crate::interface::rulesets;
-use crate::tools::playing;
+use crate::playground;
 use std::error;
 use std::hash;
 
@@ -22,7 +22,7 @@ where
     let mut eagent = egreedy::EGreedy::new(ruleset, exploration_rate, player);
     let mut logs = Vec::new();
     for _ in 0..samples {
-        let game_log = playing::play(ruleset, &mut eagent, opponent)?;
+        let game_log = playground::play(ruleset, &mut eagent, opponent)?;
         logs.push(game_log);
     }
     player.learn(&logs)?;
@@ -44,7 +44,7 @@ where
     let mut eagent = egreedy::EGreedy::new(ruleset, exploration_rate, player);
     let mut logs = Vec::new();
     for _ in 0..samples {
-        let game_log = playing::self_play(ruleset, &mut eagent)?;
+        let game_log = playground::self_play(ruleset, &mut eagent)?;
         logs.push(game_log);
     }
     player.learn(&logs)?;
