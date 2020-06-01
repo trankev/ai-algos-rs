@@ -2,7 +2,6 @@ use crate::agents::egreedy;
 use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::tools::playing;
-use std::collections;
 use std::error;
 use std::hash;
 
@@ -30,23 +29,24 @@ where
     Ok(())
 }
 
-pub fn test<RuleSet, Player, Opponent>(
+pub fn self_train<RuleSet, Player>(
     ruleset: &RuleSet,
     player: &mut Player,
-    opponent: &mut Opponent,
+    exploration_rate: f32,
     samples: usize,
-) -> Result<collections::HashMap<rulesets::Status, usize>, Box<dyn error::Error>>
+) -> Result<(), Box<dyn error::Error>>
 where
-    Player: ai::Policy<RuleSet>,
-    Opponent: ai::Policy<RuleSet>,
-    RuleSet: rulesets::Deterministic,
+    Player: ai::Policy<RuleSet> + ai::Teachable<RuleSet>,
+    RuleSet: rulesets::Deterministic + rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
     RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
     RuleSet::Ply: hash::Hash + Ord,
 {
-    let mut scores = collections::HashMap::<rulesets::Status, usize>::new();
+    let mut eagent = egreedy::EGreedy::new(ruleset, exploration_rate, player);
+    let mut logs = Vec::new();
     for _ in 0..samples {
-        let game_log = playing::play(ruleset, player, opponent)?;
-        *scores.entry(game_log.status).or_insert(0) += 1;
+        let game_log = playing::self_play(ruleset, &mut eagent)?;
+        logs.push(game_log);
     }
-    Ok(scores)
+    player.learn(&logs)?;
+    Ok(())
 }
