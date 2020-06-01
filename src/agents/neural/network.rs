@@ -1,3 +1,4 @@
+use super::actions;
 use super::replay_buffer;
 use std::error;
 use std::fs;
@@ -10,6 +11,7 @@ pub struct Network {
     session: tf::Session,
     state_size: u64,
     action_count: u64,
+    action_name: &'static str,
 }
 
 impl Network {
@@ -17,6 +19,7 @@ impl Network {
         filename: P,
         state_size: u64,
         action_count: u64,
+        action_choosing: actions::ActionChoosing,
     ) -> Result<Network, Box<dyn error::Error>> {
         let mut graph = tf::Graph::new();
         let mut proto = Vec::new();
@@ -28,6 +31,10 @@ impl Network {
             session,
             state_size,
             action_count,
+            action_name: match action_choosing {
+                actions::ActionChoosing::Deterministic => "argmax_action",
+                actions::ActionChoosing::Stochastic => "stochastic_action/Multinomial",
+            },
         })
     }
 
@@ -49,7 +56,7 @@ impl Network {
         let allowed_plies_value =
             tf::Tensor::new(&[1, self.action_count][..]).with_values(&allowed_plies)?;
         let allowed_plies_in = self.graph.operation_by_name_required("allowed_plies")?;
-        let chosen_action = self.graph.operation_by_name_required("chosen_action")?;
+        let chosen_action = self.graph.operation_by_name_required(self.action_name)?;
 
         let mut run_args = tf::SessionRunArgs::new();
         run_args.add_feed(&state_in, 0, &state_value);

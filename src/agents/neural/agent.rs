@@ -1,3 +1,4 @@
+use super::actions;
 use super::network;
 use super::replay_buffer;
 use crate::interface::ai;
@@ -30,11 +31,13 @@ where
         model_file: P,
         data_folder: Option<String>,
         discount_factor: f32,
+        action_choosing: actions::ActionChoosing,
     ) -> Result<Agent<RuleSet>, Box<dyn error::Error>> {
         let network = network::Network::from_file(
             model_file,
             RuleSet::STATE_SIZE as u64,
             RuleSet::PLY_COUNT as u64,
+            action_choosing,
         )?;
         match data_folder {
             Some(folder) => network.load(folder)?,
