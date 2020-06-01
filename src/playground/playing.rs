@@ -55,3 +55,50 @@ where
     game_log.status = status;
     Ok(game_log)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::agents::minimax;
+    use crate::interface::ai;
+    use crate::interface::rulesets;
+    use crate::interface::rulesets::Deterministic;
+    use crate::interface::rulesets::RuleSetTrait;
+    use crate::rulesets::connectn;
+    use std::error;
+
+    fn validate_game_log(
+        ruleset: &connectn::TicTacToe,
+        game_log: &ai::GameLog<connectn::TicTacToe>,
+    ) -> Result<(), Box<dyn error::Error>> {
+        let mut current_state = ruleset.initial_state();
+        for (state, ply) in &game_log.history {
+            assert_eq!(current_state, *state);
+            let status = ruleset.status(&state);
+            assert_eq!(status, rulesets::Status::Ongoing);
+            current_state = ruleset.play(&state, &ply).unwrap();
+        }
+        let status = ruleset.status(&current_state);
+        assert_eq!(status, game_log.status);
+        Ok(())
+    }
+
+    #[test]
+    fn test_play() -> Result<(), Box<dyn error::Error>> {
+        let ruleset = connectn::TicTacToe::new();
+        let mut agent = minimax::Negamax::new(&ruleset);
+        let mut opponent = minimax::Negamax::new(&ruleset);
+        let game_log = play(&ruleset, &mut agent, &mut opponent)?;
+        validate_game_log(&ruleset, &game_log)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_self_play() -> Result<(), Box<dyn error::Error>> {
+        let ruleset = connectn::TicTacToe::new();
+        let mut agent = minimax::Negamax::new(&ruleset);
+        let game_log = self_play(&ruleset, &mut agent)?;
+        validate_game_log(&ruleset, &game_log)?;
+        Ok(())
+    }
+}
