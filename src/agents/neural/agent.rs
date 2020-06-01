@@ -93,13 +93,13 @@ where
                 None => 0.5,
             };
             for (state, ply) in log.history.iter().rev() {
+                let mut state_reward = discounted_reward;
                 if let Some(player) = winner {
                     if player != state.current_player() {
-                        discounted_reward *= self.discount_factor;
-                        continue;
+                        state_reward = 0.0;
                     }
                 }
-                result.rewards.push(discounted_reward);
+                result.rewards.push(state_reward);
                 result.states.extend(self.ruleset.encode_state(&state));
                 result
                     .allowed_plies
