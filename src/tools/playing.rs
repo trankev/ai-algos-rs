@@ -24,9 +24,10 @@ where
         } else {
             ply = player2.play(&state)?;
         }
-        state = ruleset.play(&state, &ply).unwrap();
-        status = ruleset.status(&state);
-        game_log.history.push((state.clone(), ply));
+        let resulting_state = ruleset.play(&state, &ply).unwrap();
+        status = ruleset.status(&resulting_state);
+        game_log.history.push((state, ply));
+        state = resulting_state;
     }
     game_log.status = status;
     Ok(game_log)
