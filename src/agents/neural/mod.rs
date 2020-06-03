@@ -1,5 +1,6 @@
 mod actions;
 mod agent;
+mod fieldset;
 mod network;
 mod probas;
 mod replay_buffer;
