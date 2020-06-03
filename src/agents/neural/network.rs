@@ -1,5 +1,6 @@
 use super::actions;
 use super::fieldset;
+use super::learning_metrics;
 use super::replay_buffer;
 use std::error;
 use std::fs;
@@ -89,7 +90,10 @@ impl Network {
         Ok(result)
     }
 
-    pub fn learn(&self, buffer: &replay_buffer::ReplayBuffer) -> Result<(), Box<dyn error::Error>> {
+    pub fn learn(
+        &self,
+        buffer: &replay_buffer::ReplayBuffer,
+    ) -> Result<learning_metrics::LearningMetrics, Box<dyn error::Error>> {
         let action_value =
             tf::Tensor::new(&[buffer.plies.len() as u64][..]).with_values(&buffer.plies)?;
         let reward_value =
@@ -105,8 +109,16 @@ impl Network {
         run_args.add_feed(&self.fields.rewards_in, 0, &reward_value);
         run_args.add_feed(&self.fields.state_in, 0, &state_value);
         run_args.add_feed(&self.fields.allowed_plies_in, 0, &allowed_plies_value);
+        let policy_loss_fetch = run_args.request_fetch(&self.fields.policy_loss_out, 0);
+        let reg_losses_fetch = run_args.request_fetch(&self.fields.reg_losses_out, 0);
+        let total_loss_fetch = run_args.request_fetch(&self.fields.total_loss_out, 0);
         self.session.run(&mut run_args)?;
-        Ok(())
+        let metrics = learning_metrics::LearningMetrics {
+            policy_loss: run_args.fetch::<f32>(policy_loss_fetch)?[0],
+            reg_losses: run_args.fetch::<f32>(reg_losses_fetch)?[0],
+            total_loss: run_args.fetch::<f32>(total_loss_fetch)?[0],
+        };
+        Ok(metrics)
     }
 
     pub fn save(&self, path: String) -> Result<(), Box<dyn error::Error>> {

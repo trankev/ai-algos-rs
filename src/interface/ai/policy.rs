@@ -7,6 +7,10 @@ pub trait Policy<RuleSet: rulesets::RuleSetTrait> {
 }
 
 pub trait Teachable<RuleSet: rulesets::RuleSetTrait> {
-    fn learn(&mut self, game_logs: &Vec<ai::GameLog<RuleSet>>)
-        -> Result<(), Box<dyn error::Error>>;
+    type Metrics;
+
+    fn learn(
+        &mut self,
+        game_logs: &Vec<ai::GameLog<RuleSet>>,
+    ) -> Result<Self::Metrics, Box<dyn error::Error>>;
 }

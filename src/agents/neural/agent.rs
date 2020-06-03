@@ -1,4 +1,5 @@
 use super::actions;
+use super::learning_metrics;
 use super::network;
 use super::replay_buffer;
 use crate::interface::ai;
@@ -140,12 +141,14 @@ where
     RuleSet::State: Eq + rulesets::TurnByTurnState,
     RuleSet::Ply: Ord + hash::Hash,
 {
+    type Metrics = learning_metrics::LearningMetrics;
+
     fn learn(
         &mut self,
         game_logs: &Vec<ai::GameLog<RuleSet>>,
-    ) -> Result<(), Box<dyn error::Error>> {
+    ) -> Result<learning_metrics::LearningMetrics, Box<dyn error::Error>> {
         let replay_buffer = self.build_buffer(game_logs);
-        self.network.learn(&replay_buffer)?;
-        Ok(())
+        let metrics = self.network.learn(&replay_buffer)?;
+        Ok(metrics)
     }
 }

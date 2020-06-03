@@ -1,6 +1,7 @@
 mod actions;
 mod agent;
 mod fieldset;
+mod learning_metrics;
 mod network;
 mod probas;
 mod replay_buffer;
