@@ -6,6 +6,7 @@ pub struct Fields {
     pub allowed_plies_in: tf::Operation,
     pub actions_in: tf::Operation,
     pub rewards_in: tf::Operation,
+    pub qvalues_in: tf::Operation,
     pub filepath_in: tf::Operation,
 
     pub init_op: tf::Operation,
@@ -17,6 +18,7 @@ pub struct Fields {
     pub stochastic_action_out: tf::Operation,
     pub probabilities_out: tf::Operation,
     pub policy_loss_out: tf::Operation,
+    pub value_loss_out: tf::Operation,
     pub reg_losses_out: tf::Operation,
     pub total_loss_out: tf::Operation,
 }
@@ -28,6 +30,7 @@ impl Fields {
             allowed_plies_in: graph.operation_by_name_required("allowed_plies_in")?,
             actions_in: graph.operation_by_name_required("actions_in")?,
             rewards_in: graph.operation_by_name_required("rewards_in")?,
+            qvalues_in: graph.operation_by_name_required("qvalues_in")?,
             filepath_in: graph.operation_by_name_required("save/Const")?,
 
             init_op: graph.operation_by_name_required("init_op")?,
@@ -40,6 +43,7 @@ impl Fields {
                 .operation_by_name_required("stochastic_action_out/Multinomial")?,
             probabilities_out: graph.operation_by_name_required("probabilities_out")?,
             policy_loss_out: graph.operation_by_name_required("policy_loss_out")?,
+            value_loss_out: graph.operation_by_name_required("value_loss_out")?,
             reg_losses_out: graph.operation_by_name_required("reg_losses_out")?,
             total_loss_out: graph.operation_by_name_required("total_loss_out")?,
         };

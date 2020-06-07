@@ -3,6 +3,7 @@ pub struct ReplayBuffer {
     pub allowed_plies: Vec<f32>,
     pub plies: Vec<i32>,
     pub rewards: Vec<f32>,
+    pub qvalues: Vec<f32>,
 }
 
 impl ReplayBuffer {
@@ -12,6 +13,7 @@ impl ReplayBuffer {
             allowed_plies: Vec::new(),
             plies: Vec::new(),
             rewards: Vec::new(),
+            qvalues: Vec::new(),
         }
     }
 }

@@ -98,6 +98,8 @@ impl Network {
             tf::Tensor::new(&[buffer.plies.len() as u64][..]).with_values(&buffer.plies)?;
         let reward_value =
             tf::Tensor::new(&[buffer.rewards.len() as u64][..]).with_values(&buffer.rewards)?;
+        let qvalues_value =
+            tf::Tensor::new(&[buffer.qvalues.len() as u64][..]).with_values(&buffer.qvalues)?;
         let state_value = tf::Tensor::new(&[buffer.plies.len() as u64, self.state_size][..])
             .with_values(&buffer.states)?;
         let allowed_plies_value =
@@ -109,12 +111,15 @@ impl Network {
         run_args.add_feed(&self.fields.rewards_in, 0, &reward_value);
         run_args.add_feed(&self.fields.state_in, 0, &state_value);
         run_args.add_feed(&self.fields.allowed_plies_in, 0, &allowed_plies_value);
+        run_args.add_feed(&self.fields.qvalues_in, 0, &qvalues_value);
         let policy_loss_fetch = run_args.request_fetch(&self.fields.policy_loss_out, 0);
+        let value_loss_fetch = run_args.request_fetch(&self.fields.value_loss_out, 0);
         let reg_losses_fetch = run_args.request_fetch(&self.fields.reg_losses_out, 0);
         let total_loss_fetch = run_args.request_fetch(&self.fields.total_loss_out, 0);
         self.session.run(&mut run_args)?;
         let metrics = learning_metrics::LearningMetrics {
             policy_loss: run_args.fetch::<f32>(policy_loss_fetch)?[0],
+            value_loss: run_args.fetch::<f32>(value_loss_fetch)?[0],
             reg_losses: run_args.fetch::<f32>(reg_losses_fetch)?[0],
             total_loss: run_args.fetch::<f32>(total_loss_fetch)?[0],
         };

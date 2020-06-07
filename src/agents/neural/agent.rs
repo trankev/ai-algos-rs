@@ -87,29 +87,22 @@ where
     fn build_buffer(&self, logs: &Vec<ai::GameLog<RuleSet>>) -> replay_buffer::ReplayBuffer {
         let mut result = replay_buffer::ReplayBuffer::new();
         for log in logs {
-            let winner = match log.status {
-                rulesets::Status::Win { player } => Some(player),
-                rulesets::Status::Draw => None,
-                rulesets::Status::Ongoing => unreachable!(),
-            };
-            let mut discounted_reward = match winner {
-                Some(_) => 1.0,
-                None => 0.5,
-            };
+            let mut discount = 1.0;
             for (state, ply) in log.history.iter().rev() {
-                let mut state_reward = discounted_reward;
-                if let Some(player) = winner {
-                    if player != state.current_player() {
-                        state_reward = 0.0;
-                    }
-                }
-                result.rewards.push(state_reward);
+                let reward = match log.status.player_pov(&state.current_player()) {
+                    rulesets::PlayerStatus::Win => 1.0,
+                    rulesets::PlayerStatus::Draw => 0.0,
+                    rulesets::PlayerStatus::Loss => -1.0,
+                    rulesets::PlayerStatus::Ongoing => unreachable!(),
+                };
+                result.rewards.push((reward + 1.0) * discount / 2.0);
+                result.qvalues.push(reward);
                 result.states.extend(self.ruleset.encode_state(&state));
                 result
                     .allowed_plies
                     .extend(self.compute_allowed_plies(&state));
                 result.plies.push(self.ruleset.encode_ply(ply) as i32);
-                discounted_reward *= self.discount_factor;
+                discount *= self.discount_factor;
             }
         }
         result
