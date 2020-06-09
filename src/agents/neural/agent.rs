@@ -84,6 +84,12 @@ where
         Ok(ply_values)
     }
 
+    pub fn get_qvalue(&self, state: &RuleSet::State) -> Result<f32, Box<dyn error::Error>> {
+        let encoded_state = self.ruleset.encode_state(state);
+        let qvalue = self.network.get_qvalue(&encoded_state)?;
+        Ok(qvalue)
+    }
+
     fn build_buffer(&self, logs: &Vec<ai::GameLog<RuleSet>>) -> replay_buffer::ReplayBuffer {
         let mut result = replay_buffer::ReplayBuffer::new();
         for log in logs {

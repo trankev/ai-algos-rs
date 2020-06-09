@@ -106,6 +106,7 @@ def build_value_layer(input_layer, loss_weight):
         activation=tf.math.tanh,
         kernel_initializer=tf.contrib.layers.variance_scaling_initializer(),
         kernel_regularizer=tf.contrib.layers.l1_l2_regularizer(),
+        name="qvalue_out",
     )
     tf.argmax(value_layer, 1, name="argmax_value_out")
     expected_value_in = tf.compat.v1.placeholder(

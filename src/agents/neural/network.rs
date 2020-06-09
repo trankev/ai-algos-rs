@@ -67,6 +67,18 @@ impl Network {
         Ok(action)
     }
 
+    pub fn get_qvalue(&self, state: &Vec<f32>) -> Result<f32, Box<dyn error::Error>> {
+        let state_value = tf::Tensor::new(&[1, self.state_size][..]).with_values(&state)?;
+
+        let mut run_args = tf::SessionRunArgs::new();
+        run_args.add_feed(&self.fields.state_in, 0, &state_value);
+        let qvalue_fetch = run_args.request_fetch(&self.fields.qvalue_out, 0);
+        self.session.run(&mut run_args)?;
+
+        let qvalue = run_args.fetch::<f32>(qvalue_fetch)?[0];
+        Ok(qvalue)
+    }
+
     pub fn get_probabilities(
         &self,
         state: &Vec<f32>,

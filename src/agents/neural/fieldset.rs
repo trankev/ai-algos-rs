@@ -14,6 +14,7 @@ pub struct Fields {
     pub save_op: tf::Operation,
     pub restore_op: tf::Operation,
 
+    pub qvalue_out: tf::Operation,
     pub argmax_action_out: tf::Operation,
     pub stochastic_action_out: tf::Operation,
     pub probabilities_out: tf::Operation,
@@ -38,6 +39,7 @@ impl Fields {
             save_op: graph.operation_by_name_required("save/control_dependency")?,
             restore_op: graph.operation_by_name_required("save/restore_all")?,
 
+            qvalue_out: graph.operation_by_name_required("qvalue_out/Tanh")?,
             argmax_action_out: graph.operation_by_name_required("argmax_action_out")?,
             stochastic_action_out: graph
                 .operation_by_name_required("stochastic_action_out/Multinomial")?,
