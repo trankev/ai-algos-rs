@@ -3,7 +3,7 @@ use crate::interface::rulesets;
 use petgraph;
 use petgraph::graph;
 
-pub fn backpropagate<State: rulesets::StateTrait + rulesets::TurnByTurnState, Edge>(
+pub fn backpropagate<State: rulesets::StateTrait, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,
@@ -18,7 +18,7 @@ pub fn backpropagate<State: rulesets::StateTrait + rulesets::TurnByTurnState, Ed
     update_tallies(tree, node, update_visits, status);
 }
 
-pub fn update_tallies<State: rulesets::StateTrait + rulesets::TurnByTurnState, Edge>(
+pub fn update_tallies<State: rulesets::StateTrait, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,

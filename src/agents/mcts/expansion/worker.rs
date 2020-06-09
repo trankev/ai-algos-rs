@@ -8,7 +8,10 @@ use std::hash;
 
 pub struct Worker<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -20,7 +23,10 @@ where
 
 impl<RuleSet> Worker<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

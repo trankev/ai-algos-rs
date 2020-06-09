@@ -1,6 +1,5 @@
 use crate::interface::ai;
 use crate::interface::rulesets;
-use crate::interface::rulesets::TurnByTurnState;
 use std::error;
 
 pub fn play<RuleSet, Player1, Player2>(
@@ -9,8 +8,7 @@ pub fn play<RuleSet, Player1, Player2>(
     player2: &mut Player2,
 ) -> Result<ai::GameLog<RuleSet>, Box<dyn error::Error>>
 where
-    RuleSet: rulesets::Deterministic,
-    RuleSet::State: rulesets::TurnByTurnState,
+    RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
     Player1: ai::Policy<RuleSet>,
     Player2: ai::Policy<RuleSet>,
 {
@@ -19,7 +17,7 @@ where
     let mut status = ruleset.status(&state);
     while let rulesets::Status::Ongoing = status {
         let ply;
-        if state.current_player() == 0 {
+        if ruleset.current_player(&state) == 0 {
             ply = player1.play(&state)?;
         } else {
             ply = player2.play(&state)?;
@@ -39,7 +37,6 @@ pub fn self_play<RuleSet, Player>(
 ) -> Result<ai::GameLog<RuleSet>, Box<dyn error::Error>>
 where
     RuleSet: rulesets::Deterministic,
-    RuleSet::State: rulesets::TurnByTurnState,
     Player: ai::Policy<RuleSet>,
 {
     let mut game_log = ai::GameLog::new();

@@ -129,6 +129,12 @@ impl<Variant: variants::BaseVariant> rulesets::EncodableState for RuleSet<Varian
     }
 }
 
+impl<Variant: variants::BaseVariant> rulesets::TurnByTurn for RuleSet<Variant> {
+    fn current_player(&self, state: &Self::State) -> rulesets::Player {
+        state.current_player
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::plies;

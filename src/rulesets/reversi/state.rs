@@ -68,9 +68,3 @@ impl<Variant: variants::BaseVariant> rulesets::StateTrait for State<Variant> {
         format!("{}\nTo play: {}", result, self.current_player)
     }
 }
-
-impl<Variant: variants::BaseVariant> rulesets::TurnByTurnState for State<Variant> {
-    fn current_player(&self) -> rulesets::Player {
-        self.current_player
-    }
-}

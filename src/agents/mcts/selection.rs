@@ -3,7 +3,7 @@ use super::uct_value;
 use crate::interface::rulesets;
 use petgraph::graph;
 
-pub fn select<State: rulesets::StateTrait + rulesets::TurnByTurnState, Edge>(
+pub fn select<State: rulesets::StateTrait, Edge>(
     tree: &graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
 ) -> graph::NodeIndex<u32> {
@@ -45,6 +45,7 @@ mod tests {
         let root = tree.add_node(nodes::Node::new(
             tests::EmptyState::new(),
             rulesets::Status::Ongoing,
+            0,
         ));
         let result = select(&tree, root);
         assert_eq!(result, root);
@@ -54,16 +55,17 @@ mod tests {
     fn test_no_visits() {
         let mut tree = EmptyStateGraph::new();
 
-        let root_weight = nodes::Node::new_visited(tests::EmptyState::new(), 10, 0, 0);
+        let root_weight = nodes::Node::new_visited(tests::EmptyState::new(), 10, 0, 0, 0);
         let root_index = tree.add_node(root_weight);
 
-        let first_weight = nodes::Node::new_visited(tests::EmptyState::new(), 10, 10, 0);
+        let first_weight = nodes::Node::new_visited(tests::EmptyState::new(), 10, 10, 0, 0);
         let first_index = tree.add_node(first_weight);
         tree.add_edge(root_index, first_index, ());
 
         let second_index = tree.add_node(nodes::Node::new(
             tests::EmptyState::new(),
             rulesets::Status::Ongoing,
+            0,
         ));
         tree.add_edge(root_index, second_index, ());
 
@@ -75,14 +77,14 @@ mod tests {
     fn test_few_visits() {
         let mut tree = EmptyStateGraph::new();
 
-        let root_weight = nodes::Node::new_visited(tests::EmptyState::new(), 10, 0, 0);
+        let root_weight = nodes::Node::new_visited(tests::EmptyState::new(), 10, 0, 0, 0);
         let root_index = tree.add_node(root_weight);
 
-        let first_weight = nodes::Node::new_visited(tests::EmptyState::new(), 1, 0, 0);
+        let first_weight = nodes::Node::new_visited(tests::EmptyState::new(), 1, 0, 0, 0);
         let first_index = tree.add_node(first_weight);
         tree.add_edge(root_index, first_index, ());
 
-        let second_weight = nodes::Node::new_visited(tests::EmptyState::new(), 9, 8, 0);
+        let second_weight = nodes::Node::new_visited(tests::EmptyState::new(), 9, 8, 0, 0);
         let second_index = tree.add_node(second_weight);
         tree.add_edge(root_index, second_index, ());
 
@@ -94,14 +96,14 @@ mod tests {
     fn test_several_visits() {
         let mut tree = EmptyStateGraph::new();
 
-        let root_weight = nodes::Node::new_visited(tests::EmptyState::new(), 100, 50, 0);
+        let root_weight = nodes::Node::new_visited(tests::EmptyState::new(), 100, 50, 0, 0);
         let root_index = tree.add_node(root_weight);
 
-        let first_weight = nodes::Node::new_visited(tests::EmptyState::new(), 50, 40, 0);
+        let first_weight = nodes::Node::new_visited(tests::EmptyState::new(), 50, 40, 0, 0);
         let first_index = tree.add_node(first_weight);
         tree.add_edge(root_index, first_index, ());
 
-        let second_weight = nodes::Node::new_visited(tests::EmptyState::new(), 50, 60, 0);
+        let second_weight = nodes::Node::new_visited(tests::EmptyState::new(), 50, 60, 0, 0);
         let second_index = tree.add_node(second_weight);
         tree.add_edge(root_index, second_index, ());
 

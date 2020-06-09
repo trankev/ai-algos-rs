@@ -16,9 +16,3 @@ impl rulesets::StateTrait for EmptyState {
         "None".into()
     }
 }
-
-impl rulesets::TurnByTurnState for EmptyState {
-    fn current_player(&self) -> rulesets::Player {
-        self.current_player
-    }
-}

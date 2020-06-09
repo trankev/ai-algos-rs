@@ -4,6 +4,7 @@ use super::state;
 use super::status;
 use super::symmetry_iterator;
 use super::PlayError;
+use super::Player;
 
 pub trait RuleSetTrait: Clone + Send + Sized {
     type State: state::StateTrait;
@@ -36,4 +37,8 @@ pub trait EncodableState: RuleSetTrait {
     fn encode_state(&self, state: &Self::State) -> Vec<f32>;
     fn decode_ply(&self, ply_index: usize) -> Self::Ply;
     fn encode_ply(&self, ply: &Self::Ply) -> usize;
+}
+
+pub trait TurnByTurn: RuleSetTrait {
+    fn current_player(&self, state: &Self::State) -> Player;
 }

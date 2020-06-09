@@ -15,13 +15,14 @@ pub enum ExpansionStatus<State> {
     PendingExpansion,
 }
 
-pub fn expand<RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic>(
+pub fn expand<RuleSet>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     ruleset: &RuleSet,
     node: graph::NodeIndex<u32>,
 ) -> (rulesets::Status, bool)
 where
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + rulesets::TurnByTurn,
+    RuleSet::State: Eq,
     RuleSet::Ply: Eq + Ord + hash::Hash,
 {
     let state = match ponder_expansion::<RuleSet>(tree, node, true) {
@@ -38,14 +39,11 @@ where
     (rulesets::Status::Ongoing, true)
 }
 
-pub fn ponder_expansion<RuleSet: rulesets::RuleSetTrait>(
+pub fn ponder_expansion<RuleSet: rulesets::TurnByTurn>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     check_for_visits: bool,
-) -> ExpansionStatus<RuleSet::State>
-where
-    RuleSet::State: rulesets::TurnByTurnState,
-{
+) -> ExpansionStatus<RuleSet::State> {
     let weight = tree.node_weight_mut(node_index).unwrap();
     if weight.expanding {
         return ExpansionStatus::PendingExpansion;
@@ -62,16 +60,14 @@ where
     ExpansionStatus::RequiresExpansion(weight.state.clone())
 }
 
-pub fn save_expansion<RuleSet: rulesets::RuleSetTrait>(
+pub fn save_expansion<RuleSet: rulesets::TurnByTurn>(
     tree: &mut graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     node_index: graph::NodeIndex<u32>,
     successor: items::Play<RuleSet>,
-) where
-    RuleSet::State: rulesets::TurnByTurnState,
-{
+) {
     let mut parent_weight = tree.node_weight_mut(node_index).unwrap();
     parent_weight.expanding = false;
-    let node_weight = nodes::Node::new(successor.state, successor.status);
+    let node_weight = nodes::Node::new(successor.state, successor.status, successor.current_player);
     let child_index = tree.add_node(node_weight);
     let edge_weight = edges::Edge::new(successor.ply);
     tree.add_edge(node_index, child_index, edge_weight);

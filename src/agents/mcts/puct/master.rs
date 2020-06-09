@@ -25,8 +25,10 @@ enum SelectionResult {
 
 pub struct Master<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
-    RuleSet::State: rulesets::TurnByTurnState,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
 {
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     root: Option<graph::NodeIndex<u32>>,
@@ -44,8 +46,10 @@ where
 
 impl<RuleSet> Master<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
-    RuleSet::State: rulesets::TurnByTurnState,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
 {
     pub fn new(
         ruleset: RuleSet,
@@ -72,7 +76,10 @@ where
 
     fn set_state(&mut self, state: RuleSet::State) {
         let status = self.ruleset.status(&state);
-        let index = self.tree.add_node(nodes::Node::new(state, status));
+        let current_player = self.ruleset.current_player(&state);
+        let index = self
+            .tree
+            .add_node(nodes::Node::new(state, status, current_player));
         self.root = Some(index);
     }
 

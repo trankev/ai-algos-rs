@@ -15,9 +15,9 @@ use std::hash;
 
 pub struct MCTS<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + rulesets::TurnByTurn,
     RuleSet::Ply: Eq + Ord + hash::Hash,
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet::State: Eq,
 {
     ruleset: RuleSet,
     tree: graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
@@ -29,9 +29,9 @@ where
 
 impl<RuleSet> MCTS<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + rulesets::TurnByTurn,
     RuleSet::Ply: Eq + Ord + hash::Hash,
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet::State: Eq,
 {
     pub fn new(ruleset: RuleSet) -> MCTS<RuleSet> {
         MCTS {
@@ -46,7 +46,10 @@ where
 
     pub fn set_state(&mut self, state: RuleSet::State) {
         let status = self.ruleset.status(&state);
-        let index = self.tree.add_node(nodes::Node::new(state, status));
+        let current_player = self.ruleset.current_player(&state);
+        let index = self
+            .tree
+            .add_node(nodes::Node::new(state, status, current_player));
         self.root = Some(index);
     }
 

@@ -10,7 +10,10 @@ use std::thread;
 
 pub struct Pool<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -24,7 +27,10 @@ where
 
 impl<RuleSet> Pool<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {

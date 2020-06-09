@@ -5,13 +5,10 @@ use crate::interface::rulesets;
 
 use petgraph::graph;
 
-pub fn play_scores<RuleSet: rulesets::RuleSetTrait>(
+pub fn play_scores<RuleSet: rulesets::TurnByTurn>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     parent: graph::NodeIndex<u32>,
-) -> Vec<ai::PlyConsideration<RuleSet::Ply>>
-where
-    RuleSet::State: rulesets::TurnByTurnState,
-{
+) -> Vec<ai::PlyConsideration<RuleSet::Ply>> {
     let mut scores = tree
         .neighbors(parent)
         .map(|node_index| {
@@ -38,13 +35,10 @@ where
     scores
 }
 
-fn best_play<RuleSet: rulesets::RuleSetTrait>(
+fn best_play<RuleSet: rulesets::TurnByTurn>(
     tree: &graph::Graph<nodes::Node<RuleSet::State>, edges::Edge<RuleSet::Ply>>,
     mut current_node: graph::NodeIndex<u32>,
-) -> Vec<RuleSet::Ply>
-where
-    RuleSet::State: rulesets::TurnByTurnState,
-{
+) -> Vec<RuleSet::Ply> {
     let mut result = Vec::new();
     loop {
         let neighbours = tree.neighbors(current_node).map(|node_index| {

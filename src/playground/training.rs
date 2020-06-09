@@ -13,8 +13,11 @@ pub fn train<RuleSet, Player, Opponent>(
 where
     Player: ai::Policy<RuleSet> + ai::Teachable<RuleSet>,
     Opponent: ai::Policy<RuleSet>,
-    RuleSet: rulesets::Deterministic + rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
-    RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
+    RuleSet: rulesets::Deterministic
+        + rulesets::EncodableState
+        + rulesets::HasStatesWithSymmetries
+        + rulesets::TurnByTurn,
+    RuleSet::State: Eq + Ord,
     RuleSet::Ply: hash::Hash + Ord,
 {
     let mut logs = Vec::new();
@@ -34,7 +37,7 @@ pub fn self_train<RuleSet, Player>(
 where
     Player: ai::Policy<RuleSet> + ai::Teachable<RuleSet>,
     RuleSet: rulesets::Deterministic + rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
-    RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
+    RuleSet::State: Eq + Ord,
     RuleSet::Ply: hash::Hash + Ord,
 {
     let mut logs = Vec::new();

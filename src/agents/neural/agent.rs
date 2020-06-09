@@ -4,7 +4,6 @@ use super::network;
 use super::replay_buffer;
 use crate::interface::ai;
 use crate::interface::rulesets;
-use crate::interface::rulesets::TurnByTurnState;
 use crate::tools::plies;
 use std::error;
 use std::hash;
@@ -12,7 +11,7 @@ use std::path;
 
 pub struct Agent<'a, RuleSet>
 where
-    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries + rulesets::TurnByTurn,
     RuleSet::State: Eq,
     RuleSet::Ply: Ord + hash::Hash,
 {
@@ -23,8 +22,8 @@ where
 
 impl<'a, RuleSet> Agent<'a, RuleSet>
 where
-    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries + rulesets::TurnByTurn,
+    RuleSet::State: Eq,
     RuleSet::Ply: Ord + hash::Hash,
 {
     pub fn new<P: AsRef<path::Path>>(
@@ -84,18 +83,12 @@ where
         Ok(ply_values)
     }
 
-    pub fn get_qvalue(&self, state: &RuleSet::State) -> Result<f32, Box<dyn error::Error>> {
-        let encoded_state = self.ruleset.encode_state(state);
-        let qvalue = self.network.get_qvalue(&encoded_state)?;
-        Ok(qvalue)
-    }
-
     fn build_buffer(&self, logs: &Vec<ai::GameLog<RuleSet>>) -> replay_buffer::ReplayBuffer {
         let mut result = replay_buffer::ReplayBuffer::new();
         for log in logs {
             let mut discount = 1.0;
             for (state, ply) in log.history.iter().rev() {
-                let reward = match log.status.player_pov(&state.current_player()) {
+                let reward = match log.status.player_pov(&self.ruleset.current_player(&state)) {
                     rulesets::PlayerStatus::Win => 1.0,
                     rulesets::PlayerStatus::Draw => 0.0,
                     rulesets::PlayerStatus::Loss => -1.0,
@@ -121,8 +114,8 @@ where
 
 impl<'a, RuleSet> ai::Policy<RuleSet> for Agent<'a, RuleSet>
 where
-    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries + rulesets::TurnByTurn,
+    RuleSet::State: Eq,
     RuleSet::Ply: Ord + hash::Hash,
 {
     fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
@@ -136,8 +129,8 @@ where
 
 impl<'a, RuleSet> ai::Teachable<RuleSet> for Agent<'a, RuleSet>
 where
-    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries + rulesets::TurnByTurn,
+    RuleSet::State: Eq,
     RuleSet::Ply: Ord + hash::Hash,
 {
     type Metrics = learning_metrics::LearningMetrics;
@@ -149,5 +142,18 @@ where
         let replay_buffer = self.build_buffer(game_logs);
         let metrics = self.network.learn(&replay_buffer)?;
         Ok(metrics)
+    }
+}
+
+impl<'a, RuleSet> ai::QValue<RuleSet> for Agent<'a, RuleSet>
+where
+    RuleSet: rulesets::EncodableState + rulesets::HasStatesWithSymmetries + rulesets::TurnByTurn,
+    RuleSet::State: Eq,
+    RuleSet::Ply: Ord + hash::Hash,
+{
+    fn evaluate(&mut self, state: &RuleSet::State) -> Result<f32, Box<dyn error::Error>> {
+        let encoded_state = self.ruleset.encode_state(state);
+        let qvalue = self.network.get_qvalue(&encoded_state)?;
+        Ok(qvalue)
     }
 }

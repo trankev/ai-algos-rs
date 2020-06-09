@@ -13,9 +13,12 @@ use std::thread;
 
 pub struct Orchestrator<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet::State: Eq,
 {
     ruleset: RuleSet,
     master_handle: Option<thread::JoinHandle<()>>,
@@ -29,9 +32,12 @@ where
 
 impl<RuleSet> Orchestrator<RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + 'static,
+    RuleSet: rulesets::HasStatesWithSymmetries
+        + rulesets::Deterministic
+        + rulesets::TurnByTurn
+        + 'static,
     RuleSet::Ply: Eq + Ord + hash::Hash,
-    RuleSet::State: Eq + rulesets::TurnByTurnState,
+    RuleSet::State: Eq,
 {
     pub fn new(ruleset: RuleSet) -> Orchestrator<RuleSet> {
         let expansion_pool = expansion::Pool::new();

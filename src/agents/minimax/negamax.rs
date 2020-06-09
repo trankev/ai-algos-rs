@@ -1,23 +1,20 @@
 use super::state;
 use crate::interface::ai;
 use crate::interface::rulesets;
-use crate::interface::rulesets::TurnByTurnState;
 use crate::tools::plies;
 use std::error;
 use std::f32;
 
 pub struct Negamax<'a, RuleSet>
 where
-    RuleSet: rulesets::Deterministic,
-    RuleSet::State: rulesets::TurnByTurnState,
+    RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
 {
     ruleset: &'a RuleSet,
 }
 
 impl<'a, RuleSet> Negamax<'a, RuleSet>
 where
-    RuleSet: rulesets::Deterministic,
-    RuleSet::State: rulesets::TurnByTurnState,
+    RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
 {
     pub fn new(ruleset: &'a RuleSet) -> Negamax<RuleSet> {
         Negamax { ruleset }
@@ -35,7 +32,7 @@ where
     ) -> state::State<RuleSet::Ply> {
         match self.ruleset.status(&state) {
             rulesets::Status::Win { player: winner } => {
-                if winner == state.current_player() {
+                if winner == self.ruleset.current_player(&state) {
                     state::State::Win
                 } else {
                     state::State::Loss
@@ -64,8 +61,7 @@ where
 
 impl<'a, RuleSet> ai::Policy<RuleSet> for Negamax<'a, RuleSet>
 where
-    RuleSet: rulesets::Deterministic,
-    RuleSet::State: rulesets::TurnByTurnState,
+    RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
 {
     fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
         match self.compute(state) {

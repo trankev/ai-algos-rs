@@ -186,6 +186,12 @@ impl<Variant: variants::BaseVariant> rulesets::HasStatesWithSymmetries for Rever
     }
 }
 
+impl<Variant: variants::BaseVariant> rulesets::TurnByTurn for Reversi<Variant> {
+    fn current_player(&self, state: &Self::State) -> rulesets::Player {
+        state.current_player
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::instances;

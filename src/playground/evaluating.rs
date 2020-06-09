@@ -14,8 +14,8 @@ pub fn evaluate<RuleSet, Player, Opponent>(
 where
     Player: ai::Policy<RuleSet>,
     Opponent: ai::Policy<RuleSet>,
-    RuleSet: rulesets::Deterministic,
-    RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
+    RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
+    RuleSet::State: Eq + Ord,
     RuleSet::Ply: hash::Hash + Ord,
 {
     let mut scores = collections::HashMap::<rulesets::Status, usize>::new();
@@ -33,8 +33,8 @@ pub fn self_evaluate<RuleSet, Player>(
 ) -> Result<collections::HashMap<rulesets::Status, usize>, Box<dyn error::Error>>
 where
     Player: ai::Policy<RuleSet>,
-    RuleSet: rulesets::Deterministic,
-    RuleSet::State: Eq + Ord + rulesets::TurnByTurnState,
+    RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
+    RuleSet::State: Eq + Ord,
     RuleSet::Ply: hash::Hash + Ord,
 {
     let mut scores = collections::HashMap::<rulesets::Status, usize>::new();

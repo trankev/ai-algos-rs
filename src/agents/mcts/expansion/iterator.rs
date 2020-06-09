@@ -5,7 +5,7 @@ use std::hash;
 
 pub struct Expander<'a, RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + rulesets::TurnByTurn,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -16,7 +16,7 @@ where
 
 impl<'a, RuleSet> Expander<'a, RuleSet>
 where
-    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic,
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::Deterministic + rulesets::TurnByTurn,
     RuleSet::Ply: Eq + Ord + hash::Hash,
     RuleSet::State: Eq,
 {
@@ -33,10 +33,12 @@ where
         while let Some(ply) = self.ply_iterator.next() {
             let resulting_state = self.ruleset.play(self.state, &ply).unwrap();
             let status = self.ruleset.status(&resulting_state);
+            let current_player = self.ruleset.current_player(&resulting_state);
             return Some(items::Play {
                 ply,
                 state: resulting_state,
                 status,
+                current_player,
             });
         }
         None
