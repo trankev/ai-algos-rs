@@ -56,11 +56,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::agents::minimax;
     use crate::interface::ai;
     use crate::interface::rulesets;
     use crate::interface::rulesets::Deterministic;
     use crate::interface::rulesets::RuleSetTrait;
+    use crate::policies::minimax;
     use crate::rulesets::connectn;
     use std::error;
 
