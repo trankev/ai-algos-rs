@@ -59,7 +59,7 @@ where
     }
 }
 
-impl<'a, RuleSet> ai::Policy<RuleSet> for Negamax<'a, RuleSet>
+impl<'a, RuleSet> ai::Agent<RuleSet> for Negamax<'a, RuleSet>
 where
     RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
 {

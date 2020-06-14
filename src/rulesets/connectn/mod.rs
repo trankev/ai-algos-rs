@@ -7,10 +7,11 @@ mod symmetry_iterators;
 mod variants;
 
 pub use plies::Ply;
-use ruleset::RuleSet;
+pub use ruleset::RuleSet;
 pub use state::State;
 pub use symmetry::Symmetry;
 pub use symmetry_iterators::SymmetryIterator;
+pub use variants::BaseVariant;
 
 pub type TicTacToeState = State<variants::TicTacToe>;
 pub type GomokuState = State<variants::Gomoku>;

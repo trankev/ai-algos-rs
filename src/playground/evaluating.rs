@@ -12,8 +12,8 @@ pub fn evaluate<RuleSet, Player, Opponent>(
     samples: usize,
 ) -> Result<collections::HashMap<rulesets::Status, usize>, Box<dyn error::Error>>
 where
-    Player: ai::Policy<RuleSet>,
-    Opponent: ai::Policy<RuleSet>,
+    Player: ai::Agent<RuleSet>,
+    Opponent: ai::Agent<RuleSet>,
     RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
     RuleSet::State: Eq + Ord,
     RuleSet::Ply: hash::Hash + Ord,
@@ -32,7 +32,7 @@ pub fn self_evaluate<RuleSet, Player>(
     samples: usize,
 ) -> Result<collections::HashMap<rulesets::Status, usize>, Box<dyn error::Error>>
 where
-    Player: ai::Policy<RuleSet>,
+    Player: ai::Agent<RuleSet>,
     RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
     RuleSet::State: Eq + Ord,
     RuleSet::Ply: hash::Hash + Ord,

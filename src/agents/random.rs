@@ -20,7 +20,7 @@ impl<'a, RuleSet: rulesets::RuleSetTrait> Agent<'a, RuleSet> {
     }
 }
 
-impl<'a, RuleSet: rulesets::RuleSetTrait> ai::Policy<RuleSet> for Agent<'a, RuleSet> {
+impl<'a, RuleSet: rulesets::RuleSetTrait> ai::Agent<RuleSet> for Agent<'a, RuleSet> {
     fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
         let available_plies = plies::BasicIterator::new(self.ruleset, state);
         let ply = available_plies.choose(&mut self.rng).unwrap();

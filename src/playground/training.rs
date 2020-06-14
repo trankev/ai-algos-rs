@@ -11,8 +11,8 @@ pub fn train<RuleSet, Player, Opponent>(
     samples: usize,
 ) -> Result<Player::Metrics, Box<dyn error::Error>>
 where
-    Player: ai::Policy<RuleSet> + ai::Teachable<RuleSet>,
-    Opponent: ai::Policy<RuleSet>,
+    Player: ai::Learner<RuleSet>,
+    Opponent: ai::Agent<RuleSet>,
     RuleSet: rulesets::Deterministic
         + rulesets::EncodableState
         + rulesets::HasStatesWithSymmetries
@@ -35,7 +35,7 @@ pub fn self_train<RuleSet, Player>(
     samples: usize,
 ) -> Result<Player::Metrics, Box<dyn error::Error>>
 where
-    Player: ai::Policy<RuleSet> + ai::Teachable<RuleSet>,
+    Player: ai::Learner<RuleSet>,
     RuleSet: rulesets::Deterministic + rulesets::EncodableState + rulesets::HasStatesWithSymmetries,
     RuleSet::State: Eq + Ord,
     RuleSet::Ply: hash::Hash + Ord,

@@ -10,7 +10,7 @@ use std::error;
 pub struct EGreedy<'a, RuleSet, Agent>
 where
     RuleSet: rulesets::RuleSetTrait,
-    Agent: ai::Policy<RuleSet>,
+    Agent: ai::Agent<RuleSet>,
 {
     ruleset: &'a RuleSet,
     exploration_rate: f32,
@@ -21,7 +21,7 @@ where
 impl<'a, RuleSet, Agent> EGreedy<'a, RuleSet, Agent>
 where
     RuleSet: rulesets::RuleSetTrait,
-    Agent: ai::Policy<RuleSet>,
+    Agent: ai::Agent<RuleSet>,
 {
     pub fn new(
         ruleset: &'a RuleSet,
@@ -38,10 +38,10 @@ where
     }
 }
 
-impl<'a, RuleSet, Agent> ai::Policy<RuleSet> for EGreedy<'a, RuleSet, Agent>
+impl<'a, RuleSet, Agent> ai::Agent<RuleSet> for EGreedy<'a, RuleSet, Agent>
 where
     RuleSet: rulesets::RuleSetTrait,
-    Agent: ai::Policy<RuleSet>,
+    Agent: ai::Agent<RuleSet>,
 {
     fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>> {
         if self.rng.gen_range(0.0, 1.0) < self.exploration_rate {

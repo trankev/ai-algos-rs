@@ -9,8 +9,8 @@ pub fn play<RuleSet, Player1, Player2>(
 ) -> Result<ai::GameLog<RuleSet>, Box<dyn error::Error>>
 where
     RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
-    Player1: ai::Policy<RuleSet>,
-    Player2: ai::Policy<RuleSet>,
+    Player1: ai::Agent<RuleSet>,
+    Player2: ai::Agent<RuleSet>,
 {
     let mut game_log = ai::GameLog::new();
     let mut state = ruleset.initial_state();
@@ -37,7 +37,7 @@ pub fn self_play<RuleSet, Player>(
 ) -> Result<ai::GameLog<RuleSet>, Box<dyn error::Error>>
 where
     RuleSet: rulesets::Deterministic,
-    Player: ai::Policy<RuleSet>,
+    Player: ai::Agent<RuleSet>,
 {
     let mut game_log = ai::GameLog::new();
     let mut state = ruleset.initial_state();

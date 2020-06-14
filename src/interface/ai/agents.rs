@@ -2,11 +2,11 @@ use crate::interface::ai;
 use crate::interface::rulesets;
 use std::error;
 
-pub trait Policy<RuleSet: rulesets::RuleSetTrait> {
+pub trait Agent<RuleSet: rulesets::RuleSetTrait> {
     fn play(&mut self, state: &RuleSet::State) -> Result<RuleSet::Ply, Box<dyn error::Error>>;
 }
 
-pub trait Teachable<RuleSet: rulesets::RuleSetTrait> {
+pub trait Learner<RuleSet: rulesets::RuleSetTrait>: Agent<RuleSet> {
     type Metrics;
 
     fn learn(
