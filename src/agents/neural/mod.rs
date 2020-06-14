@@ -1,12 +1,4 @@
-mod actions;
-mod agent;
-mod fieldset;
-mod learning_metrics;
-mod network;
-mod probas;
-mod replay_buffer;
+mod agents;
+mod networks;
 
-pub use actions::ActionChoosing;
-pub use agent::Agent;
-pub use network::Network;
-pub use probas::Probas;
+pub use agents::Agent;
