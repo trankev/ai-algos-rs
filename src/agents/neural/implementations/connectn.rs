@@ -6,7 +6,8 @@ pub struct ConvolutionalConnectN {}
 impl<Variant: connectn::BaseVariant> base::Implementation<connectn::RuleSet<Variant>>
     for ConvolutionalConnectN
 {
-    const DIMENSIONS: &'static [usize] = &[Variant::GRID_SIZE, Variant::GRID_SIZE];
+    const STATE_DIMENSIONS: &'static [usize] = &[Variant::GRID_SIZE, Variant::GRID_SIZE];
+    const PLY_COUNT: usize = Variant::CELL_COUNT;
 
     fn encode_state(state: &connectn::State<Variant>) -> Vec<f32> {
         let player = state.current_player as usize;

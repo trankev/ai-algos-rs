@@ -4,6 +4,7 @@ use tensorflow as tf;
 pub struct FieldSet {
     pub state_in: tf::Operation,
     pub is_training_in: tf::Operation,
+    pub allowed_plies_in: tf::Operation,
 
     pub init_op: tf::Operation,
 
@@ -16,6 +17,7 @@ impl FieldSet {
         let result = FieldSet {
             state_in: graph.operation_by_name_required("state_in")?,
             is_training_in: graph.operation_by_name_required("is_training_in")?,
+            allowed_plies_in: graph.operation_by_name_required("allowed_plies_in")?,
 
             init_op: graph.operation_by_name_required("init_op")?,
 

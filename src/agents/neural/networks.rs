@@ -11,12 +11,14 @@ pub struct Network {
     state_dimensions: Vec<u64>,
     session: tf::Session,
     fields: fieldsets::FieldSet,
+    ply_count: u64,
 }
 
 impl Network {
     pub fn new<P: AsRef<path::Path>>(
         path: P,
         state_in_dimensions: &[usize],
+        ply_count: usize,
     ) -> Result<Network, Box<dyn error::Error>> {
         let mut graph = tf::Graph::new();
         let mut proto = Vec::new();
@@ -31,6 +33,7 @@ impl Network {
             session,
             fields,
             state_dimensions,
+            ply_count: ply_count as u64,
         };
         Ok(network)
     }
@@ -42,11 +45,18 @@ impl Network {
         Ok(())
     }
 
-    pub fn predict(&self, state: &Vec<f32>) -> Result<(f32, Vec<f32>), Box<dyn error::Error>> {
+    pub fn predict(
+        &self,
+        state: &Vec<f32>,
+        allowed_plies: &Vec<f32>,
+    ) -> Result<(f32, Vec<f32>), Box<dyn error::Error>> {
         let state_value = tf::Tensor::new(&self.state_dimensions[..]).with_values(&state)?;
+        let allowed_plies_value =
+            tf::Tensor::new(&[1, self.ply_count][..]).with_values(&allowed_plies)?;
         let training_value = tf::Tensor::new(&[][..]).with_values(&[false])?;
         let mut run_args = tf::SessionRunArgs::new();
         run_args.add_feed(&self.fields.state_in, 0, &state_value);
+        run_args.add_feed(&self.fields.allowed_plies_in, 0, &allowed_plies_value);
         run_args.add_feed(&self.fields.is_training_in, 0, &training_value);
         let probs_fetch = run_args.request_fetch(&self.fields.probs_out, 0);
         let value_fetch = run_args.request_fetch(&self.fields.value_out, 0);

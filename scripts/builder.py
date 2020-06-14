@@ -85,8 +85,18 @@ def build_dense_layers(layer_in, settings, is_training, dropout):
 
 
 def build_policy_layer(layer_in, settings):
+    allowed_plies = tf.compat.v1.placeholder(
+        shape=[None, settings["action_count"]],
+        dtype=tf.float32,
+        name="allowed_plies_in",
+    )
     pis = tf.layers.dense(layer_in, settings["action_count"])
-    tf.nn.softmax(pis, name="probs_out")
+    allowed_outputs = tf.nn.softmax(pis) * allowed_plies
+    tf.math.divide(
+        allowed_outputs,
+        tf.math.reduce_sum(allowed_outputs),
+        name="probs_out",
+    )
     target_pis = tf.placeholder(
         tf.float32,
         shape=[None, settings["action_count"]],
