@@ -1,3 +1,4 @@
+pub mod agents;
 pub mod interface;
 pub mod playground;
 pub mod policies;
