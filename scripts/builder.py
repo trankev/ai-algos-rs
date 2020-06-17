@@ -111,7 +111,7 @@ def build_value_layer(layer_in, setttings):
         tf.layers.dense(layer_in, 1),
         name="value_out"
     )
-    target_value = tf.placeholder(tf.float32, shape=[None])
+    target_value = tf.placeholder(tf.float32, shape=[None], name="target_value_in")
     loss_value = tf.losses.mean_squared_error(target_value, tf.reshape(value, shape=[-1]))
     return loss_value
 
@@ -122,7 +122,7 @@ def setup_training(losses, settings):
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
         optimizer = tf.train.AdamOptimizer(settings["learning_rate"])
-        optimizer.minimize(total_loss, name="total_loss_out")
+        optimizer.minimize(total_loss, name="train_op")
 
 
 def setup_saving():

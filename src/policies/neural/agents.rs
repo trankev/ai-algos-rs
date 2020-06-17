@@ -1,5 +1,7 @@
 use super::implementations;
 use super::networks;
+use super::ply_encoding;
+use super::samples;
 use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::tools::plies;
@@ -7,6 +9,9 @@ use std::error;
 use std::hash;
 use std::marker;
 use std::path;
+use rand;
+use rand::Rng;
+use rand::rngs;
 
 pub struct Agent<'a, RuleSet, Implementation>
 where
@@ -16,6 +21,7 @@ where
     ruleset: &'a RuleSet,
     network: networks::Network,
     implementation: marker::PhantomData<Implementation>,
+    rng: rngs::ThreadRng,
 }
 
 impl<'a, RuleSet, Implementation> Agent<'a, RuleSet, Implementation>
@@ -36,10 +42,12 @@ where
         )?;
         network.initialize()?;
         let implementation = marker::PhantomData;
+        let rng = rand::thread_rng();
         let agent = Agent {
             ruleset,
             network,
             implementation,
+            rng,
         };
         Ok(agent)
     }
@@ -84,5 +92,54 @@ where
             probabilities,
         };
         Ok(result)
+    }
+}
+
+impl<'a, RuleSet, Implementation> ai::Teachable<RuleSet> for Agent<'a, RuleSet, Implementation>
+where
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::TurnByTurn,
+    Implementation: implementations::Implementation<RuleSet>,
+    RuleSet::Ply: Ord + hash::Hash,
+    RuleSet::State: Eq,
+{
+    fn learn(&mut self, logs: &Vec<ai::PolicyLog<RuleSet>>) -> Result<(), Box<dyn error::Error>> {
+        let batch_size = 64;
+        let epochs = 10;
+        let state_count: usize = logs.iter().map(|log| log.history.len()).sum();
+        let bucket_count = state_count / batch_size + 1;
+        let mut buckets = Vec::new();
+        for _ in 0..bucket_count {
+            buckets.push(samples::TrainSample::new());
+        }
+        for log in logs {
+            for turn in &log.history {
+                let encoded_state = Implementation::encode_state(&turn.state);
+                let predictions =
+                    ply_encoding::encode::<RuleSet, Implementation>(&turn.prediction.probabilities);
+                let reward = match log.status.player_pov(&self.ruleset.current_player(&turn.state)) {
+                    rulesets::PlayerStatus::Win => 1.0,
+                    rulesets::PlayerStatus::Draw => 0.0,
+                    rulesets::PlayerStatus::Loss => -1.0,
+                    rulesets::PlayerStatus::Ongoing => unreachable!(),
+                };
+                let bucket_index = {
+                    let mut bucket_index = 0;
+                    for _ in 0..10 {
+                        bucket_index = self.rng.gen_range(0, bucket_count);
+                        if buckets[bucket_index].size < batch_size  as u64 {
+                            break;
+                        }
+                    }
+                    bucket_index
+                };
+                buckets[bucket_index].add(&encoded_state, reward, &predictions);
+            }
+        }
+        for _ in 0..epochs {
+            for bucket in &buckets {
+                self.network.train(&bucket)?;
+            }
+        }
+        Ok(())
     }
 }

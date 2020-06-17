@@ -1,3 +1,4 @@
+use crate::interface::ai;
 use crate::interface::rulesets;
 use std::error;
 
@@ -12,4 +13,8 @@ pub trait Policy<RuleSet: rulesets::RuleSetTrait> {
         &mut self,
         state: &RuleSet::State,
     ) -> Result<Prediction<RuleSet>, Box<dyn error::Error>>;
+}
+
+pub trait Teachable<RuleSet: rulesets::RuleSetTrait>: Policy<RuleSet> {
+    fn learn(&mut self, logs: &Vec<ai::PolicyLog<RuleSet>>) -> Result<(), Box<dyn error::Error>>;
 }

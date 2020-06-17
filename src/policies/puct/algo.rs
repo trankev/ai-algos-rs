@@ -144,3 +144,14 @@ where
         Ok(prediction)
     }
 }
+
+impl<'a, RuleSet, Policy> ai::Teachable<RuleSet> for PUCT<'a, RuleSet, Policy>
+where
+    RuleSet: rulesets::TurnByTurn + rulesets::Deterministic,
+    RuleSet::State: Eq + hash::Hash,
+    Policy: ai::Teachable<RuleSet>,
+{
+    fn learn(&mut self, logs: &Vec<ai::PolicyLog<RuleSet>>) -> Result<(), Box<dyn error::Error>> {
+        self.inner_policy.learn(logs)
+    }
+}
