@@ -5,13 +5,13 @@ use super::samples;
 use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::tools::plies;
+use rand;
+use rand::rngs;
+use rand::Rng;
 use std::error;
 use std::hash;
 use std::marker;
 use std::path;
-use rand;
-use rand::Rng;
-use rand::rngs;
 
 pub struct Agent<'a, RuleSet, Implementation>
 where
@@ -59,6 +59,13 @@ where
             allowed_plies[index] = 1.0;
         }
         allowed_plies
+    }
+
+    pub fn save<P: AsRef<path::Path>>(
+        &self,
+        project_folder: P,
+    ) -> Result<(), Box<dyn error::Error>> {
+        self.network.save(project_folder)
     }
 }
 
@@ -116,7 +123,10 @@ where
                 let encoded_state = Implementation::encode_state(&turn.state);
                 let predictions =
                     ply_encoding::encode::<RuleSet, Implementation>(&turn.prediction.probabilities);
-                let reward = match log.status.player_pov(&self.ruleset.current_player(&turn.state)) {
+                let reward = match log
+                    .status
+                    .player_pov(&self.ruleset.current_player(&turn.state))
+                {
                     rulesets::PlayerStatus::Win => 1.0,
                     rulesets::PlayerStatus::Draw => 0.0,
                     rulesets::PlayerStatus::Loss => -1.0,
@@ -126,7 +136,7 @@ where
                     let mut bucket_index = 0;
                     for _ in 0..10 {
                         bucket_index = self.rng.gen_range(0, bucket_count);
-                        if buckets[bucket_index].size < batch_size  as u64 {
+                        if buckets[bucket_index].size < batch_size as u64 {
                             break;
                         }
                     }

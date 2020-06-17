@@ -7,6 +7,7 @@ use std::path;
 use tensorflow as tf;
 
 const MODEL_FILENAME: &str = "model.pb";
+const VARIABLES_FOLDER: &str = "variables";
 
 pub struct Network {
     state_dimensions: Vec<u64>,
@@ -71,7 +72,35 @@ impl Network {
         Ok((value_value, probabilities))
     }
 
-    pub fn save<P: AsRef<path::Path>>(&self, project_folder: P) -> Result<(), Box<dyn error::Error>> {
+    pub fn train(&self, sample: &samples::TrainSample) -> Result<(), Box<dyn error::Error>> {
+        let mut state_dimensions = self.state_dimensions.clone();
+        state_dimensions[0] = sample.size;
+        let states_value = tf::Tensor::new(&state_dimensions[..]).with_values(&sample.states)?;
+        let values_value = tf::Tensor::new(&[sample.size][..]).with_values(&sample.values)?;
+        let predictions_value =
+            tf::Tensor::new(&[sample.size, self.ply_count][..]).with_values(&sample.predictions)?;
+        let training_value = tf::Tensor::new(&[][..]).with_values(&[true])?;
+
+        let mut run_args = tf::SessionRunArgs::new();
+        run_args.add_target(&self.fields.train_op);
+        run_args.add_feed(&self.fields.state_in, 0, &states_value);
+        run_args.add_feed(&self.fields.target_value_in, 0, &values_value);
+        run_args.add_feed(&self.fields.target_pis_in, 0, &predictions_value);
+        run_args.add_feed(&self.fields.is_training_in, 0, &training_value);
+
+        let policy_loss_fetch = run_args.request_fetch(&self.fields.pi_loss_out, 0);
+        let value_loss_fetch = run_args.request_fetch(&self.fields.value_loss_out, 0);
+
+        self.session.run(&mut run_args)?;
+        let policy_loss = run_args.fetch::<f32>(policy_loss_fetch)?[0];
+        let value_loss = run_args.fetch::<f32>(value_loss_fetch)?[0];
+        Ok(())
+    }
+
+    pub fn save<P: AsRef<path::Path>>(
+        &self,
+        project_folder: P,
+    ) -> Result<(), Box<dyn error::Error>> {
         let variables_folder = project_folder.as_ref().join(VARIABLES_FOLDER);
         let variables_folder = String::from(variables_folder.to_str().unwrap());
         let filepath_tensor = tf::Tensor::from(variables_folder);
