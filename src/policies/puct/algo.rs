@@ -4,6 +4,7 @@ use crate::interface::rulesets;
 use std::collections;
 use std::error;
 use std::hash;
+use std::path;
 
 pub struct PUCT<'a, RuleSet, Policy>
 where
@@ -153,5 +154,23 @@ where
 {
     fn learn(&mut self, logs: &Vec<ai::PolicyLog<RuleSet>>) -> Result<(), Box<dyn error::Error>> {
         self.inner_policy.learn(logs)
+    }
+}
+
+impl<'a, RuleSet, Policy> ai::WithMemory for PUCT<'a, RuleSet, Policy>
+where
+    RuleSet: rulesets::RuleSetTrait,
+    RuleSet::State: Eq + hash::Hash,
+    Policy: ai::Policy<RuleSet> + ai::WithMemory,
+{
+    fn save<P: AsRef<path::Path>>(&self, project_folder: P) -> Result<(), Box<dyn error::Error>> {
+        self.inner_policy.save(project_folder)
+    }
+
+    fn load<P: AsRef<path::Path>>(
+        &mut self,
+        project_folder: P,
+    ) -> Result<(), Box<dyn error::Error>> {
+        self.inner_policy.load(project_folder)
     }
 }

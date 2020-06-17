@@ -12,6 +12,7 @@ pub use ply_considerations::PlyConsideration;
 pub use policies::Policy;
 pub use policies::Prediction;
 pub use policies::Teachable;
+pub use policies::WithMemory;
 pub use policy_logs::PolicyLog;
 pub use policy_logs::PolicyTurn;
 pub use qvalue::QValue;

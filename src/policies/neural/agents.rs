@@ -60,20 +60,6 @@ where
         }
         allowed_plies
     }
-
-    pub fn save<P: AsRef<path::Path>>(
-        &self,
-        project_folder: P,
-    ) -> Result<(), Box<dyn error::Error>> {
-        self.network.save(project_folder)
-    }
-
-    pub fn load<P: AsRef<path::Path>>(
-        &self,
-        project_folder: P,
-    ) -> Result<(), Box<dyn error::Error>> {
-        self.network.load(project_folder)
-    }
 }
 
 impl<'a, RuleSet, Implementation> ai::Policy<RuleSet> for Agent<'a, RuleSet, Implementation>
@@ -158,5 +144,24 @@ where
             }
         }
         Ok(())
+    }
+}
+
+impl<'a, RuleSet, Implementation> ai::WithMemory for Agent<'a, RuleSet, Implementation>
+where
+    RuleSet: rulesets::HasStatesWithSymmetries + rulesets::TurnByTurn,
+    Implementation: implementations::Implementation<RuleSet>,
+    RuleSet::Ply: Ord + hash::Hash,
+    RuleSet::State: Eq,
+{
+    fn save<P: AsRef<path::Path>>(&self, project_folder: P) -> Result<(), Box<dyn error::Error>> {
+        self.network.save(project_folder)
+    }
+
+    fn load<P: AsRef<path::Path>>(
+        &mut self,
+        project_folder: P,
+    ) -> Result<(), Box<dyn error::Error>> {
+        self.network.load(project_folder)
     }
 }
