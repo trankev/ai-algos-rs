@@ -110,4 +110,18 @@ impl Network {
         self.session.run(&mut run_args)?;
         Ok(())
     }
+
+    pub fn load<P: AsRef<path::Path>>(
+        &self,
+        project_folder: P,
+    ) -> Result<(), Box<dyn error::Error>> {
+        let variables_folder = project_folder.as_ref().join(VARIABLES_FOLDER);
+        let variables_folder = String::from(variables_folder.to_str().unwrap());
+        let filepath_tensor = tf::Tensor::from(variables_folder);
+        let mut run_args = tf::SessionRunArgs::new();
+        run_args.add_target(&self.fields.load_op);
+        run_args.add_feed(&self.fields.filepath_in, 0, &filepath_tensor);
+        self.session.run(&mut run_args)?;
+        Ok(())
+    }
 }

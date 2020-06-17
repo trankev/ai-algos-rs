@@ -67,6 +67,13 @@ where
     ) -> Result<(), Box<dyn error::Error>> {
         self.network.save(project_folder)
     }
+
+    pub fn load<P: AsRef<path::Path>>(
+        &self,
+        project_folder: P,
+    ) -> Result<(), Box<dyn error::Error>> {
+        self.network.load(project_folder)
+    }
 }
 
 impl<'a, RuleSet, Implementation> ai::Policy<RuleSet> for Agent<'a, RuleSet, Implementation>

@@ -12,6 +12,7 @@ pub struct FieldSet {
     pub init_op: tf::Operation,
     pub train_op: tf::Operation,
     pub save_op: tf::Operation,
+    pub load_op: tf::Operation,
 
     pub probs_out: tf::Operation,
     pub value_out: tf::Operation,
@@ -33,6 +34,7 @@ impl FieldSet {
             init_op: graph.operation_by_name_required("init_op")?,
             train_op: graph.operation_by_name_required("train_op")?,
             save_op: graph.operation_by_name_required("save/control_dependency")?,
+            load_op: graph.operation_by_name_required("save/restore_all")?,
 
             probs_out: graph.operation_by_name_required("probs_out")?,
             value_out: graph.operation_by_name_required("value_out")?,
