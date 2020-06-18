@@ -63,7 +63,7 @@ impl<Variant: variants::BaseVariant> PlyIterator<Variant> {
         state: &state::State<Variant>,
     ) -> Option<(rulesets::Player, usize)> {
         loop {
-            while let Some((player, index)) = self.iterate_strip(state) {
+            if let Some((player, index)) = self.iterate_strip(state) {
                 return Some((player, index));
             }
             self.current_index += 1;

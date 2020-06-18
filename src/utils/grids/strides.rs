@@ -1,5 +1,3 @@
-use num;
-
 pub fn compute_strides<T: num::PrimInt>(dimensions: &[T]) -> Vec<T> {
     dimensions
         .iter()

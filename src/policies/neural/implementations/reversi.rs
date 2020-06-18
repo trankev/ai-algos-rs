@@ -12,7 +12,7 @@ impl<Variant: reversi::BaseVariant> base::Implementation<reversi::Reversi<Varian
     fn encode_state(state: &reversi::State<Variant>) -> Vec<f32> {
         let player = state.current_player as usize;
         let opponent = 1 - player;
-        let result = (0..Variant::CELL_COUNT)
+        (0..Variant::CELL_COUNT)
             .map(|index| {
                 if state.grids[player].isset(index) {
                     1.0
@@ -22,8 +22,7 @@ impl<Variant: reversi::BaseVariant> base::Implementation<reversi::Reversi<Varian
                     0.0
                 }
             })
-            .collect();
-        result
+            .collect()
     }
 
     fn decode_ply(ply_index: usize) -> reversi::Ply<Variant> {

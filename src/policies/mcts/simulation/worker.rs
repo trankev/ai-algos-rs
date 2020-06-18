@@ -3,7 +3,6 @@ use super::requests;
 use super::responses;
 use crate::interface::rulesets;
 use crossbeam::channel;
-use rand;
 use rand::rngs;
 use std::error;
 

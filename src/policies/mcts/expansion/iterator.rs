@@ -30,7 +30,7 @@ where
     }
 
     pub fn iterate(&mut self) -> Option<items::Play<RuleSet>> {
-        while let Some(ply) = self.ply_iterator.next() {
+        if let Some(ply) = self.ply_iterator.next() {
             let resulting_state = self.ruleset.play(self.state, &ply).unwrap();
             let status = self.ruleset.status(&resulting_state);
             let current_player = self.ruleset.current_player(&resulting_state);

@@ -1,7 +1,6 @@
 use crate::interface::ai;
 use crate::interface::rulesets;
 use crate::tools::plies;
-use rand;
 use rand::rngs;
 use rand::seq::IteratorRandom;
 use std::error;

@@ -1,6 +1,5 @@
 use crate::interface::ai;
 use crate::interface::rulesets;
-use rand;
 use rand::distributions;
 use rand::distributions::Distribution;
 use rand::rngs;

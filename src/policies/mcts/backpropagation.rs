@@ -1,6 +1,5 @@
 use super::nodes;
 use crate::interface::rulesets;
-use petgraph;
 use petgraph::graph;
 
 pub fn backpropagate<State: rulesets::StateTrait, Edge>(

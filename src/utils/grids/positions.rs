@@ -6,7 +6,7 @@ pub struct Positions {
 impl Positions {
     pub fn new(dimensions: Vec<isize>) -> Positions {
         let mut current_position = vec![0; dimensions.len()];
-        if current_position.len() > 0 {
+        if !current_position.is_empty() {
             let last_index = current_position.len() - 1;
             current_position[last_index] = -1;
         }

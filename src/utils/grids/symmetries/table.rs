@@ -11,7 +11,7 @@ pub struct SymmetryTable {
 }
 
 impl SymmetryTable {
-    pub fn new(dimensions: &Vec<usize>) -> SymmetryTable {
+    pub fn new(dimensions: &[usize]) -> SymmetryTable {
         let idimensions: Vec<isize> = dimensions.iter().map(|&x| x as isize).collect();
         let symmetries = iterator::Symmetries::new(idimensions.clone());
         let strides = grids::compute_strides(&idimensions);
@@ -47,7 +47,7 @@ impl SymmetryTable {
     }
 }
 
-fn revert_permutation_indices(indices: &Vec<usize>) -> Vec<usize> {
+fn revert_permutation_indices(indices: &[usize]) -> Vec<usize> {
     let mut result = vec![0; indices.len()];
     indices
         .iter()

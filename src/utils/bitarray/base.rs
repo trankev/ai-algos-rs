@@ -1,7 +1,5 @@
 use super::comparison;
 use super::settings;
-use generic_array;
-use num;
 use num::traits::One;
 use num::traits::PrimInt;
 use num::traits::Zero;

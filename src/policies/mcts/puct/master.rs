@@ -11,7 +11,6 @@ use crate::interface::ai;
 use crate::interface::rulesets;
 use crossbeam::channel;
 use petgraph::graph;
-use rand;
 use rand::rngs;
 use std::error;
 
