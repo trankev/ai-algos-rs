@@ -72,7 +72,7 @@ where
             status = simulation::simulate::<RuleSet>(&self.ruleset, &state, &mut self.rng);
             selected = to_simulate;
         }
-        backpropagation::backpropagate(&mut self.tree, selected, true, Some(&status));
+        backpropagation::backpropagate(&mut self.tree, selected, true, Some(status));
     }
 
     pub fn play_scores(&self) -> Option<Vec<ai::PlyConsideration<RuleSet::Ply>>> {

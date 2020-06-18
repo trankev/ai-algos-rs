@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn test_initial_state() {
-        let ruleset = ClassicReversi::new();
+        let ruleset = ClassicReversi::default();
         let state = ruleset.initial_state();
         let mut iterator = PlyIterator::new(&ruleset, &state);
         let mut result = collections::HashSet::<ClassicPly>::new();
@@ -147,7 +147,7 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (p1_indices, p2_indices, current_player, expected) = $value;
-                    let ruleset = ruleset::Reversi::<instances::Classic>::new();
+                    let ruleset = ruleset::Reversi::<instances::Classic>::default();
                     let state = state::State::from_indices(&p1_indices, &p2_indices, current_player);
                     let mut iterator = PlyIterator::new(&ruleset, &state);
                     let mut result = Vec::new();

@@ -11,6 +11,6 @@ pub trait Learner<RuleSet: rulesets::RuleSetTrait>: Agent<RuleSet> {
 
     fn learn(
         &mut self,
-        game_logs: &Vec<ai::GameLog<RuleSet>>,
+        game_logs: &[ai::GameLog<RuleSet>],
     ) -> Result<Self::Metrics, Box<dyn error::Error>>;
 }

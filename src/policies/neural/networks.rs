@@ -49,8 +49,8 @@ impl Network {
 
     pub fn predict(
         &self,
-        state: &Vec<f32>,
-        allowed_plies: &Vec<f32>,
+        state: &[f32],
+        allowed_plies: &[f32],
     ) -> Result<(f32, Vec<f32>), Box<dyn error::Error>> {
         let state_value = tf::Tensor::new(&self.state_dimensions[..]).with_values(&state)?;
         let allowed_plies_value =

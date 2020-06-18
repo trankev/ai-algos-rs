@@ -80,13 +80,19 @@ impl<Variant: variants::BaseVariant> Reversi<Variant> {
     }
 }
 
+impl<Variant: variants::BaseVariant> Default for Reversi<Variant> {
+    fn default() -> Reversi<Variant> {
+        Self::new()
+    }
+}
+
 impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for Reversi<Variant> {
     type Ply = plies::Ply<Variant>;
     type State = state::State<Variant>;
     type PlyIterator = ply_iterators::PlyIterator<Variant>;
 
     fn initial_state(&self) -> Self::State {
-        state::State::new()
+        state::State::default()
     }
 
     fn status(&self, state: &Self::State) -> rulesets::Status {
@@ -212,7 +218,7 @@ mod tests {
 
     #[test]
     fn test_play_on_occupied_cell() {
-        let game = Reversi::<instances::Mini>::new();
+        let game = Reversi::<instances::Mini>::default();
         let state = state::State::from_indices(&[5, 10], &[6, 9], 0);
         let ply = MiniPly::Place(5);
         let result = game.play(&state, &ply);
@@ -221,7 +227,7 @@ mod tests {
 
     #[test]
     fn test_play_on_non_reversing_cell() {
-        let game = Reversi::<instances::Mini>::new();
+        let game = Reversi::<instances::Mini>::default();
         let state = state::State::from_indices(&[5, 10], &[6, 9], 0);
         let ply = MiniPly::Place(4);
         let result = game.play(&state, &ply);
@@ -234,7 +240,7 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (in_p1_idx, in_p2_idx, in_player, ply_idx, out_p1_idx, out_p2_idx, out_player) = $value;
-                    let game = Reversi::<instances::Mini>::new();
+                    let game = Reversi::<instances::Mini>::default();
                     let state = state::State::from_indices(&in_p1_idx, &in_p2_idx, in_player);
                     let ply = MiniPly::Place(ply_idx);
                     let resulting_state = game.play(&state, &ply).unwrap();
@@ -263,7 +269,7 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (p1_indices, p2_indices, current_player, expected) = $value;
-                    let game = Reversi::<instances::Mini>::new();
+                    let game = Reversi::<instances::Mini>::default();
                     let state = state::State::from_indices(&p1_indices, &p2_indices, current_player);
                     let status = game.status(&state);
                     assert_eq!(status, expected);
@@ -281,7 +287,7 @@ mod tests {
 
     #[test]
     fn test_swap_state() {
-        let game = Reversi::<instances::Mini>::new();
+        let game = Reversi::<instances::Mini>::default();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
         let symmetries =
             <Reversi<instances::Mini> as rulesets::HasStatesWithSymmetries>::SymmetryIterator::new(

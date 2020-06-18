@@ -17,3 +17,9 @@ impl ReplayBuffer {
         }
     }
 }
+
+impl Default for ReplayBuffer {
+    fn default() -> ReplayBuffer {
+        Self::new()
+    }
+}

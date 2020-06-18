@@ -6,7 +6,7 @@ pub fn backpropagate<State: rulesets::StateTrait, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,
-    status: Option<&rulesets::Status>,
+    status: Option<rulesets::Status>,
 ) {
     let mut neighbours = tree
         .neighbors_directed(node, petgraph::Direction::Incoming)
@@ -21,7 +21,7 @@ pub fn update_tallies<State: rulesets::StateTrait, Edge>(
     tree: &mut graph::Graph<nodes::Node<State>, Edge>,
     node: graph::NodeIndex<u32>,
     update_visits: bool,
-    status: Option<&rulesets::Status>,
+    status: Option<rulesets::Status>,
 ) {
     let weight = tree.node_weight_mut(node).unwrap();
     if update_visits {

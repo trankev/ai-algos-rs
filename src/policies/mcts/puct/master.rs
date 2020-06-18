@@ -167,7 +167,7 @@ where
                 Ok(SelectionResult::Simulation)
             }
             expansion::ExpansionStatus::Terminal(status) => {
-                backpropagation::backpropagate(&mut self.tree, selected, true, Some(&status));
+                backpropagation::backpropagate(&mut self.tree, selected, true, Some(status));
                 Ok(SelectionResult::Nothing)
             }
             expansion::ExpansionStatus::PendingExpansion => Ok(SelectionResult::PendingExpansion),
@@ -216,7 +216,7 @@ where
             &mut self.tree,
             response.node_index,
             false,
-            Some(&response.status),
+            Some(response.status),
         );
         let mut handled = 1;
         loop {
@@ -227,7 +227,7 @@ where
                         &mut self.tree,
                         response.node_index,
                         false,
-                        Some(&response.status),
+                        Some(response.status),
                     );
                 }
                 Err(channel::TryRecvError::Empty) => break,
@@ -286,7 +286,9 @@ where
                 }
                 requests::Request::ListConsiderations => {
                     let result = self.play_scores().unwrap();
-                    let response = responses::Response::PlyConsiderations(result);
+                    let response = responses::Response {
+                        considerations: result,
+                    };
                     self.master_response_sender.send(response)?;
                 }
                 requests::Request::Stop => break,

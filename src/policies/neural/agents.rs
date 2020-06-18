@@ -101,7 +101,7 @@ where
     RuleSet::Ply: Ord + hash::Hash,
     RuleSet::State: Eq,
 {
-    fn learn(&mut self, logs: &Vec<ai::PolicyLog<RuleSet>>) -> Result<(), Box<dyn error::Error>> {
+    fn learn(&mut self, logs: &[ai::PolicyLog<RuleSet>]) -> Result<(), Box<dyn error::Error>> {
         let batch_size = 64;
         let epochs = 10;
         let state_count: usize = logs.iter().map(|log| log.history.len()).sum();
@@ -117,7 +117,7 @@ where
                     ply_encoding::encode::<RuleSet, Implementation>(&turn.prediction.probabilities);
                 let reward = match log
                     .status
-                    .player_pov(&self.ruleset.current_player(&turn.state))
+                    .player_pov(self.ruleset.current_player(&turn.state))
                 {
                     rulesets::PlayerStatus::Win => 1.0,
                     rulesets::PlayerStatus::Draw => 0.0,

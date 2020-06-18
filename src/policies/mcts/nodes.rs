@@ -86,13 +86,13 @@ impl<State: rulesets::StateTrait> Node<State> {
         }
     }
 
-    pub fn backpropagate(&mut self, status: &rulesets::Status) {
+    pub fn backpropagate(&mut self, status: rulesets::Status) {
         self.status = match self.status {
             Status::Ongoing {
                 mut score,
                 mut draw_rate,
             } => {
-                match status.player_pov(&self.current_player) {
+                match status.player_pov(self.current_player) {
                     rulesets::PlayerStatus::Loss => score += 1.0 / self.visits,
                     rulesets::PlayerStatus::Draw => {
                         score += 0.5 / self.visits;
@@ -109,7 +109,7 @@ impl<State: rulesets::StateTrait> Node<State> {
 
     pub fn score(&self) -> f32 {
         match &self.status {
-            Status::Terminal { status } => match status.player_pov(&self.current_player) {
+            Status::Terminal { status } => match status.player_pov(self.current_player) {
                 rulesets::PlayerStatus::Win => 0.0,
                 rulesets::PlayerStatus::Draw => 0.5,
                 rulesets::PlayerStatus::Loss => 1.0,
@@ -121,7 +121,7 @@ impl<State: rulesets::StateTrait> Node<State> {
 
     pub fn win_rate(&self) -> f32 {
         match &self.status {
-            Status::Terminal { status } => match status.player_pov(&self.current_player) {
+            Status::Terminal { status } => match status.player_pov(self.current_player) {
                 rulesets::PlayerStatus::Loss => 1.0,
                 _ => 0.0,
             },
@@ -131,7 +131,7 @@ impl<State: rulesets::StateTrait> Node<State> {
 
     pub fn draw_rate(&self) -> f32 {
         match &self.status {
-            Status::Terminal { status } => match status.player_pov(&self.current_player) {
+            Status::Terminal { status } => match status.player_pov(self.current_player) {
                 rulesets::PlayerStatus::Draw => 1.0,
                 _ => 0.0,
             },

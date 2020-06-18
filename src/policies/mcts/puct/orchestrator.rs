@@ -89,10 +89,7 @@ where
         let request = requests::Request::ListConsiderations;
         self.master_request_sender.send(request)?;
         let response = self.master_response_receiver.recv()?;
-        if let responses::Response::PlyConsiderations(considerations) = response {
-            return Ok(Some(considerations));
-        }
-        Ok(None)
+        Ok(Some(response.considerations))
     }
 
     pub fn start(

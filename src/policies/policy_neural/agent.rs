@@ -83,12 +83,12 @@ where
         Ok(ply_values)
     }
 
-    fn build_buffer(&self, logs: &Vec<ai::GameLog<RuleSet>>) -> replay_buffer::ReplayBuffer {
+    fn build_buffer(&self, logs: &[ai::GameLog<RuleSet>]) -> replay_buffer::ReplayBuffer {
         let mut result = replay_buffer::ReplayBuffer::new();
         for log in logs {
             let mut discount = 1.0;
             for (state, ply) in log.history.iter().rev() {
-                let reward = match log.status.player_pov(&self.ruleset.current_player(&state)) {
+                let reward = match log.status.player_pov(self.ruleset.current_player(state)) {
                     rulesets::PlayerStatus::Win => 1.0,
                     rulesets::PlayerStatus::Draw => 0.0,
                     rulesets::PlayerStatus::Loss => -1.0,
@@ -137,7 +137,7 @@ where
 
     fn learn(
         &mut self,
-        game_logs: &Vec<ai::GameLog<RuleSet>>,
+        game_logs: &[ai::GameLog<RuleSet>],
     ) -> Result<learning_metrics::LearningMetrics, Box<dyn error::Error>> {
         let replay_buffer = self.build_buffer(game_logs);
         let metrics = self.network.learn(&replay_buffer)?;

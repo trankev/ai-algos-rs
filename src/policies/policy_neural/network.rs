@@ -45,11 +45,7 @@ impl Network {
         Ok(())
     }
 
-    pub fn play(
-        &self,
-        state: &Vec<f32>,
-        allowed_plies: &Vec<f32>,
-    ) -> Result<i32, Box<dyn error::Error>> {
+    pub fn play(&self, state: &[f32], allowed_plies: &[f32]) -> Result<i32, Box<dyn error::Error>> {
         let state_value = tf::Tensor::new(&[1, self.state_size][..]).with_values(&state)?;
         let allowed_plies_value =
             tf::Tensor::new(&[1, self.action_count][..]).with_values(&allowed_plies)?;
@@ -67,7 +63,7 @@ impl Network {
         Ok(action)
     }
 
-    pub fn get_qvalue(&self, state: &Vec<f32>) -> Result<f32, Box<dyn error::Error>> {
+    pub fn get_qvalue(&self, state: &[f32]) -> Result<f32, Box<dyn error::Error>> {
         let state_value = tf::Tensor::new(&[1, self.state_size][..]).with_values(&state)?;
 
         let mut run_args = tf::SessionRunArgs::new();
@@ -81,8 +77,8 @@ impl Network {
 
     pub fn get_probabilities(
         &self,
-        state: &Vec<f32>,
-        allowed_plies: &Vec<f32>,
+        state: &[f32],
+        allowed_plies: &[f32],
     ) -> Result<Vec<f32>, Box<dyn error::Error>> {
         let state_value = tf::Tensor::new(&[1, self.state_size][..]).with_values(&state)?;
         let allowed_plies_value =

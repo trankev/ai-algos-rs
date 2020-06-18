@@ -8,7 +8,7 @@ pub enum Status {
 }
 
 impl Status {
-    pub fn player_pov(&self, player: &Player) -> PlayerStatus {
+    pub fn player_pov(self, player: Player) -> PlayerStatus {
         match self {
             Status::Ongoing => PlayerStatus::Ongoing,
             Status::Draw => PlayerStatus::Draw,

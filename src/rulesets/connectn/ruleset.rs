@@ -30,6 +30,12 @@ impl<Variant: variants::BaseVariant> RuleSet<Variant> {
     }
 }
 
+impl<Variant: variants::BaseVariant> Default for RuleSet<Variant> {
+    fn default() -> RuleSet<Variant> {
+        Self::new()
+    }
+}
+
 impl<Variant: variants::BaseVariant> rulesets::RuleSetTrait for RuleSet<Variant> {
     type State = state::State<Variant>;
     type Ply = plies::Ply<Variant>;

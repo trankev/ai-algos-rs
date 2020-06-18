@@ -44,22 +44,19 @@ where
     }
 
     pub fn run(&mut self) -> Result<(), Box<dyn error::Error>> {
-        loop {
-            match self.receiver.recv()? {
-                requests::Request::ExpansionRequest { node_index, state } => {
-                    self.operation_count += 1;
-                    let mut iterator = iterator::Expander::new(&self.ruleset, &state);
-                    let mut successors = Vec::new();
-                    while let Some(item) = iterator.iterate() {
-                        successors.push(item);
-                    }
-                    self.sender.send(responses::Response {
-                        node_index,
-                        successors,
-                    })?;
-                }
-                requests::Request::Stop => break,
+        while let requests::Request::ExpansionRequest { node_index, state } =
+            self.receiver.recv()?
+        {
+            self.operation_count += 1;
+            let mut iterator = iterator::Expander::new(&self.ruleset, &state);
+            let mut successors = Vec::new();
+            while let Some(item) = iterator.iterate() {
+                successors.push(item);
             }
+            self.sender.send(responses::Response {
+                node_index,
+                successors,
+            })?;
         }
         Ok(())
     }

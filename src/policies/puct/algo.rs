@@ -77,7 +77,7 @@ where
                     }
                     _ => {
                         let node_state = nodes::NodeStatus::Terminal;
-                        let qvalue = match status.player_pov(&self.ruleset.current_player(&state)) {
+                        let qvalue = match status.player_pov(self.ruleset.current_player(state)) {
                             rulesets::PlayerStatus::Win => 1.0,
                             rulesets::PlayerStatus::Draw => 0.0,
                             rulesets::PlayerStatus::Loss => -1.0,
@@ -152,7 +152,7 @@ where
     RuleSet::State: Eq + hash::Hash,
     Policy: ai::Teachable<RuleSet>,
 {
-    fn learn(&mut self, logs: &Vec<ai::PolicyLog<RuleSet>>) -> Result<(), Box<dyn error::Error>> {
+    fn learn(&mut self, logs: &[ai::PolicyLog<RuleSet>]) -> Result<(), Box<dyn error::Error>> {
         self.inner_policy.learn(logs)
     }
 }

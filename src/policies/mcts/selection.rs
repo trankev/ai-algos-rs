@@ -25,7 +25,7 @@ pub fn select<State: rulesets::StateTrait, Edge>(
         .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap());
     match best_neighbour {
         Some((child_index, _)) => select(tree, child_index),
-        None => match tree.neighbors(node).nth(0) {
+        None => match tree.neighbors(node).next() {
             Some(child_index) => child_index,
             None => node,
         },

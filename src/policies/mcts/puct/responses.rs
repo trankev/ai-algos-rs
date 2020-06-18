@@ -1,6 +1,6 @@
 use crate::interface::ai;
 use crate::interface::rulesets;
 
-pub enum Response<RuleSet: rulesets::RuleSetTrait> {
-    PlyConsiderations(Vec<ai::PlyConsideration<RuleSet::Ply>>),
+pub struct Response<RuleSet: rulesets::RuleSetTrait> {
+    pub considerations: Vec<ai::PlyConsideration<RuleSet::Ply>>,
 }

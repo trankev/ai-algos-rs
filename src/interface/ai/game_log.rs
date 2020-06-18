@@ -14,3 +14,9 @@ impl<RuleSet: rulesets::RuleSetTrait> GameLog<RuleSet> {
         }
     }
 }
+
+impl<RuleSet: rulesets::RuleSetTrait> Default for GameLog<RuleSet> {
+    fn default() -> GameLog<RuleSet> {
+        Self::new()
+    }
+}

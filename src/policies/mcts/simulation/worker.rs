@@ -30,16 +30,13 @@ impl<RuleSet: rulesets::Deterministic> Worker<RuleSet> {
     }
 
     pub fn run(&mut self) -> Result<(), Box<dyn error::Error>> {
-        loop {
-            match self.receiver.recv()? {
-                requests::Request::SimulationRequest { node_index, state } => {
-                    self.operation_count += 1;
-                    let status = algo::simulate(&self.ruleset, &state, &mut self.rng);
-                    self.sender
-                        .send(responses::Response { node_index, status })?;
-                }
-                requests::Request::Stop => break,
-            }
+        while let requests::Request::SimulationRequest { node_index, state } =
+            self.receiver.recv()?
+        {
+            self.operation_count += 1;
+            let status = algo::simulate(&self.ruleset, &state, &mut self.rng);
+            self.sender
+                .send(responses::Response { node_index, status })?;
         }
         Ok(())
     }

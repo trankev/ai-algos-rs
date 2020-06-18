@@ -15,7 +15,7 @@ impl TrainSample {
         }
     }
 
-    pub fn add(&mut self, state: &Vec<f32>, value: f32, predictions: &Vec<f32>) {
+    pub fn add(&mut self, state: &[f32], value: f32, predictions: &[f32]) {
         self.states.extend(state);
         self.values.push(value);
         self.predictions.extend(predictions);

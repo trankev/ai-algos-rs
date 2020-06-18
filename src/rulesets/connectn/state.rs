@@ -69,6 +69,12 @@ impl<Variant: variants::BaseVariant> State<Variant> {
     }
 }
 
+impl<Variant: variants::BaseVariant> Default for State<Variant> {
+    fn default() -> State<Variant> {
+        Self::new()
+    }
+}
+
 impl<Variant: variants::BaseVariant> rulesets::StateTrait for State<Variant> {
     fn ascii_representation(&self) -> String {
         let mut result = String::new();
