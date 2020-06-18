@@ -153,7 +153,11 @@ impl<Variant: variants::BaseVariant> rulesets::Deterministic for Reversi<Variant
                 result.current_player = 1 - result.current_player;
                 Ok(result)
             }
-            plies::Ply::Pass => Ok(state.clone()),
+            plies::Ply::Pass => {
+                let mut result = state.clone();
+                result.current_player = 1 - result.current_player;
+                Ok(result)
+            }
             plies::Ply::Unused(_) => unreachable!(),
         }
     }

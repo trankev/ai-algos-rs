@@ -23,7 +23,7 @@ impl Status {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum PlayerStatus {
     Ongoing,
     Win,
