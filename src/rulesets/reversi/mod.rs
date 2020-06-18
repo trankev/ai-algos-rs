@@ -13,3 +13,4 @@ pub use plies::Ply;
 pub use ruleset::Reversi;
 pub use state::State;
 pub use symmetry::Symmetry;
+pub use variants::BaseVariant;
