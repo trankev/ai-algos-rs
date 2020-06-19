@@ -1,4 +1,5 @@
 use super::fieldsets;
+use super::metrics;
 use super::samples;
 use std::error;
 use std::fs;
@@ -72,7 +73,10 @@ impl Network {
         Ok((value_value, probabilities))
     }
 
-    pub fn train(&self, sample: &samples::TrainSample) -> Result<(), Box<dyn error::Error>> {
+    pub fn train(
+        &self,
+        sample: &samples::TrainSample,
+    ) -> Result<metrics::Metrics, Box<dyn error::Error>> {
         let mut state_dimensions = self.state_dimensions.clone();
         state_dimensions[0] = sample.size;
         let states_value = tf::Tensor::new(&state_dimensions[..]).with_values(&sample.states)?;
@@ -92,9 +96,11 @@ impl Network {
         let value_loss_fetch = run_args.request_fetch(&self.fields.value_loss_out, 0);
 
         self.session.run(&mut run_args)?;
-        let _policy_loss = run_args.fetch::<f32>(policy_loss_fetch)?[0];
-        let _value_loss = run_args.fetch::<f32>(value_loss_fetch)?[0];
-        Ok(())
+        let metrics = metrics::Metrics {
+            policy_loss: run_args.fetch::<f32>(policy_loss_fetch)?[0],
+            value_loss: run_args.fetch::<f32>(value_loss_fetch)?[0],
+        };
+        Ok(metrics)
     }
 
     pub fn save<P: AsRef<path::Path>>(

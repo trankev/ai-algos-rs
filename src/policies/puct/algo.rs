@@ -152,7 +152,12 @@ where
     RuleSet::State: Eq + hash::Hash,
     Policy: ai::Teachable<RuleSet>,
 {
-    fn learn(&mut self, logs: &[ai::PolicyLog<RuleSet>]) -> Result<(), Box<dyn error::Error>> {
+    type Metrics = Policy::Metrics;
+
+    fn learn(
+        &mut self,
+        logs: &[ai::PolicyLog<RuleSet>],
+    ) -> Result<Self::Metrics, Box<dyn error::Error>> {
         self.inner_policy.learn(logs)
     }
 }

@@ -17,7 +17,11 @@ pub trait Policy<RuleSet: rulesets::RuleSetTrait> {
 }
 
 pub trait Teachable<RuleSet: rulesets::RuleSetTrait>: Policy<RuleSet> {
-    fn learn(&mut self, logs: &[ai::PolicyLog<RuleSet>]) -> Result<(), Box<dyn error::Error>>;
+    type Metrics;
+    fn learn(
+        &mut self,
+        logs: &[ai::PolicyLog<RuleSet>],
+    ) -> Result<Self::Metrics, Box<dyn error::Error>>;
 }
 
 pub trait WithMemory {

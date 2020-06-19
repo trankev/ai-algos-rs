@@ -1,4 +1,5 @@
 use super::implementations;
+use super::metrics;
 use super::networks;
 use super::ply_encoding;
 use super::samples;
@@ -101,7 +102,12 @@ where
     RuleSet::Ply: Ord + hash::Hash,
     RuleSet::State: Eq,
 {
-    fn learn(&mut self, logs: &[ai::PolicyLog<RuleSet>]) -> Result<(), Box<dyn error::Error>> {
+    type Metrics = metrics::Metrics;
+
+    fn learn(
+        &mut self,
+        logs: &[ai::PolicyLog<RuleSet>],
+    ) -> Result<metrics::Metrics, Box<dyn error::Error>> {
         let batch_size = 64;
         let epochs = 10;
         let state_count: usize = logs.iter().map(|log| log.history.len()).sum();
@@ -137,12 +143,21 @@ where
                 buckets[bucket_index].add(&encoded_state, reward, &predictions);
             }
         }
+        let mut totals = metrics::Metrics {
+            policy_loss: 0.0,
+            value_loss: 0.0,
+        };
         for _ in 0..epochs {
             for bucket in &buckets {
-                self.network.train(&bucket)?;
+                let bucket_metrics = self.network.train(&bucket)?;
+                totals.policy_loss += bucket_metrics.policy_loss;
+                totals.value_loss += bucket_metrics.value_loss;
             }
         }
-        Ok(())
+        let iterations = (epochs * bucket_count) as f32;
+        totals.policy_loss /= iterations;
+        totals.value_loss /= iterations;
+        Ok(totals)
     }
 }
 
