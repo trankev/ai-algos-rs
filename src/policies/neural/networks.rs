@@ -92,8 +92,8 @@ impl Network {
         let value_loss_fetch = run_args.request_fetch(&self.fields.value_loss_out, 0);
 
         self.session.run(&mut run_args)?;
-        let policy_loss = run_args.fetch::<f32>(policy_loss_fetch)?[0];
-        let value_loss = run_args.fetch::<f32>(value_loss_fetch)?[0];
+        let _policy_loss = run_args.fetch::<f32>(policy_loss_fetch)?[0];
+        let _value_loss = run_args.fetch::<f32>(value_loss_fetch)?[0];
         Ok(())
     }
 

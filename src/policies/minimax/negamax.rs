@@ -71,6 +71,24 @@ where
     }
 }
 
+impl<'a, RuleSet> ai::Policy<RuleSet> for Negamax<'a, RuleSet>
+where
+    RuleSet: rulesets::Deterministic + rulesets::TurnByTurn,
+{
+    fn predict(
+        &mut self,
+        state: &RuleSet::State,
+    ) -> Result<ai::Prediction<RuleSet>, Box<dyn error::Error>> {
+        match self.compute(state) {
+            state::State::TreeSearch { ply, .. } => Ok(ai::Prediction {
+                value: 0.0,
+                probabilities: vec![(ply, 1.0)],
+            }),
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Negamax;
