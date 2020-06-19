@@ -1,6 +1,8 @@
 use crate::interface::rulesets;
 
-#[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(
+    Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
+)]
 pub struct EmptyState {
     current_player: rulesets::Player,
 }

@@ -13,8 +13,9 @@ itertools = "*"
 petgraph = "*"
 crossbeam = "*"
 typenum = "*"
-generic-array = "*"
+generic-array = {version = "*", features = ["serde"]}
 num = "*"
+serde = {version = "*", features = ["derive"]}
 
 [dev-dependencies]
 more-asserts = "*"

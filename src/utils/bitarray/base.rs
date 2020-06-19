@@ -6,7 +6,9 @@ use num::traits::Zero;
 use std::ops;
 use typenum::Unsigned;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
+)]
 pub struct BitArray<Settings: settings::BitArraySettings> {
     first_bits: generic_array::GenericArray<Settings::FirstBitType, Settings::ArrayLength>,
     last_bits: Settings::LastBitType,

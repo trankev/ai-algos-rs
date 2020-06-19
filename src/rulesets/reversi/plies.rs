@@ -2,7 +2,9 @@ use super::variants;
 use crate::interface::rulesets;
 use std::marker;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
+)]
 pub enum Ply<Variant: variants::BaseVariant> {
     Place(usize),
     Pass,

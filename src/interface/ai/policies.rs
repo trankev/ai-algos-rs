@@ -3,7 +3,7 @@ use crate::interface::rulesets;
 use std::error;
 use std::path;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct Prediction<RuleSet: rulesets::RuleSetTrait> {
     pub value: f32,
     pub probabilities: Vec<(RuleSet::Ply, f32)>,
@@ -17,7 +17,7 @@ pub trait Policy<RuleSet: rulesets::RuleSetTrait> {
 }
 
 pub trait Teachable<RuleSet: rulesets::RuleSetTrait>: Policy<RuleSet> {
-    type Metrics;
+    type Metrics: for<'a> serde::Deserialize<'a> + serde::Serialize;
     fn learn(
         &mut self,
         logs: &[ai::PolicyLog<RuleSet>],

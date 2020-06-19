@@ -3,7 +3,9 @@ use super::variants;
 use crate::interface::rulesets;
 use crate::utils::bitarray;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
+)]
 pub struct State<Variant: variants::BaseVariant> {
     pub grids: [bitarray::BitArray<Variant::ArraySettings>; 2],
     pub current_player: u8,

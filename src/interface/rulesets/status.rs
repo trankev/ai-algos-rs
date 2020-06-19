@@ -1,6 +1,6 @@
 use super::Player;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, serde::Deserialize, serde::Serialize)]
 pub enum Status {
     Ongoing,
     Draw,
