@@ -214,22 +214,22 @@ mod tests {
     use crate::interface::rulesets::SymmetryIteratorTrait;
     use std::collections;
 
-    type MiniPly = plies::Ply<instances::Mini>;
+    type MicroPly = plies::Ply<instances::Micro>;
 
     #[test]
     fn test_play_on_occupied_cell() {
-        let game = Reversi::<instances::Mini>::default();
+        let game = Reversi::<instances::Micro>::default();
         let state = state::State::from_indices(&[5, 10], &[6, 9], 0);
-        let ply = MiniPly::Place(5);
+        let ply = MicroPly::Place(5);
         let result = game.play(&state, &ply);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_play_on_non_reversing_cell() {
-        let game = Reversi::<instances::Mini>::default();
+        let game = Reversi::<instances::Micro>::default();
         let state = state::State::from_indices(&[5, 10], &[6, 9], 0);
-        let ply = MiniPly::Place(4);
+        let ply = MicroPly::Place(4);
         let result = game.play(&state, &ply);
         assert!(result.is_err());
     }
@@ -240,9 +240,9 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (in_p1_idx, in_p2_idx, in_player, ply_idx, out_p1_idx, out_p2_idx, out_player) = $value;
-                    let game = Reversi::<instances::Mini>::default();
+                    let game = Reversi::<instances::Micro>::default();
                     let state = state::State::from_indices(&in_p1_idx, &in_p2_idx, in_player);
-                    let ply = MiniPly::Place(ply_idx);
+                    let ply = MicroPly::Place(ply_idx);
                     let resulting_state = game.play(&state, &ply).unwrap();
                     let expected = state::State::from_indices(&out_p1_idx, &out_p2_idx, out_player);
                     assert_eq!(resulting_state, expected);
@@ -269,7 +269,7 @@ mod tests {
                 #[test]
                 fn $name() {
                     let (p1_indices, p2_indices, current_player, expected) = $value;
-                    let game = Reversi::<instances::Mini>::default();
+                    let game = Reversi::<instances::Micro>::default();
                     let state = state::State::from_indices(&p1_indices, &p2_indices, current_player);
                     let status = game.status(&state);
                     assert_eq!(status, expected);
@@ -287,10 +287,10 @@ mod tests {
 
     #[test]
     fn test_swap_state() {
-        let game = Reversi::<instances::Mini>::default();
+        let game = Reversi::<instances::Micro>::default();
         let state = state::State::from_indices(&[1, 2, 4, 7], &[0, 3, 6], 1);
         let symmetries =
-            <Reversi<instances::Mini> as rulesets::HasStatesWithSymmetries>::SymmetryIterator::new(
+            <Reversi<instances::Micro> as rulesets::HasStatesWithSymmetries>::SymmetryIterator::new(
                 &game,
             );
         let mut symmetry_set = collections::HashSet::new();

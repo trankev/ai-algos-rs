@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn test_symmetrys() {
-        let ruleset = reversi::Reversi::<reversi::Mini>::default();
+        let ruleset = reversi::Reversi::<reversi::Micro>::default();
         let iterator = SymmetryIterator::new(&ruleset);
         let result = iterator.collect::<collections::HashSet<_>>();
         let expected = (0u8..8)

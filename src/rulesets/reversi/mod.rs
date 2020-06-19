@@ -8,6 +8,7 @@ mod symmetry_iterators;
 mod variants;
 
 pub use instances::Classic;
+pub use instances::Micro;
 pub use instances::Mini;
 pub use plies::Ply;
 pub use ruleset::Reversi;

@@ -28,6 +28,15 @@ impl settings::BitArraySettings for BitArray64Settings {
 }
 
 #[derive(Debug, Clone, Hash, Eq, Ord, PartialEq, PartialOrd)]
+pub struct BitArray36Settings {}
+impl settings::BitArraySettings for BitArray36Settings {
+    const SIZE: usize = 36;
+    type FirstBitType = u64;
+    type ArrayLength = typenum::U0;
+    type LastBitType = u64;
+}
+
+#[derive(Debug, Clone, Hash, Eq, Ord, PartialEq, PartialOrd)]
 pub struct BitArray16Settings {}
 impl settings::BitArraySettings for BitArray16Settings {
     const SIZE: usize = 16;
